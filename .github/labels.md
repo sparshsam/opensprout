@@ -1,0 +1,38 @@
+# Suggested Labels
+
+- `type: bug`
+- `type: feature`
+- `type: docs`
+- `type: chore`
+- `type: refactor`
+- `type: test`
+- `type: security`
+- `type: accessibility`
+- `type: privacy`
+- `type: self-hosting`
+- `good first issue`
+- `help wanted`
+- `difficulty: easy`
+- `difficulty: medium`
+- `difficulty: hard`
+- `area: plants`
+- `area: reminders`
+- `area: care-logs`
+- `area: photos`
+- `area: auth`
+- `area: database`
+- `area: ui`
+- `area: mobile`
+- `area: api`
+- `area: docker`
+- `area: docs`
+- `status: needs triage`
+- `status: accepted`
+- `status: blocked`
+- `status: in progress`
+- `status: needs reproduction`
+- `status: needs design`
+- `release: v0.1`
+- `release: v0.2`
+- `release: v0.5`
+- `release: v1.0`

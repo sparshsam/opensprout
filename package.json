@@ -1,0 +1,25 @@
+{
+  "name": "opensprout",
+  "version": "0.1.0",
+  "private": true,
+  "license": "AGPL-3.0-or-later",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm --workspace apps/web run dev",
+    "build": "npm --workspace apps/web run build",
+    "lint": "npm --workspace apps/web run lint",
+    "typecheck": "npm --workspace apps/web run typecheck"
+  },
+  "overrides": {
+    "postcss": "8.5.15",
+    "next@15.5.18": {
+      "postcss": "8.5.15"
+    }
+  },
+  "engines": {
+    "node": ">=20.11.0"
+  }
+}

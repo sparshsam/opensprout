@@ -1,0 +1,17 @@
+{
+  "name": "OpenSprout",
+  "short_name": "OpenSprout",
+  "description": "Free and open-source plant care tracking.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fbf9",
+  "theme_color": "#16784f",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
