@@ -7,6 +7,8 @@
 
 OpenSprout is a privacy-first, open-source plant care dashboard for tracking watering, fertilizing, journals, reminders, and plant health without ads, subscriptions, or data lock-in.
 
+Live demo: [opensprout.vercel.app](https://opensprout.vercel.app)
+
 ## Why OpenSprout?
 
 Plant care apps should feel like useful household tools, not another subscription trying to own your data.
@@ -29,7 +31,9 @@ OpenSprout is designed to be self-hostable, PWA-first, mobile-friendly, local-fi
 
 ![OpenSprout mobile dashboard](docs/assets/opensprout-mobile.png)
 
-## Current App Status
+## Current Status
+
+OpenSprout is publicly deployed on Vercel at [opensprout.vercel.app](https://opensprout.vercel.app).
 
 OpenSprout now has a real Supabase-backed MVP flow:
 
@@ -124,6 +128,25 @@ Then copy your local Supabase URL and publishable key into `apps/web/.env.local`
 
 For the hosted OpenSprout Supabase project, the schema was applied through Supabase MCP raw SQL execution. The migration file in this repository remains the source of truth for schema review and future environment setup.
 
+## Deployment
+
+OpenSprout is deployed as a Vercel project backed by Supabase.
+
+Production demo:
+
+- [https://opensprout.vercel.app](https://opensprout.vercel.app)
+
+Required Vercel environment variables:
+
+| Variable | Environment | Notes |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Production, Preview, Development | Supabase project URL. |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Production, Preview, Development | Browser-safe Supabase publishable key. |
+
+Production and local development deployments need these values before build time. Preview deployments may need the same Supabase variables configured separately in Vercel, especially when Vercel asks whether preview variables apply to all branches or a specific branch.
+
+Do not add `SUPABASE_SERVICE_ROLE_KEY` or any secret service role key to `NEXT_PUBLIC_` variables.
+
 ## Architecture
 
 ```text
@@ -193,6 +216,7 @@ Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, bra
 
 - [Architecture](docs/architecture.md)
 - [Roadmap](docs/roadmap.md)
+- [GitHub setup](docs/github.md)
 - [License notes](docs/license-notes.md)
 - [Contributing](CONTRIBUTING.md)
 
