@@ -9,6 +9,7 @@ out
 dist
 coverage
 *.tsbuildinfo
+.vercel
 supabase/.temp
 
 # local env
@@ -29,3 +30,5 @@ pnpm-debug.log*
 Thumbs.db
 .idea
 .vscode
+
+.vercel
