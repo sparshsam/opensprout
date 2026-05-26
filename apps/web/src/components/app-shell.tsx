@@ -618,8 +618,7 @@ function PlantForm({
         species.scientific_name ?? "",
         ...species.aliases,
       ].some((value) => value.toLowerCase().includes(query));
-    })
-    .slice(0, 12);
+    });
 
   function applySpeciesTemplate(speciesId: string) {
     const species = speciesList.find((item) => item.id === speciesId);
