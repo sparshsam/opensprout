@@ -29,17 +29,26 @@ OpenSprout is designed to be self-hostable, PWA-first, mobile-friendly, local-fi
 
 ![OpenSprout mobile dashboard](docs/assets/opensprout-mobile.png)
 
-## Features
+## Current App Status
 
-- Responsive plant dashboard.
-- Plant cards and detail panel.
-- Care reminders preview.
-- Health journal preview.
-- Add plant demo interaction.
-- Searchable plant list.
-- JSON export demo.
-- PWA manifest and service worker.
-- Supabase/Postgres schema with RLS and private Storage policy.
+OpenSprout now has a real Supabase-backed MVP flow:
+
+- Supabase Auth sign up, login, logout, and session persistence.
+- Protected dashboard for authenticated users.
+- Persisted plant create, edit, and delete.
+- Care schedules created when a plant is created.
+- Due and overdue care tasks calculated from `care_schedules`.
+- Mark watered and mark fertilized actions.
+- Persisted `care_logs` entries.
+- JSON export from live rows loaded in the dashboard.
+
+Planned but not complete yet:
+
+- Photo journal uploads.
+- Import/restore.
+- Offline sync queue.
+- Push notifications.
+- Full task instance generation.
 
 ## Tech Stack
 
@@ -77,7 +86,7 @@ npm run typecheck  # Run TypeScript checks
 
 ## Environment Variables
 
-Copy `.env.example` to `.env.local` and configure your Supabase project.
+For local app development, copy `.env.example` to `apps/web/.env.local` and configure your Supabase project.
 
 | Variable | Required | Description |
 | --- | --- | --- |
@@ -111,20 +120,22 @@ supabase start
 supabase db reset
 ```
 
-Then copy your local Supabase URL and publishable key into `.env.local`.
+Then copy your local Supabase URL and publishable key into `apps/web/.env.local`.
+
+For the hosted OpenSprout Supabase project, the schema was applied through Supabase MCP raw SQL execution. The migration file in this repository remains the source of truth for schema review and future environment setup.
 
 ## Architecture
 
 ```text
 opensprout/
-├── apps/web              # Next.js 15 PWA
-├── packages/ui           # Future shared UI package
-├── packages/database     # Future generated database types
-├── packages/shared       # Future shared domain types
-├── packages/config       # Future shared tooling config
-├── docs                  # Architecture, roadmap, screenshots
-├── supabase/migrations   # Database schema and RLS
-└── .github               # Issue templates and project organization
+|-- apps/web              # Next.js 15 PWA
+|-- packages/ui           # Future shared UI package
+|-- packages/database     # Future generated database types
+|-- packages/shared       # Future shared domain types
+|-- packages/config       # Future shared tooling config
+|-- docs                  # Architecture, roadmap, screenshots
+|-- supabase/migrations   # Database schema and RLS
+`-- .github               # Issue templates and project organization
 ```
 
 More detail is available in [docs/architecture.md](docs/architecture.md).
@@ -135,16 +146,19 @@ More detail is available in [docs/architecture.md](docs/architecture.md).
 
 - Public starter repo with AGPLv3 license.
 - Responsive dashboard and PWA foundation.
+- Supabase Auth and protected app state.
+- Persisted plant CRUD with RLS.
+- Care schedule creation on plant creation.
+- Care logs for watering and fertilizing.
 - Initial Supabase schema with RLS.
-- Plant dashboard, reminders preview, journal preview, and JSON export demo.
 
 ### v0.2
 
-- Real authentication flow.
-- Create, edit, archive, and delete plants.
-- Watering, fertilizing, pruning, and repotting logs.
+- Archive plants and soft-delete sync tombstones.
+- Watering, fertilizing, pruning, and repotting log details.
 - Plant detail timeline.
 - Reminder scheduling and task completion.
+- Photo journal upload foundation.
 
 ### v1.0
 
@@ -159,9 +173,9 @@ See [docs/roadmap.md](docs/roadmap.md) for the longer release path.
 
 ## Good First Issues
 
-- Add empty states for users with no plants.
-- Add a plant profile edit form.
-- Add a real care log form.
+- Add richer empty states for users with no plants.
+- Add plant archive support.
+- Add detailed care log forms.
 - Add unit tests for export JSON shaping.
 - Add a Supabase local development guide.
 - Improve mobile navigation.

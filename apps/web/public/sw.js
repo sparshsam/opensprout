@@ -1,4 +1,4 @@
-const CACHE_NAME = "opensprout-v0.1.0";
+const CACHE_NAME = "opensprout-v0.2.0";
 const APP_SHELL = ["/", "/manifest.webmanifest", "/icons/icon.svg"];
 
 self.addEventListener("install", (event) => {
