@@ -32,6 +32,8 @@ The dashboard uses Supabase directly from the browser with the publishable key. 
 ```text
 AppShell
 |-- Supabase Auth session
+|-- src/lib/data/species.ts
+|   `-- public read-only Care Templates
 |-- src/lib/data/plants.ts
 |   |-- plants
 |   |-- care_schedules
@@ -96,6 +98,7 @@ RootLayout
 The initial migration includes:
 
 - `profiles`
+- `plant_species`
 - `plants`
 - `care_schedules`
 - `task_instances`
@@ -107,5 +110,7 @@ The initial migration includes:
 - private Supabase Storage bucket `plant-photos`
 
 Every user-owned public table has RLS enabled. Policies use `auth.uid()` against `user_id` or `profiles.id`. Mutable tables include `client_id`, `sync_version`, `last_modified_at`, and `deleted_at` for local-first sync and tombstones.
+
+`plant_species` is a public, read-only Care Templates table. It stores common plant guidance and suggested watering/fertilizing intervals. Plants can optionally reference `plant_species.id` through `plants.species_id`, while still preserving custom species text for plants that are not in the template list.
 
 For the hosted OpenSprout project, the schema was applied through Supabase MCP raw SQL execution. The repo migration file remains the source of truth.

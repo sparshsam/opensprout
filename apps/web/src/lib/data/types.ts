@@ -12,6 +12,7 @@ export type Database = {
           id: string;
           user_id: string;
           name: string;
+          species_id: string | null;
           species: string | null;
           cultivar: string | null;
           nickname: string | null;
@@ -34,6 +35,7 @@ export type Database = {
           id?: string;
           user_id: string;
           name: string;
+          species_id?: string | null;
           species?: string | null;
           cultivar?: string | null;
           nickname?: string | null;
@@ -53,6 +55,48 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["plants"]["Insert"]>;
+        Relationships: [];
+      };
+      plant_species: {
+        Row: {
+          id: string;
+          common_name: string;
+          scientific_name: string | null;
+          aliases: string[];
+          category: string | null;
+          light_preference: string | null;
+          watering_min_days: number | null;
+          watering_max_days: number | null;
+          fertilizing_frequency_days: number | null;
+          humidity_preference: string | null;
+          soil_notes: string | null;
+          toxicity: string | null;
+          difficulty: "beginner" | "easy" | "moderate" | "advanced" | null;
+          care_summary: string | null;
+          common_problems: string[];
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          common_name: string;
+          scientific_name?: string | null;
+          aliases?: string[];
+          category?: string | null;
+          light_preference?: string | null;
+          watering_min_days?: number | null;
+          watering_max_days?: number | null;
+          fertilizing_frequency_days?: number | null;
+          humidity_preference?: string | null;
+          soil_notes?: string | null;
+          toxicity?: string | null;
+          difficulty?: "beginner" | "easy" | "moderate" | "advanced" | null;
+          care_summary?: string | null;
+          common_problems?: string[];
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["plant_species"]["Insert"]>;
         Relationships: [];
       };
       care_schedules: {
@@ -399,5 +443,6 @@ export type Database = {
 export type PlantRow = Database["public"]["Tables"]["plants"]["Row"];
 export type PlantInsert = Database["public"]["Tables"]["plants"]["Insert"];
 export type PlantUpdate = Database["public"]["Tables"]["plants"]["Update"];
+export type PlantSpeciesRow = Database["public"]["Tables"]["plant_species"]["Row"];
 export type CareScheduleRow = Database["public"]["Tables"]["care_schedules"]["Row"];
 export type CareLogRow = Database["public"]["Tables"]["care_logs"]["Row"];

@@ -3,6 +3,7 @@ import type { CareLogRow, CareScheduleRow, CareType, Database, HealthStatus, Pla
 
 export type PlantFormValues = {
   name: string;
+  species_id?: string;
   species?: string;
   location?: string;
   notes?: string;
@@ -92,6 +93,7 @@ export async function createPlant(supabase: Client, userId: string, values: Plan
     .insert({
       user_id: userId,
       name: values.name.trim(),
+      species_id: cleanText(values.species_id),
       species: cleanText(values.species),
       location: cleanText(values.location),
       notes: cleanText(values.notes),
@@ -127,6 +129,7 @@ export async function updatePlant(supabase: Client, plantId: string, values: Pla
     .from("plants")
     .update({
       name: values.name.trim(),
+      species_id: cleanText(values.species_id),
       species: cleanText(values.species),
       location: cleanText(values.location),
       notes: cleanText(values.notes),

@@ -9,6 +9,7 @@ out
 dist
 coverage
 *.tsbuildinfo
+supabase/.temp
 
 # local env
 .env

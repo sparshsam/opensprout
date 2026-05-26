@@ -40,6 +40,8 @@ OpenSprout now has a real Supabase-backed MVP flow:
 - Supabase Auth sign up, login, logout, and session persistence.
 - Protected dashboard for authenticated users.
 - Persisted plant create, edit, and delete.
+- Built-in Care Templates for 30 common houseplants and herbs.
+- Add-plant species selection that pre-fills watering and fertilizing intervals.
 - Care schedules created when a plant is created.
 - Due and overdue care tasks calculated from `care_schedules`.
 - Mark watered and mark fertilized actions.
@@ -53,6 +55,7 @@ Planned but not complete yet:
 - Offline sync queue.
 - Push notifications.
 - Full task instance generation.
+- Community-contributed plant species database.
 
 ## Tech Stack
 
@@ -106,6 +109,7 @@ The initial schema is in `supabase/migrations/20260525111000_initial_schema.sql`
 It includes:
 
 - User profiles
+- Read-only plant species Care Templates
 - Plants
 - Care schedules
 - Task instances
@@ -116,6 +120,8 @@ It includes:
 - Sync devices
 - Private `plant-photos` Storage bucket
 - RLS policies for all user-owned data
+
+Care Templates are stored in the public `plant_species` table. Anyone can read these templates, while app users still own their private plant records through RLS. User plants may reference a template with `species_id`, but custom free-text species names remain supported for unknown plants.
 
 Recommended local setup:
 
@@ -170,6 +176,7 @@ More detail is available in [docs/architecture.md](docs/architecture.md).
 - Public starter repo with AGPLv3 license.
 - Responsive dashboard and PWA foundation.
 - Supabase Auth and protected app state.
+- Built-in Care Templates for common plants.
 - Persisted plant CRUD with RLS.
 - Care schedule creation on plant creation.
 - Care logs for watering and fertilizing.
@@ -203,6 +210,8 @@ See [docs/roadmap.md](docs/roadmap.md) for the longer release path.
 - Add a Supabase local development guide.
 - Improve mobile navigation.
 - Add screenshot refresh instructions.
+- Add more Care Templates for common regional plants.
+- Improve species search and alias matching.
 
 ## Why AGPLv3?
 

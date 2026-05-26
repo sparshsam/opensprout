@@ -35,7 +35,8 @@ import {
   type DashboardData,
   type PlantFormValues,
 } from "@/lib/data/plants";
-import type { CareScheduleRow, CareType, HealthStatus, PlantRow } from "@/lib/data/types";
+import { listPlantSpecies } from "@/lib/data/species";
+import type { CareScheduleRow, CareType, HealthStatus, PlantRow, PlantSpeciesRow } from "@/lib/data/types";
 import { createClient } from "@/lib/supabase/browser";
 import { cn } from "@/lib/utils";
 
@@ -63,6 +64,7 @@ const plantImages = ["/plant-monstera.svg", "/plant-pothos.svg", "/plant-calathe
 
 const emptyForm: PlantFormValues = {
   name: "",
+  species_id: "",
   species: "",
   location: "",
   notes: "",
@@ -76,6 +78,7 @@ export function AppShell() {
   const [sessionLoading, setSessionLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [data, setData] = useState<DashboardData>({ plants: [], schedules: [], logs: [] });
+  const [speciesList, setSpeciesList] = useState<PlantSpeciesRow[]>([]);
   const [dataLoading, setDataLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -135,6 +138,23 @@ export function AppShell() {
     }
   }, [refreshDashboard, user]);
 
+  useEffect(() => {
+    if (!user) return;
+
+    let mounted = true;
+    listPlantSpecies(supabase)
+      .then((templates) => {
+        if (mounted) setSpeciesList(templates);
+      })
+      .catch((speciesError) => {
+        if (mounted) setError(errorMessage(speciesError));
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [supabase, user]);
+
   const tasks = useMemo(() => buildCareTasks(data.plants, data.schedules), [data.plants, data.schedules]);
   const selectedPlant = data.plants.find((plant) => plant.id === selectedId) ?? data.plants[0] ?? null;
   const selectedSchedules = selectedPlant
@@ -159,6 +179,7 @@ export function AppShell() {
     setEditingPlant(plant);
     setFormValues({
       name: plant.name,
+      species_id: plant.species_id ?? "",
       species: plant.species ?? "",
       location: plant.location ?? "",
       notes: plant.notes ?? "",
@@ -392,6 +413,7 @@ export function AppShell() {
                   <PlantForm
                     editing={Boolean(editingPlant)}
                     values={formValues}
+                    speciesList={speciesList}
                     saving={savingPlant}
                     onChange={setFormValues}
                     onCancel={() => {
@@ -570,6 +592,7 @@ function Brand() {
 function PlantForm({
   editing,
   values,
+  speciesList,
   saving,
   onChange,
   onCancel,
@@ -577,14 +600,95 @@ function PlantForm({
 }: {
   editing: boolean;
   values: PlantFormValues;
+  speciesList: PlantSpeciesRow[];
   saving: boolean;
   onChange: (values: PlantFormValues) => void;
   onCancel: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
+  const [templateQuery, setTemplateQuery] = useState("");
+  const selectedSpecies = speciesList.find((species) => species.id === values.species_id) ?? null;
+  const visibleSpecies = speciesList
+    .filter((species) => {
+      const query = templateQuery.trim().toLowerCase();
+      if (!query) return true;
+
+      return [
+        species.common_name,
+        species.scientific_name ?? "",
+        ...species.aliases,
+      ].some((value) => value.toLowerCase().includes(query));
+    })
+    .slice(0, 12);
+
+  function applySpeciesTemplate(speciesId: string) {
+    const species = speciesList.find((item) => item.id === speciesId);
+    if (!species) {
+      onChange({ ...values, species_id: "", species: "" });
+      return;
+    }
+
+    onChange({
+      ...values,
+      name: values.name || species.common_name,
+      species_id: species.id,
+      species: species.scientific_name ?? species.common_name,
+      water_every_days: suggestedWaterDays(species) ?? values.water_every_days,
+      fertilize_every_days: species.fertilizing_frequency_days ?? values.fertilize_every_days,
+    });
+  }
+
   return (
     <form className="mt-4 rounded-md border border-border bg-white p-4" onSubmit={onSubmit}>
       <div className="grid gap-3 md:grid-cols-2">
+        {!editing && (
+          <div className="md:col-span-2 rounded-md border border-emerald-200 bg-emerald-50 p-3">
+            <div className="grid gap-3 md:grid-cols-[1fr_1fr]">
+              <label className="text-sm font-semibold text-emerald-950">
+                Care Templates
+                <Input
+                  className="mt-2 bg-white"
+                  value={templateQuery}
+                  onChange={(event) => setTemplateQuery(event.target.value)}
+                  placeholder="Search snake plant, pothos, basil..."
+                />
+              </label>
+              <label className="text-sm font-semibold text-emerald-950">
+                Choose a plant
+                <select
+                  className="mt-2 h-10 w-full rounded-md border border-input bg-white px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring"
+                  value={values.species_id ?? ""}
+                  onChange={(event) => applySpeciesTemplate(event.target.value)}
+                >
+                  <option value="">Custom or unknown plant</option>
+                  {visibleSpecies.map((species) => (
+                    <option key={species.id} value={species.id}>
+                      {species.common_name}
+                      {species.scientific_name ? ` (${species.scientific_name})` : ""}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            {selectedSpecies && (
+              <div className="mt-3 grid gap-3 text-sm text-emerald-950 md:grid-cols-3">
+                <p>
+                  <span className="block text-xs font-bold uppercase text-emerald-700">Light</span>
+                  {selectedSpecies.light_preference ?? "No light note yet."}
+                </p>
+                <p>
+                  <span className="block text-xs font-bold uppercase text-emerald-700">Water</span>
+                  {formatWaterRange(selectedSpecies)}
+                </p>
+                <p>
+                  <span className="block text-xs font-bold uppercase text-emerald-700">Difficulty</span>
+                  {selectedSpecies.difficulty ?? "Not rated"}
+                </p>
+                <p className="md:col-span-3">{selectedSpecies.care_summary}</p>
+              </div>
+            )}
+          </div>
+        )}
         <label className="text-sm font-semibold">
           Name
           <Input
@@ -600,7 +704,7 @@ function PlantForm({
           <Input
             className="mt-2"
             value={values.species ?? ""}
-            onChange={(event) => onChange({ ...values, species: event.target.value })}
+            onChange={(event) => onChange({ ...values, species_id: "", species: event.target.value })}
             placeholder="Monstera deliciosa"
           />
         </label>
@@ -808,6 +912,23 @@ function CenteredState({ label, compact = false }: { label: string; compact?: bo
 
 function scheduleCadence(schedules: CareScheduleRow[], careType: CareType) {
   return schedules.find((schedule) => schedule.care_type === careType)?.cadence_value;
+}
+
+function suggestedWaterDays(species: PlantSpeciesRow) {
+  if (species.watering_min_days && species.watering_max_days) {
+    return Math.round((species.watering_min_days + species.watering_max_days) / 2);
+  }
+
+  return species.watering_min_days ?? species.watering_max_days;
+}
+
+function formatWaterRange(species: PlantSpeciesRow) {
+  if (species.watering_min_days && species.watering_max_days) {
+    return `${species.watering_min_days}-${species.watering_max_days} days`;
+  }
+
+  const days = species.watering_min_days ?? species.watering_max_days;
+  return days ? `About every ${days} days` : "No watering template yet.";
 }
 
 function formatSchedule(schedules: CareScheduleRow[], careType: CareType) {
