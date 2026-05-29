@@ -48,7 +48,7 @@ AppShell
 Initial route handlers live in `apps/web/src/app/api`:
 
 - `GET /api/plants`: list the signed-in user's plants.
-- `POST /api/plants`: create a plant with local-first client metadata.
+- `POST /api/plants`: create a plant with validated input and server-generated sync metadata.
 - `GET /api/export`: export user-owned tables as portable JSON.
 
 The current dashboard primarily uses the browser data layer in `src/lib/data`. Route handlers remain available for future server-driven flows.

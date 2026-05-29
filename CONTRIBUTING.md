@@ -15,10 +15,11 @@ Thanks for helping grow OpenSprout. Beginners, docs fixes, design feedback, bug 
 
 ```bash
 npm install
+cp .env.example apps/web/.env.local
 npm run dev
 ```
 
-Copy `.env.example` to `.env.local` and add your Supabase project URL and publishable key when working on authenticated or database-backed flows.
+Add your Supabase project URL and publishable key to `apps/web/.env.local` when working on authenticated or database-backed flows. Never use a Supabase service role key in frontend environment variables.
 
 ## Branches and Commits
 
@@ -56,4 +57,4 @@ Suggested commit prefixes:
 
 ## Security
 
-Please do not open public issues for sensitive vulnerabilities. A dedicated `SECURITY.md` contact path should be added before public production use.
+Please do not open public issues for sensitive vulnerabilities. Follow the disclosure process in [SECURITY.md](SECURITY.md).

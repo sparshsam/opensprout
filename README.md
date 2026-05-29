@@ -3,71 +3,49 @@
 ![License: AGPL v3](https://img.shields.io/badge/License-AGPLv3-blue.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-15-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-ready-blue)
-![Open Source](https://img.shields.io/badge/open--source-yes-brightgreen)
+![Supabase](https://img.shields.io/badge/Supabase-backed-3ecf8e)
+![CI](https://github.com/sparshsam/opensprout/actions/workflows/ci.yml/badge.svg)
 
-OpenSprout is a privacy-first, open-source plant care dashboard for tracking watering, fertilizing, journals, reminders, and plant health without ads, subscriptions, or data lock-in.
+**OpenSprout is a privacy-minded, open-source plant care dashboard for tracking plants, care schedules, and watering or fertilizing logs without subscriptions or data lock-in.**
 
-Live demo: [opensprout.vercel.app](https://opensprout.vercel.app)
+[Live demo](https://opensprout.vercel.app) · [Architecture](docs/architecture.md) · [Roadmap](docs/roadmap.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
-## Why OpenSprout?
-
-Plant care apps should feel like useful household tools, not another subscription trying to own your data.
-
-OpenSprout is built around three principles:
-
-- Plant care tools should not require subscriptions.
-- Gardening data should remain portable and private.
-- Improvements should remain open to the community.
-
-OpenSprout is designed to be self-hostable, PWA-first, mobile-friendly, local-first where practical, beginner-friendly, and open-source forever.
+OpenSprout is built for people who want a practical plant tracker they can inspect, self-host, and improve. It currently supports authenticated plant tracking, built-in care templates, schedule-based reminders, care logs, and JSON export. It does not yet include photo uploads, push notifications, offline sync, or import/restore.
 
 ## Screenshots
 
-### Desktop Dashboard
-
 ![OpenSprout desktop dashboard](docs/assets/opensprout-desktop.png)
 
-### Mobile Dashboard
+| Mobile dashboard | Dashboard concept |
+| --- | --- |
+| ![OpenSprout mobile dashboard](docs/assets/opensprout-mobile.png) | ![OpenSprout dashboard concept](docs/assets/opensprout-dashboard-concept.png) |
 
-![OpenSprout mobile dashboard](docs/assets/opensprout-mobile.png)
+## Why OpenSprout?
+
+Most plant care apps eventually become a subscription, a closed data silo, or both. OpenSprout takes a different path:
+
+- **No subscriptions**: the project is free and open-source.
+- **Portable data**: users can export their rows as JSON.
+- **Self-hostable direction**: the stack is ordinary Next.js, Supabase, and PostgreSQL.
+- **Open improvements**: AGPLv3 keeps public hosted improvements open to the community.
 
 ## Current Status
 
-OpenSprout is publicly deployed on Vercel at [opensprout.vercel.app](https://opensprout.vercel.app).
+OpenSprout is an early but usable MVP. The public demo is deployed on Vercel and backed by Supabase.
 
-OpenSprout now has a real Supabase-backed MVP flow:
-
-- Supabase Auth sign up, login, logout, and session persistence.
-- Protected dashboard for authenticated users.
-- Persisted plant create, edit, and delete.
-- Built-in Care Templates for 30 common houseplants and herbs.
-- Add-plant species selection that pre-fills watering and fertilizing intervals.
-- Care schedules created when a plant is created.
-- Due and overdue care tasks calculated from `care_schedules`.
-- Mark watered and mark fertilized actions.
-- Persisted `care_logs` entries.
-- JSON export from live rows loaded in the dashboard.
-
-Planned but not complete yet:
-
-- Photo journal uploads.
-- Import/restore.
-- Offline sync queue.
-- Push notifications.
-- Full task instance generation.
-- Community-contributed plant species database.
-
-## Tech Stack
-
-- Next.js 15
-- TypeScript
-- Tailwind CSS
-- shadcn-style UI primitives
-- Supabase
-- PostgreSQL
-- Supabase Auth
-- Supabase Storage
-- Vercel-ready frontend
+| Area | Status | Notes |
+| --- | --- | --- |
+| Authentication | Available | Supabase email/password auth with session persistence. |
+| Plant dashboard | Available | Protected dashboard for signed-in users. |
+| Plant CRUD | Available | Create, edit, delete, and inspect persisted plants. |
+| Care Templates | Available | 30 built-in plant species templates with suggested care rhythms. |
+| Schedules | Available | Watering and fertilizing schedules are created from user inputs/templates. |
+| Care logs | Available | Mark plants watered or fertilized and persist logs. |
+| JSON export | Available | Exports user-owned rows currently loaded by the app/backend. |
+| PWA foundation | Partial | Manifest and service worker exist; offline sync is not complete. |
+| Photos | Planned | Supabase Storage bucket exists, but UI upload flow is not implemented yet. |
+| Import/restore | Planned | Schema includes transfer metadata; restore flow is not complete yet. |
+| Push reminders | Planned | Not implemented yet. |
 
 ## Quick Start
 
@@ -75,160 +53,159 @@ Planned but not complete yet:
 git clone https://github.com/sparshsam/opensprout.git
 cd opensprout
 npm install
+cp .env.example apps/web/.env.local
 npm run dev
 ```
 
-Then open `http://localhost:3000`.
+Then open [http://localhost:3000](http://localhost:3000).
 
-The web app lives in `apps/web`.
-
-## Package Scripts
-
-```bash
-npm run dev        # Start the Next.js app
-npm run build      # Build for production
-npm run lint       # Run ESLint
-npm run typecheck  # Run TypeScript checks
-```
+You need a Supabase project with the OpenSprout schema applied before authenticated plant data will work locally.
 
 ## Environment Variables
 
-For local app development, copy `.env.example` to `apps/web/.env.local` and configure your Supabase project.
+Configure these in `apps/web/.env.local` for local development and in Vercel for deployments.
 
 | Variable | Required | Description |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL used by the web app. |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Yes | Supabase publishable key for browser/server client access. |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Yes | Browser-safe Supabase publishable key. |
 
-Do not expose Supabase service role keys in the frontend.
+Do not expose Supabase service role keys in `NEXT_PUBLIC_` variables or client-side code.
 
 ## Supabase Setup
 
-The initial schema is in `supabase/migrations/20260525111000_initial_schema.sql`.
+The schema source of truth lives in [`supabase/migrations`](supabase/migrations).
 
-It includes:
+It currently includes:
 
-- User profiles
-- Read-only plant species Care Templates
-- Plants
-- Care schedules
-- Task instances
-- Care logs
-- Journal entries
-- Journal photos
-- Export/import metadata
-- Sync devices
-- Private `plant-photos` Storage bucket
-- RLS policies for all user-owned data
+- user profiles
+- read-only `plant_species` Care Templates
+- user-owned plants
+- care schedules
+- care logs
+- journal and photo metadata tables for future features
+- export/import metadata
+- sync device metadata
+- private `plant-photos` Storage bucket
+- RLS policies for user-owned data
 
-Care Templates are stored in the public `plant_species` table. Anyone can read these templates, while app users still own their private plant records through RLS. User plants may reference a template with `species_id`, but custom free-text species names remain supported for unknown plants.
-
-Recommended local setup:
+For local Supabase development:
 
 ```bash
 supabase start
 supabase db reset
 ```
 
-Then copy your local Supabase URL and publishable key into `apps/web/.env.local`.
+Then copy the local Supabase URL and publishable key into `apps/web/.env.local`.
 
-For the hosted OpenSprout Supabase project, the schema was applied through Supabase MCP raw SQL execution. The migration file in this repository remains the source of truth for schema review and future environment setup.
+The hosted demo database was updated through Supabase SQL execution while the repo migrations remain the reviewable source of truth.
 
-## Deployment
+## Development
 
-OpenSprout is deployed as a Vercel project backed by Supabase.
+The web app lives in [`apps/web`](apps/web).
 
-Production demo:
+```bash
+npm run dev        # Start the Next.js app
+npm run lint       # Run ESLint
+npm run typecheck  # Run TypeScript checks
+npm run build      # Build for production
+```
 
-- [https://opensprout.vercel.app](https://opensprout.vercel.app)
+CI runs `npm ci`, `npm audit --audit-level=high`, lint, typecheck, and build on pushes and pull requests.
 
-Required Vercel environment variables:
-
-| Variable | Environment | Notes |
-| --- | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Production, Preview, Development | Supabase project URL. |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Production, Preview, Development | Browser-safe Supabase publishable key. |
-
-Production and local development deployments need these values before build time. Preview deployments may need the same Supabase variables configured separately in Vercel, especially when Vercel asks whether preview variables apply to all branches or a specific branch.
-
-Do not add `SUPABASE_SERVICE_ROLE_KEY` or any secret service role key to `NEXT_PUBLIC_` variables.
-
-## Architecture
+## Project Structure
 
 ```text
 opensprout/
-|-- apps/web              # Next.js 15 PWA
-|-- packages/ui           # Future shared UI package
-|-- packages/database     # Future generated database types
-|-- packages/shared       # Future shared domain types
-|-- packages/config       # Future shared tooling config
-|-- docs                  # Architecture, roadmap, screenshots
-|-- supabase/migrations   # Database schema and RLS
-`-- .github               # Issue templates and project organization
+|-- apps/web              # Next.js 15 app
+|-- packages/             # Future shared packages
+|-- docs/                 # Architecture, roadmap, license notes, screenshots
+|-- supabase/migrations   # PostgreSQL schema, RLS, seeds
+|-- .github/              # Workflows, issue templates, project docs
+|-- SECURITY.md           # Vulnerability disclosure policy
+|-- CONTRIBUTING.md       # Contributor guide
+`-- LICENSE               # AGPLv3
 ```
 
-More detail is available in [docs/architecture.md](docs/architecture.md).
+## Deployment
+
+The public demo is deployed on Vercel:
+
+[https://opensprout.vercel.app](https://opensprout.vercel.app)
+
+Vercel needs the same Supabase environment variables listed above. Production and Development variables are configured for the current demo project. Preview deployments may need Supabase variables configured separately in Vercel, depending on whether they apply to all branches or a specific branch.
+
+The root [`vercel.json`](vercel.json) configures the monorepo build output and edge security headers.
+
+## Security and Privacy Notes
+
+OpenSprout is privacy-minded, not zero-knowledge.
+
+- User-owned rows are isolated with Supabase Auth and PostgreSQL RLS.
+- The frontend uses only the Supabase publishable key.
+- Service role keys must never be exposed to the browser.
+- Data in the hosted demo is stored in Supabase PostgreSQL, not client-side encrypted.
+- The app now sets CSP and common browser security headers on the deployed site.
+- Basic in-memory API rate limiting is included, but it is not a distributed production-grade limiter.
+- Account deletion, import/restore, and full offline sync are still planned work.
+
+Please report sensitive issues through [SECURITY.md](SECURITY.md), not public issues.
 
 ## Roadmap
 
-### MVP
+### v0.1: Usable MVP
 
-- Public starter repo with AGPLv3 license.
-- Responsive dashboard and PWA foundation.
-- Supabase Auth and protected app state.
-- Built-in Care Templates for common plants.
-- Persisted plant CRUD with RLS.
-- Care schedule creation on plant creation.
-- Care logs for watering and fertilizing.
-- Initial Supabase schema with RLS.
+- Supabase Auth
+- protected dashboard
+- plant CRUD
+- Care Templates
+- watering/fertilizing schedules
+- care logs
+- JSON export
+- public Vercel demo
+- basic security hardening and CI
 
-### v0.2
+### v0.2: Care Tracking Polish
 
-- Archive plants and soft-delete sync tombstones.
-- Watering, fertilizing, pruning, and repotting log details.
-- Plant detail timeline.
-- Reminder scheduling and task completion.
-- Photo journal upload foundation.
+- edit care schedules after creation
+- richer care log forms
+- plant detail timeline
+- archive plants instead of hard delete
+- better empty states and onboarding
 
-### v1.0
+### v0.3: Photos and Reminders
 
-- Stable self-hosting path.
-- Full export/import backup flow.
-- Private photo uploads.
-- Offline sync queue.
-- Accessibility and security review.
-- Complete contributor and deployment docs.
+- private plant photo uploads
+- plant health journal UI
+- calendar view
+- reminder task workflow
+- push notification research
 
-See [docs/roadmap.md](docs/roadmap.md) for the longer release path.
+### v1.0: Self-Hostable Stable Release
 
-## Good First Issues
+- documented self-host path
+- import/restore flow
+- offline sync queue
+- accessibility and security review
+- expanded community plant template process
 
-- Add richer empty states for users with no plants.
-- Add plant archive support.
-- Add detailed care log forms.
-- Add unit tests for export JSON shaping.
-- Add a Supabase local development guide.
-- Improve mobile navigation.
-- Add screenshot refresh instructions.
-- Add more Care Templates for common regional plants.
-- Improve species search and alias matching.
-
-## Why AGPLv3?
-
-OpenSprout is licensed under AGPLv3 to make sure improvements to hosted versions remain open to the community. Anyone can use, study, modify, and self-host the project, but public network use must preserve the same openness.
+See the full roadmap in [`docs/roadmap.md`](docs/roadmap.md).
 
 ## Contributing
 
-Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, branch, PR, and design guidance.
+Contributions are welcome, especially focused bug fixes, docs improvements, accessibility work, and careful plant template additions.
 
-## Documentation
+Start with:
 
-- [Architecture](docs/architecture.md)
-- [Roadmap](docs/roadmap.md)
-- [GitHub setup](docs/github.md)
-- [License notes](docs/license-notes.md)
-- [Contributing](CONTRIBUTING.md)
+- [`CONTRIBUTING.md`](CONTRIBUTING.md)
+- [`docs/architecture.md`](docs/architecture.md)
+- [`docs/roadmap.md`](docs/roadmap.md)
+- [good first issue ideas](.github/project.md)
+
+Keep pull requests small, include screenshots for UI changes, and call out privacy/security implications when relevant.
 
 ## License
 
-OpenSprout is licensed under the GNU Affero General Public License v3.0 or later. See [LICENSE](LICENSE).
+OpenSprout is licensed under the GNU Affero General Public License v3.0 or later.
+
+AGPLv3 allows use, study, modification, and self-hosting, but modified versions made available over a network must preserve the same source-availability obligations. See [`LICENSE`](LICENSE) and [`docs/license-notes.md`](docs/license-notes.md).
