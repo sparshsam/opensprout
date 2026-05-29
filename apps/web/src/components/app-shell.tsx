@@ -37,6 +37,7 @@ import {
 } from "@/lib/data/plants";
 import { listPlantSpecies } from "@/lib/data/species";
 import type { CareScheduleRow, CareType, HealthStatus, PlantRow, PlantSpeciesRow } from "@/lib/data/types";
+import { ValidationError } from "@/lib/data/validation";
 import { createClient } from "@/lib/supabase/browser";
 import { cn } from "@/lib/utils";
 
@@ -116,10 +117,12 @@ export function AppShell() {
   }, [supabase]);
 
   const refreshDashboard = useCallback(async () => {
+    if (!user) return;
+
     setDataLoading(true);
     setError(null);
     try {
-      const nextData = await listDashboardData(supabase);
+      const nextData = await listDashboardData(supabase, user.id);
       setData(nextData);
       setSelectedId((current) => {
         if (current && nextData.plants.some((plant) => plant.id === current)) return current;
@@ -130,7 +133,7 @@ export function AppShell() {
     } finally {
       setDataLoading(false);
     }
-  }, [supabase]);
+  }, [supabase, user]);
 
   useEffect(() => {
     if (user) {
@@ -198,7 +201,7 @@ export function AppShell() {
     setError(null);
     try {
       if (editingPlant) {
-        const updated = await updatePlant(supabase, editingPlant.id, formValues);
+        const updated = await updatePlant(supabase, user.id, editingPlant.id, formValues);
         setNotice(`${updated.name} updated.`);
       } else {
         const created = await createPlant(supabase, user.id, formValues);
@@ -216,12 +219,14 @@ export function AppShell() {
   }
 
   async function handleDeletePlant(plant: PlantRow) {
+    if (!user) return;
+
     const confirmed = window.confirm(`Delete ${plant.name}? This removes its schedules, logs, and journal entries.`);
     if (!confirmed) return;
 
     setError(null);
     try {
-      await deletePlant(supabase, plant.id);
+      await deletePlant(supabase, user.id, plant.id);
       setNotice(`${plant.name} deleted.`);
       await refreshDashboard();
     } catch (deleteError) {
@@ -547,7 +552,7 @@ function AuthPanel({ supabase }: { supabase: ReturnType<typeof createClient> }) 
               className="mt-2"
               type="password"
               autoComplete={mode === "signup" ? "new-password" : "current-password"}
-              minLength={6}
+              minLength={8}
               required
               value={password}
               onChange={(event) => setPassword(event.target.value)}
@@ -936,9 +941,7 @@ function formatSchedule(schedules: CareScheduleRow[], careType: CareType) {
 }
 
 function errorMessage(error: unknown) {
-  if (error instanceof Error) return error.message;
-  if (typeof error === "object" && error && "message" in error) {
-    return String(error.message);
-  }
-  return "Something went wrong.";
+  console.error(error);
+  if (error instanceof ValidationError) return error.message;
+  return "Something went wrong. Please try again.";
 }

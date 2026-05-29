@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { CareLogRow, CareScheduleRow, CareType, Database, HealthStatus, PlantRow } from "@/lib/data/types";
+import { validatePlantValues } from "@/lib/data/validation";
 
 export type PlantFormValues = {
   name: string;
@@ -54,22 +55,25 @@ function cleanText(value?: string) {
   return trimmed ? trimmed : null;
 }
 
-export async function listDashboardData(supabase: Client): Promise<DashboardData> {
+export async function listDashboardData(supabase: Client, userId: string): Promise<DashboardData> {
   const [plantsResult, schedulesResult, logsResult] = await Promise.all([
     supabase
       .from("plants")
       .select("*")
+      .eq("user_id", userId)
       .is("deleted_at", null)
       .order("updated_at", { ascending: false }),
     supabase
       .from("care_schedules")
       .select("*")
+      .eq("user_id", userId)
       .is("deleted_at", null)
       .eq("active", true)
       .order("next_due_at", { ascending: true, nullsFirst: false }),
     supabase
       .from("care_logs")
       .select("*")
+      .eq("user_id", userId)
       .is("deleted_at", null)
       .order("occurred_at", { ascending: false })
       .limit(100),
@@ -87,17 +91,18 @@ export async function listDashboardData(supabase: Client): Promise<DashboardData
 }
 
 export async function createPlant(supabase: Client, userId: string, values: PlantFormValues) {
+  const validated = validatePlantValues(values);
   const timestamp = nowIso();
   const { data: plant, error } = await supabase
     .from("plants")
     .insert({
       user_id: userId,
-      name: values.name.trim(),
-      species_id: cleanText(values.species_id),
-      species: cleanText(values.species),
-      location: cleanText(values.location),
-      notes: cleanText(values.notes),
-      health_status: values.health_status ?? "stable",
+      name: validated.name,
+      species_id: cleanText(validated.species_id),
+      species: cleanText(validated.species),
+      location: cleanText(validated.location),
+      notes: cleanText(validated.notes),
+      health_status: validated.health_status ?? "stable",
       client_id: clientId("plant"),
       client_created_at: timestamp,
       client_updated_at: timestamp,
@@ -108,11 +113,11 @@ export async function createPlant(supabase: Client, userId: string, values: Plan
   if (error) throw error;
 
   const schedules = [
-    values.water_every_days
-      ? buildSchedule(userId, plant.id, "water", values.water_every_days)
+    validated.water_every_days
+      ? buildSchedule(userId, plant.id, "water", validated.water_every_days)
       : null,
-    values.fertilize_every_days
-      ? buildSchedule(userId, plant.id, "fertilize", values.fertilize_every_days)
+    validated.fertilize_every_days
+      ? buildSchedule(userId, plant.id, "fertilize", validated.fertilize_every_days)
       : null,
   ].filter((schedule): schedule is NonNullable<typeof schedule> => Boolean(schedule));
 
@@ -124,19 +129,21 @@ export async function createPlant(supabase: Client, userId: string, values: Plan
   return plant;
 }
 
-export async function updatePlant(supabase: Client, plantId: string, values: PlantFormValues) {
+export async function updatePlant(supabase: Client, userId: string, plantId: string, values: PlantFormValues) {
+  const validated = validatePlantValues(values);
   const { data, error } = await supabase
     .from("plants")
     .update({
-      name: values.name.trim(),
-      species_id: cleanText(values.species_id),
-      species: cleanText(values.species),
-      location: cleanText(values.location),
-      notes: cleanText(values.notes),
-      health_status: values.health_status ?? "stable",
+      name: validated.name,
+      species_id: cleanText(validated.species_id),
+      species: cleanText(validated.species),
+      location: cleanText(validated.location),
+      notes: cleanText(validated.notes),
+      health_status: validated.health_status ?? "stable",
       client_updated_at: nowIso(),
     })
     .eq("id", plantId)
+    .eq("user_id", userId)
     .select()
     .single();
 
@@ -144,8 +151,8 @@ export async function updatePlant(supabase: Client, plantId: string, values: Pla
   return data;
 }
 
-export async function deletePlant(supabase: Client, plantId: string) {
-  const { error } = await supabase.from("plants").delete().eq("id", plantId);
+export async function deletePlant(supabase: Client, userId: string, plantId: string) {
+  const { error } = await supabase.from("plants").delete().eq("id", plantId).eq("user_id", userId);
   if (error) throw error;
 }
 
@@ -153,6 +160,7 @@ export async function markCareDone(supabase: Client, userId: string, plantId: st
   const { data: schedule } = await supabase
     .from("care_schedules")
     .select("*")
+    .eq("user_id", userId)
     .eq("plant_id", plantId)
     .eq("care_type", careType)
     .eq("active", true)
@@ -194,7 +202,8 @@ export async function markCareDone(supabase: Client, userId: string, plantId: st
         next_due_at: addDaysIso(days),
         client_updated_at: timestamp,
       })
-      .eq("id", schedule.id);
+      .eq("id", schedule.id)
+      .eq("user_id", userId);
 
     if (scheduleError) throw scheduleError;
   }
