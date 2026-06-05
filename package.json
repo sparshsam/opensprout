@@ -13,12 +13,6 @@
     "lint": "npm --workspace apps/web run lint",
     "typecheck": "npm --workspace apps/web run typecheck"
   },
-  "overrides": {
-    "postcss": "8.5.15",
-    "next@15.5.18": {
-      "postcss": "8.5.15"
-    }
-  },
   "engines": {
     "node": ">=20.11.0"
   }
