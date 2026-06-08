@@ -2,7 +2,7 @@
   "name": "opensprout",
   "version": "0.1.0",
   "private": true,
-  "license": "AGPL-3.0-or-later",
+  "license": "MIT",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -15,5 +15,16 @@
   },
   "engines": {
     "node": ">=20.11.0"
-  }
+  },
+  "description": "Privacy-first plant care software for schedules, logs, and stewardship.",
+  "author": "Sparsh Sam",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sparshsam/opensprout.git"
+  },
+  "homepage": "https://github.com/sparshsam/opensprout#readme",
+  "bugs": {
+    "url": "https://github.com/sparshsam/opensprout/issues"
+  },
+  "keywords": []
 }

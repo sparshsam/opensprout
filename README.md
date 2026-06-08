@@ -209,3 +209,16 @@ Keep pull requests small, include screenshots for UI changes, and call out priva
 OpenSprout is licensed under the GNU Affero General Public License v3.0 or later.
 
 AGPLv3 allows use, study, modification, and self-hosting, but modified versions made available over a network must preserve the same source-availability obligations. See [`LICENSE`](LICENSE) and [`docs/license-notes.md`](docs/license-notes.md).
+
+---
+
+*Last updated: June 2026*
+
+## Tech Stack
+
+| Layer | Choice |
+|-------|--------|
+| Framework | Next.js (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS |
+| Data | Local-first with optional sync |
