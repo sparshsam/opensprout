@@ -1,5 +1,49 @@
 # OpenSprout Architecture
 
+## System Overview
+
+```mermaid
+flowchart TB
+    subgraph Client [Browser]
+        A[Next.js 15 PWA]
+        AUTH[Auth UI]
+    end
+
+    subgraph Supabase [Supabase]
+        DB[(PostgreSQL)]
+        RLS[Row-Level Security]
+        SVC[Auth Service]
+        STORAGE[Storage Bucket]
+    end
+
+    A --> AUTH
+    AUTH --> SVC
+    A --> DB
+    DB --> RLS
+    A -.-> STORAGE
+```
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant B as Browser
+    participant S as Supabase
+    participant R as RLS
+
+    U->>B: Sign in
+    B->>S: Auth request
+    S->>B: Session token
+    U->>B: Add plant
+    B->>S: INSERT plants (with token)
+    S->>R: auth.uid() check
+    R->>S: Policy pass
+    S->>B: Plant created
+    U->>B: View dashboard
+    B->>S: SELECT plants
+    S->>R: auth.uid() filter
+    B->>U: Plant cards + care tasks
+```
+
 ## Folder Architecture
 
 ```text
@@ -29,18 +73,30 @@ opensprout/
 
 The dashboard uses Supabase directly from the browser with the publishable key. RLS is the security boundary, and no service role key is used in the frontend.
 
-```text
-AppShell
-|-- Supabase Auth session
-|-- src/lib/data/species.ts
-|   `-- public read-only Care Templates
-|-- src/lib/data/plants.ts
-|   |-- plants
-|   |-- care_schedules
-|   `-- care_logs
-|-- src/lib/data/care.ts
-|   `-- due/overdue task calculation
-`-- Supabase RLS
+```mermaid
+flowchart LR
+    subgraph DataLayer [Browser Data Layer]
+        SPECIES[src/lib/data/species.ts]
+        PLANTS[src/lib/data/plants.ts]
+        CARE[src/lib/data/care.ts]
+    end
+
+    subgraph Tables [Supabase Tables]
+        PS[plant_species]
+        P[plants]
+        CS[care_schedules]
+        CL[care_logs]
+    end
+
+    SPECIES --> PS
+    PLANTS --> P
+    PLANTS --> CS
+    PLANTS --> CL
+    CARE --> CS
+    CARE --> CL
+    P --> RLS[Row-Level Security]
+    CS --> RLS
+    CL --> RLS
 ```
 
 ## API Structure

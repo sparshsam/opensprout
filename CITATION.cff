@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: >-
+  If you use OpenSprout in research or publications, please cite
+  this repository.
+title: OpenSprout
+abstract: >-
+  A privacy-first, open-source plant care dashboard for tracking
+  watering, fertilizing, journals, reminders, and plant health
+  without ads, subscriptions, or data lock-in.
+authors:
+  - family-names: Agarwal
+    given-names: Sparsh
+    orcid: ''
+license: AGPL-3.0-or-later
+repository-code: 'https://github.com/sparshagarwal/opensprout'
+keywords:
+  - plant-care
+  - gardening
+  - pwa
+  - supabase
+  - nextjs
+  - self-hosted
+type: software
