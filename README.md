@@ -5,6 +5,7 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-ready-blue)
 ![Supabase](https://img.shields.io/badge/Supabase-backed-3ecf8e)
 ![CI](https://github.com/sparshsam/opensprout/actions/workflows/ci.yml/badge.svg)
+![Ecosystem Standards](https://img.shields.io/badge/Ecosystem_Standards-1.0-2ea44f)
 
 **OpenSprout is a privacy-minded, open-source plant care dashboard for tracking plants, care schedules, and watering or fertilizing logs without subscriptions or data lock-in.**
 
@@ -31,7 +32,9 @@ Most plant care apps eventually become a subscription, a closed data silo, or bo
 
 ## Current Status
 
-OpenSprout is an early but usable MVP. The public demo is deployed on Vercel and backed by Supabase.
+**Maturity:** Prototype. Core workflows are functional (auth, plant CRUD, care schedules, care logs) but breaking changes are expected as the API and data model stabilize.
+
+The public demo is deployed on Vercel and backed by Supabase.
 
 | Area | Status | Notes |
 | --- | --- | --- |
@@ -46,6 +49,12 @@ OpenSprout is an early but usable MVP. The public demo is deployed on Vercel and
 | Photos | Planned | Supabase Storage bucket exists, but UI upload flow is not implemented yet. |
 | Import/restore | Planned | Schema includes transfer metadata; restore flow is not complete yet. |
 | Push reminders | Planned | Not implemented yet. |
+
+## Ecosystem Role
+
+OpenSprout is the **care systems** project in the [Sparsh Sam ecosystem](https://github.com/sparshsam/ecosystem-standards). It provides privacy-first, open-source infrastructure for tracking living things that need routine attention — starting with houseplants, but designed for the general pattern of schedules, logs, and long-running stewardship routines.
+
+All repositories follow the [ecosystem standards](https://github.com/sparshsam/ecosystem-standards) for documentation, security, naming, and maturity classification.
 
 ## Quick Start
 

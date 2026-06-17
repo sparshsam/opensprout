@@ -1,0 +1,30 @@
+{
+  "creators": [
+    {
+      "name": "Agarwal, Sparsh",
+      "orcid": "0009-0007-1585-6927"
+    }
+  ],
+  "title": "OpenSprout: Privacy-first plant care records for schedules, logs, and stewardship",
+  "description": "A privacy-first, open-source plant care dashboard for tracking plants, care schedules, and watering or fertilizing logs without subscriptions or data lock-in. Built with Next.js, TypeScript, and Supabase.",
+  "license": "AGPL-3.0-or-later",
+  "keywords": [
+    "plant-care",
+    "gardening",
+    "houseplants",
+    "pwa",
+    "supabase",
+    "nextjs",
+    "self-hosted",
+    "privacy-first",
+    "care-systems",
+    "calm-software"
+  ],
+  "access_right": "open",
+  "upload_type": "software",
+  "communities": [
+    {
+      "identifier": "sparshsam-ecosystem"
+    }
+  ]
+}
