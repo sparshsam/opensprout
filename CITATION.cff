@@ -10,9 +10,9 @@ abstract: >-
 authors:
   - family-names: Agarwal
     given-names: Sparsh
-    orcid: ''
+    orcid: 'https://orcid.org/0009-0007-1585-6927'
 license: AGPL-3.0-or-later
-repository-code: 'https://github.com/sparshagarwal/opensprout'
+repository-code: 'https://github.com/sparshsam/opensprout'
 keywords:
   - plant-care
   - gardening
