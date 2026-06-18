@@ -1,0 +1,302 @@
+import {
+  cacheTable,
+  getPendingActions,
+  removePendingAction,
+  getLastSyncTime,
+  setLastSyncTime,
+} from "@/lib/data/db";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/lib/data/types";
+
+// ---------------------------------------------------------------------------
+// Exported types
+// ---------------------------------------------------------------------------
+
+export type SyncStatus = "synced" | "syncing" | "offline" | "error";
+
+export type SyncStats = {
+  pushed: number;
+  pulled: Record<string, number>;
+  pending: number;
+  lastSync: string | null;
+  status: SyncStatus;
+};
+
+// ---------------------------------------------------------------------------
+// Internal constants
+// ---------------------------------------------------------------------------
+
+/**
+ * Maps Supabase table names to local IndexedDB cache store names.
+ */
+const TABLE_TO_CACHE: Record<string, string> = {
+  plants: "plants",
+  care_schedules: "schedules",
+  care_logs: "logs",
+  task_instances: "tasks",
+  journal_entries: "journalEntries",
+  journal_photos: "journalPhotos",
+};
+
+/**
+ * The tables that are pulled during a fresh sync.
+ */
+const PULL_TABLES = [
+  "plants",
+  "care_schedules",
+  "care_logs",
+  "task_instances",
+  "journal_entries",
+  "journal_photos",
+] as const;
+
+const SUPABASE_URL =
+  process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co";
+
+// ---------------------------------------------------------------------------
+// Connectivity check
+// ---------------------------------------------------------------------------
+
+/**
+ * Quick connectivity check.
+ *
+ * Returns `true` immediately when `navigator.onLine` is `false` (known
+ * offline), otherwise attempts a lightweight HEAD request against the
+ * Supabase project URL.
+ */
+export async function isOnline(): Promise<boolean> {
+  if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    return false;
+  }
+
+  try {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), 5_000);
+    const res = await fetch(SUPABASE_URL, {
+      method: "HEAD",
+      signal: controller.signal,
+    });
+    clearTimeout(id);
+    return res.ok || res.status < 500;
+  } catch {
+    return false;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Push pending actions
+// ---------------------------------------------------------------------------
+
+/**
+ * Replay every queued pending action against Supabase.
+ *
+ * Successfully replayed actions are removed from the queue. Failing
+ * actions are left in place (they can be retried on the next sync) and
+ * their error messages are collected.
+ */
+export async function pushPendingActions(
+  supabase: SupabaseClient<Database>,
+): Promise<{ pushed: number; errors: string[] }> {
+  const pending = await getPendingActions();
+  let pushed = 0;
+  const errors: string[] = [];
+
+  for (const action of pending) {
+    const table = action.table as keyof Database["public"]["Tables"];
+    try {
+
+      switch (action.action) {
+        case "create": {
+          const { error } = await supabase
+            .from(table)
+            .insert(action.data as never)
+            .select()
+            .single();
+          if (error) {
+            errors.push(
+              `[push:${action.id}] create ${table}/${action.recordId}: ${error.message}`,
+            );
+            continue;
+          }
+          break;
+        }
+
+        case "update": {
+          const { error } = await supabase
+            .from(table)
+            .update(action.data as never)
+            .eq("id", action.recordId);
+          if (error) {
+            errors.push(
+              `[push:${action.id}] update ${table}/${action.recordId}: ${error.message}`,
+            );
+            continue;
+          }
+          break;
+        }
+
+        case "delete": {
+          const { error } = await supabase
+            .from(table)
+            .delete()
+            .eq("id", action.recordId);
+          if (error) {
+            errors.push(
+              `[push:${action.id}] delete ${table}/${action.recordId}: ${error.message}`,
+            );
+            continue;
+          }
+          break;
+        }
+
+        default: {
+          errors.push(
+            `[push:${action.id}] unknown action "${action.action}" for ${table}/${action.recordId}`,
+          );
+          continue;
+        }
+      }
+
+      // Success — remove the action from the queue
+      await removePendingAction(action.id);
+      pushed++;
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : String(err);
+      errors.push(`[push:${action.id}] ${table}/${action.recordId}: ${message}`);
+    }
+  }
+
+  return { pushed, errors };
+}
+
+// ---------------------------------------------------------------------------
+// Pull fresh data
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetch the latest records for every synced table from Supabase and
+ * replace the local cache with the result.
+ *
+ * Returns a map of cache store name → number of records pulled.
+ */
+export async function pullFreshData(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+): Promise<Record<string, number>> {
+  const pulled: Record<string, number> = {};
+  const now = new Date().toISOString();
+
+  for (const tableName of PULL_TABLES) {
+    const cacheName = TABLE_TO_CACHE[tableName];
+    if (!cacheName) {
+      continue;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from(tableName)
+        .select("*")
+        .eq("user_id", userId);
+
+      if (error) {
+        // Log but don't fail the whole batch
+        console.warn(`[sync] pull ${tableName} failed: ${error.message}`);
+        pulled[cacheName] = 0;
+        continue;
+      }
+
+      const records = (data ?? []) as { id: string }[];
+      await cacheTable(cacheName, records);
+      await setLastSyncTime(tableName, now);
+
+      pulled[cacheName] = records.length;
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : String(err);
+      console.warn(`[sync] pull ${tableName} failed: ${message}`);
+      pulled[cacheName] = 0;
+    }
+  }
+
+  return pulled;
+}
+
+// ---------------------------------------------------------------------------
+// Full sync (push + pull)
+// ---------------------------------------------------------------------------
+
+/**
+ * Run a full synchronisation cycle:
+ *
+ * 1. Push any locally-queued pending actions to Supabase.
+ * 2. Pull the latest data from Supabase and update the local caches.
+ * 3. Return a summary of what happened.
+ */
+export async function syncAll(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+): Promise<{ pushed: number; pulled: Record<string, number>; errors: string[] }> {
+  const errors: string[] = [];
+
+  // ── Push phase ──────────────────────────────────────────────────────
+  const pushResult = await pushPendingActions(supabase);
+  errors.push(...pushResult.errors);
+
+  // ── Pull phase ──────────────────────────────────────────────────────
+  const pulled = await pullFreshData(supabase, userId);
+
+  return {
+    pushed: pushResult.pushed,
+    pulled,
+    errors,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Convenience: build a SyncStats snapshot
+// ---------------------------------------------------------------------------
+
+/**
+ * Build a user-facing sync-statistics object from the given sync result.
+ *
+ * This is a convenience helper — it is **not** called automatically and
+ * does **not** perform any sync work itself.
+ */
+export async function buildSyncStats(
+  result: { pushed: number; pulled: Record<string, number>; errors: string[] },
+): Promise<SyncStats> {
+  const pending = await getPendingActions();
+
+  // Derive a status from the result
+  let status: SyncStatus = "synced";
+  if (result.errors.length > 0) {
+    status = "error";
+  }
+  // If there were no errors but nothing was pushed/pulled and there are
+  // pending actions left, the device may be offline.
+  if (
+    result.pushed === 0 &&
+    Object.values(result.pulled).every((c) => c === 0) &&
+    pending.length > 0
+  ) {
+    status = "offline";
+  }
+
+  // Use the most recent lastSync across all tables
+  let lastSync: string | null = null;
+  for (const table of PULL_TABLES) {
+    const ts = await getLastSyncTime(table);
+    if (ts && (lastSync === null || ts > lastSync)) {
+      lastSync = ts;
+    }
+  }
+
+  return {
+    pushed: result.pushed,
+    pulled: result.pulled,
+    pending: pending.length,
+    lastSync,
+    status,
+  };
+}

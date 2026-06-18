@@ -9,6 +9,7 @@ const config: CapacitorConfig = {
     url: process.env.CAPACITOR_DEV_URL || undefined,
     androidScheme: "https",
     cleartext: true,
+    allowNavigation: ["opensprout://*"],
   },
   plugins: {
     SplashScreen: {

@@ -29,6 +29,7 @@ import type { TimelineEvent } from "@/lib/data/tasks";
 import { listPlantTimeline } from "@/lib/data/tasks";
 import { TimelineItem } from "@/components/cards/timeline-item";
 import { CoverPhoto } from "@/components/cards/cover-photo";
+import { PullToRefresh } from "@/components/pull-to-refresh";
 
 const careTypes: CareType[] = [
   "water", "fertilize", "mist", "rotate", "prune", "repot", "inspect", "custom",
@@ -63,6 +64,7 @@ export default function PlantsPage() {
     handleUpdatePlant,
     handleDeletePlant,
     handleMarkCare,
+    refreshDashboard,
   } = useApp();
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -210,6 +212,7 @@ export default function PlantsPage() {
       )}
 
       <section className="grid gap-5 py-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+        <PullToRefresh onRefresh={refreshDashboard}>
         {/* Left: plant list */}
         <div className="space-y-5">
           <label className="relative block">
@@ -325,6 +328,7 @@ export default function PlantsPage() {
             </div>
           )}
         </aside>
+        </PullToRefresh>
       </section>
     </>
   );

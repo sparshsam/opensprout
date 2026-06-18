@@ -1,16 +1,26 @@
 "use client";
 
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useApp } from "@/lib/context/app-context";
-import { Download, FileUp, LogOut, Bell, BellOff } from "lucide-react";
+import {
+  Download,
+  LogOut,
+  Bell,
+  BellOff,
+  Loader2,
+  RefreshCw,
+  Database,
+  Upload,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState, useEffect, useCallback } from "react";
 import {
   loadReminderPrefs,
   saveReminderPrefs,
   requestNotificationPermission,
 } from "@/lib/data/reminders";
 import type { ReminderPreferences } from "@/lib/data/reminders";
+import { readImportFile, executeImport, type ImportResult } from "@/lib/data/import";
 
 const LEAD_TIME_OPTIONS = [
   { value: 15, label: "15 min" },
@@ -21,7 +31,18 @@ const LEAD_TIME_OPTIONS = [
 ];
 
 export default function SettingsPage() {
-  const { user, data, handleSignOut } = useApp();
+  const {
+    user,
+    data,
+    handleSignOut,
+    supabase,
+    isOnline,
+    syncStats,
+    handleSync,
+    handleClearCache,
+  } = useApp();
+
+  // ── Reminder preferences ──
   const [prefs, setPrefs] = useState<ReminderPreferences>(loadReminderPrefs);
   const [permRequested, setPermRequested] = useState(false);
 
@@ -40,33 +61,27 @@ export default function SettingsPage() {
 
   const handleLeadTimeChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setPrefs((prev) => ({
-        ...prev,
-        leadTimeMinutes: Number(e.target.value),
-      }));
-    },
-    [],
+      setPrefs((prev) => ({ ...prev, leadTimeMinutes: Number(e.target.value) }));
+    }, [],
   );
 
   const handleQuietStartChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setPrefs((prev) => ({
-        ...prev,
-        quietHoursStart: e.target.value || null,
-      }));
-    },
-    [],
+      setPrefs((prev) => ({ ...prev, quietHoursStart: e.target.value || null }));
+    }, [],
   );
 
   const handleQuietEndChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setPrefs((prev) => ({
-        ...prev,
-        quietHoursEnd: e.target.value || null,
-      }));
-    },
-    [],
+      setPrefs((prev) => ({ ...prev, quietHoursEnd: e.target.value || null }));
+    }, [],
   );
+
+  // ── Import state ──
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   function exportJson() {
     const payload = JSON.stringify(
@@ -81,6 +96,41 @@ export default function SettingsPage() {
     anchor.download = "opensprout-backup.json";
     anchor.click();
     URL.revokeObjectURL(url);
+  }
+
+  async function handleImportFile(file: File) {
+    setImporting(true);
+    setImportResult(null);
+    try {
+      const { data: parsed, errors } = await readImportFile(file);
+      if (!parsed) {
+        setImportResult({
+          imported: { plants: 0, schedules: 0, logs: 0 },
+          errors: errors.map((e) => `${e.record}: ${e.message}`),
+          filename: file.name,
+        });
+        return;
+      }
+      const result = await executeImport(supabase!, user!.id, parsed);
+      setImportResult({ ...result, filename: file.name });
+    } catch (e) {
+      setImportResult({
+        imported: { plants: 0, schedules: 0, logs: 0 },
+        errors: [(e as Error).message],
+        filename: file.name,
+      });
+    } finally {
+      setImporting(false);
+    }
+  }
+
+  async function handleSyncNow() {
+    setSyncing(true);
+    try {
+      await handleSync();
+    } finally {
+      setSyncing(false);
+    }
   }
 
   return (
@@ -120,19 +170,10 @@ export default function SettingsPage() {
           <p className="mt-1 text-sm text-muted-foreground">
             Configure care task notification preferences.
           </p>
-
           <div className="mt-4 space-y-4">
-            {/* Toggle */}
             <div className="flex items-center justify-between">
-              <label
-                htmlFor="reminders-toggle"
-                className="flex items-center gap-2 text-sm font-medium cursor-pointer"
-              >
-                {prefs.enabled ? (
-                  <Bell size={16} aria-hidden />
-                ) : (
-                  <BellOff size={16} aria-hidden />
-                )}
+              <label htmlFor="reminders-toggle" className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                {prefs.enabled ? <Bell size={16} aria-hidden /> : <BellOff size={16} aria-hidden />}
                 Enable reminders
               </label>
               <button
@@ -141,9 +182,7 @@ export default function SettingsPage() {
                 aria-checked={prefs.enabled}
                 onClick={handleToggle}
                 className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                  prefs.enabled
-                    ? "bg-primary"
-                    : "bg-muted-foreground/40"
+                  prefs.enabled ? "bg-primary" : "bg-muted-foreground/40"
                 }`}
               >
                 <span
@@ -153,17 +192,10 @@ export default function SettingsPage() {
                 />
               </button>
             </div>
-
             {prefs.enabled && (
               <>
-                {/* Lead time */}
                 <div>
-                  <label
-                    htmlFor="lead-time"
-                    className="block text-sm font-medium mb-1"
-                  >
-                    Lead time
-                  </label>
+                  <label htmlFor="lead-time" className="block text-sm font-medium mb-1">Lead time</label>
                   <select
                     id="lead-time"
                     value={prefs.leadTimeMinutes}
@@ -171,56 +203,56 @@ export default function SettingsPage() {
                     className="h-10 w-full rounded-md border border-input bg-white px-3 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring"
                   >
                     {LEAD_TIME_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
                   </select>
                 </div>
-
-                {/* Quiet hours start */}
                 <div>
-                  <label
-                    htmlFor="quiet-start"
-                    className="block text-sm font-medium mb-1"
-                  >
-                    Quiet hours start
-                  </label>
-                  <Input
-                    id="quiet-start"
-                    type="time"
-                    value={prefs.quietHoursStart ?? ""}
-                    onChange={handleQuietStartChange}
-                  />
+                  <label htmlFor="quiet-start" className="block text-sm font-medium mb-1">Quiet hours start</label>
+                  <Input id="quiet-start" type="time" value={prefs.quietHoursStart ?? ""} onChange={handleQuietStartChange} />
                 </div>
-
-                {/* Quiet hours end */}
                 <div>
-                  <label
-                    htmlFor="quiet-end"
-                    className="block text-sm font-medium mb-1"
-                  >
-                    Quiet hours end
-                  </label>
-                  <Input
-                    id="quiet-end"
-                    type="time"
-                    value={prefs.quietHoursEnd ?? ""}
-                    onChange={handleQuietEndChange}
-                  />
+                  <label htmlFor="quiet-end" className="block text-sm font-medium mb-1">Quiet hours end</label>
+                  <Input id="quiet-end" type="time" value={prefs.quietHoursEnd ?? ""} onChange={handleQuietEndChange} />
                 </div>
-
-                {/* Timezone */}
                 <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Timezone
-                  </label>
-                  <p className="text-sm text-muted-foreground">
-                    {prefs.timezone}
-                  </p>
+                  <label className="block text-sm font-medium mb-1">Timezone</label>
+                  <p className="text-sm text-muted-foreground">{prefs.timezone}</p>
                 </div>
               </>
             )}
+          </div>
+        </div>
+
+        {/* Sync */}
+        <div className="rounded-md border border-border bg-card p-4 shadow-panel">
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <RefreshCw size={18} aria-hidden />
+            Sync
+          </h2>
+          <div className="mt-3 space-y-2">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span className={`inline-block h-2 w-2 rounded-full ${isOnline ? "bg-green-500" : "bg-red-500"}`} />
+              {isOnline ? "Online" : "Offline"}
+            </div>
+            {syncStats?.lastSync && (
+              <p className="text-sm text-muted-foreground">
+                Last synced: {new Date(syncStats.lastSync).toLocaleString()}
+              </p>
+            )}
+            {syncStats !== null && (
+              <p className="text-sm text-muted-foreground">Pending actions: {syncStats.pending}</p>
+            )}
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button variant="outline" onClick={handleSyncNow} disabled={syncing || !isOnline}>
+              {syncing ? <Loader2 size={16} className="animate-spin" aria-hidden /> : <RefreshCw size={16} aria-hidden />}
+              Sync now
+            </Button>
+            <Button variant="outline" onClick={handleClearCache}>
+              <Database size={16} aria-hidden />
+              Clear local cache
+            </Button>
           </div>
         </div>
 
@@ -235,31 +267,52 @@ export default function SettingsPage() {
               <Download size={16} aria-hidden />
               Export JSON
             </Button>
-            <Button variant="outline" disabled title="Import is planned for the backup milestone.">
-              <FileUp size={16} aria-hidden />
-              Import
+            <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={importing}>
+              {importing ? <Loader2 size={16} className="animate-spin" aria-hidden /> : <Upload size={16} aria-hidden />}
+              {importing ? "Importing..." : "Import"}
             </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleImportFile(file);
+                e.target.value = "";
+              }}
+            />
           </div>
+          {importResult && (
+            <div className="mt-3 space-y-2 text-sm">
+              {importResult.errors.length === 0 && importResult.imported.plants + importResult.imported.schedules + importResult.imported.logs > 0 ? (
+                <p className="text-green-600 dark:text-green-400">
+                  Imported {importResult.imported.plants} plant{importResult.imported.plants !== 1 ? "s" : ""}, {importResult.imported.schedules} schedule{importResult.imported.schedules !== 1 ? "s" : ""}, {importResult.imported.logs} log{importResult.imported.logs !== 1 ? "s" : ""}{importResult.filename ? ` from ${importResult.filename}` : ""}.
+                </p>
+              ) : null}
+              {importResult.errors.length > 0 && (
+                <div className="rounded-md border border-red-300 bg-red-50 p-3 dark:border-red-700 dark:bg-red-950">
+                  <p className="font-medium text-red-800 dark:text-red-300">{importResult.errors.length} error{importResult.errors.length !== 1 ? "s" : ""}</p>
+                  <ul className="mt-1 list-inside list-disc text-red-700 dark:text-red-400">
+                    {importResult.errors.map((err, i) => (
+                      <li key={i}>{err}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* About */}
         <div className="rounded-md border border-border bg-card p-4 shadow-panel">
           <h2 className="text-lg font-bold">About OpenSprout</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Version 0.1.0
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">Version 0.1.0</p>
           <p className="mt-2 text-sm text-muted-foreground leading-6">
-            OpenSprout is free, open-source plant care tracking software
-            licensed under AGPL v3. No subscriptions, no data lock-in.
-            Built with Next.js, Supabase, and TypeScript.
+            OpenSprout is free, open-source plant care tracking software licensed under AGPL v3. No subscriptions, no data lock-in. Built with Next.js, Supabase, and TypeScript.
           </p>
           <p className="mt-3 text-xs text-muted-foreground">
-            <a
-              href="https://github.com/sparshsam/opensprout"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
-            >
+            <a href="https://github.com/sparshsam/opensprout" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
               github.com/sparshsam/opensprout
             </a>
           </p>

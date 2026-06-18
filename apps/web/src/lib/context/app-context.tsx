@@ -30,12 +30,19 @@ import {
   type CompleteTaskInput,
   type TaskWithPlant,
 } from "@/lib/data/tasks";
+import { syncAll, isOnline, buildSyncStats, type SyncStats } from "@/lib/data/sync";
+import {
+  clearCache,
+  getCacheStats,
+  queueAction,
+} from "@/lib/data/db";
 import {
   createContext,
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -76,6 +83,11 @@ export interface AppState {
   handleSnoozeTask: (taskId: string, snoozeUntil: string) => Promise<void>;
   handleRescheduleTask: (taskId: string, newDueAt: string) => Promise<void>;
   handleSignOut: () => Promise<void>;
+  isOnline: boolean;
+  syncStats: SyncStats | null;
+  cacheStats: { table: string; count: number }[];
+  handleSync: () => Promise<void>;
+  handleClearCache: () => Promise<void>;
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -119,6 +131,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     upcoming: [],
   });
 
+  // Offline / sync state
+  const [isOnlineState, setIsOnlineState] = useState(true);
+  const [syncStats, setSyncStats] = useState<SyncStats | null>(null);
+  const [cacheStats, setCacheStats] = useState<{ table: string; count: number }[]>([]);
+  const deepLinkHandled = useRef(false);
+
   // Session listener
   useEffect(() => {
     const client = supabase;
@@ -150,6 +168,66 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       listener.subscription.unsubscribe();
     };
   }, [supabase]);
+
+  // Track online/offline status
+  useEffect(() => {
+    const handleOnline = () => setIsOnlineState(true);
+    const handleOffline = () => setIsOnlineState(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    // Check real connectivity on mount
+    isOnline().then(setIsOnlineState);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  // Deep-link handler — check URL params on mount + Capacitor appUrlOpen
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    function handleDeepLink(taskId?: string | null, plantId?: string | null) {
+      if (taskId) {
+        console.info("[app-context] deep-link taskId:", taskId);
+        // Navigate to plants page — user can find the task there
+        if (typeof window !== "undefined") {
+          window.location.href = "/today";
+        }
+      } else if (plantId) {
+        console.info("[app-context] deep-link plantId:", plantId);
+        if (typeof window !== "undefined") {
+          window.location.href = "/plants";
+        }
+      }
+    }
+
+    // URL params (cold start from notification tap)
+    if (!deepLinkHandled.current) {
+      deepLinkHandled.current = true;
+      const params = new URLSearchParams(window.location.search);
+      handleDeepLink(params.get("taskId"), params.get("plantId"));
+    }
+
+    // Capacitor appUrlOpen (app already running or cold start via URL scheme)
+    async function setupCapacitorListener() {
+      try {
+        const { App } = await import("@capacitor/app");
+        await App.addListener("appUrlOpen", (data) => {
+          const url = new URL(data.url);
+          const taskId = url.searchParams.get("taskId");
+          const plantId = url.searchParams.get("plantId");
+          handleDeepLink(taskId, plantId);
+        });
+      } catch {
+        // Not running in Capacitor — no-op on web
+      }
+    }
+    void setupCapacitorListener();
+  }, []);
 
   // Refresh dashboard data
   const refreshDashboard = useCallback(async () => {
@@ -199,17 +277,61 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
   }, [supabase, user]);
 
+  // ── Sync / cache handlers ──────────────────────────────────────────
+
+  /** Full sync: push pending actions, pull fresh data, update stats. */
+  const handleSync = useCallback(async () => {
+    const client = supabase;
+    if (!user || !client) return;
+    setError(null);
+    try {
+      const result = await syncAll(client, user.id);
+      const stats = await buildSyncStats(result);
+      setSyncStats(stats);
+      const cStats = await getCacheStats();
+      setCacheStats(cStats);
+    } catch (syncError) {
+      console.error("[sync] handleSync failed", syncError);
+    }
+  }, [supabase, user]);
+
+  /** Clear all local IndexedDB caches and reset sync stats. */
+  const handleClearCache = useCallback(async () => {
+    try {
+      await clearCache();
+      setSyncStats(null);
+      setCacheStats([]);
+      setNotice("Local cache cleared.");
+    } catch (cacheError) {
+      setError(errorMessage(cacheError));
+    }
+  }, [setNotice, setError]);
+
+  // Sync after dashboard refresh when online
+  useEffect(() => {
+    if (user && isOnlineState) {
+      void handleSync();
+    }
+    // Intentionally not depending on handleSync — it's stable (deps supabase/user)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, isOnlineState]);
+
   const handleCreatePlant = useCallback(
     async (values: PlantFormValues) => {
       const client = supabase;
       if (!user || !client) throw new Error("Not authenticated");
       setError(null);
+      if (!isOnlineState) {
+        await queueAction("plants", "create", "", values);
+        setNotice("Action queued — will sync when online.");
+        return {} as PlantRow;
+      }
       const created = await createPlant(client, user.id, values);
       setNotice(`${created.name} added.`);
       await refreshDashboard();
       return created;
     },
-    [supabase, user, refreshDashboard],
+    [supabase, user, refreshDashboard, isOnlineState],
   );
 
   const handleUpdatePlant = useCallback(
@@ -217,11 +339,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const client = supabase;
       if (!user || !client) throw new Error("Not authenticated");
       setError(null);
+      if (!isOnlineState) {
+        await queueAction("plants", "update", plantId, values);
+        setNotice("Action queued — will sync when online.");
+        return;
+      }
       const updated = await updatePlant(client, user.id, plantId, values);
       setNotice(`${updated.name} updated.`);
       await refreshDashboard();
     },
-    [supabase, user, refreshDashboard],
+    [supabase, user, refreshDashboard, isOnlineState],
   );
 
   const handleDeletePlant = useCallback(
@@ -229,11 +356,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const client = supabase;
       if (!user || !client) return;
       setError(null);
+      if (!isOnlineState) {
+        await queueAction("plants", "archive", plant.id);
+        setNotice("Action queued — will sync when online.");
+        return;
+      }
       await deletePlant(client, user.id, plant.id);
       setNotice(`${plant.name} deleted.`);
       await refreshDashboard();
     },
-    [supabase, user, refreshDashboard],
+    [supabase, user, refreshDashboard, isOnlineState],
   );
 
   const handleMarkCare = useCallback(
@@ -261,11 +393,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const client = supabase;
       if (!user || !client) return;
       setError(null);
+      if (!isOnlineState) {
+        await queueAction("tasks", "complete", taskId, input);
+        setNotice("Action queued — will sync when online.");
+        return;
+      }
       await completeTask(client, user.id, taskId, input);
       setNotice("Task completed.");
       await refreshDashboard();
     },
-    [supabase, user, refreshDashboard],
+    [supabase, user, refreshDashboard, isOnlineState],
   );
 
   const handleSkipTask = useCallback(
@@ -273,11 +410,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const client = supabase;
       if (!user || !client) return;
       setError(null);
+      if (!isOnlineState) {
+        await queueAction("tasks", "skip", taskId);
+        setNotice("Action queued — will sync when online.");
+        return;
+      }
       await skipTask(client, user.id, taskId);
       setNotice("Task skipped.");
       await refreshDashboard();
     },
-    [supabase, user, refreshDashboard],
+    [supabase, user, refreshDashboard, isOnlineState],
   );
 
   const handleSnoozeTask = useCallback(
@@ -285,11 +427,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const client = supabase;
       if (!user || !client) return;
       setError(null);
+      if (!isOnlineState) {
+        await queueAction("tasks", "snooze", taskId, snoozeUntil);
+        setNotice("Action queued — will sync when online.");
+        return;
+      }
       await snoozeTask(client, user.id, taskId, snoozeUntil);
       setNotice("Task snoozed.");
       await refreshDashboard();
     },
-    [supabase, user, refreshDashboard],
+    [supabase, user, refreshDashboard, isOnlineState],
   );
 
   const handleRescheduleTask = useCallback(
@@ -297,11 +444,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const client = supabase;
       if (!user || !client) return;
       setError(null);
+      if (!isOnlineState) {
+        await queueAction("tasks", "reschedule", taskId, newDueAt);
+        setNotice("Action queued — will sync when online.");
+        return;
+      }
       await rescheduleTask(client, user.id, taskId, newDueAt);
       setNotice("Task rescheduled.");
       await refreshDashboard();
     },
-    [supabase, user, refreshDashboard],
+    [supabase, user, refreshDashboard, isOnlineState],
   );
 
   const value = useMemo<AppState>(
@@ -327,6 +479,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       handleSnoozeTask,
       handleRescheduleTask,
       handleSignOut,
+      isOnline: isOnlineState,
+      syncStats,
+      cacheStats,
+      handleSync,
+      handleClearCache,
     }),
     [
       supabase,
@@ -348,6 +505,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       handleSnoozeTask,
       handleRescheduleTask,
       handleSignOut,
+      isOnlineState,
+      syncStats,
+      cacheStats,
+      handleSync,
+      handleClearCache,
     ],
   );
 
