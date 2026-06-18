@@ -6,11 +6,22 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:mobile": "CAPACITOR_BUILD=true next build && npx cap sync",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "cap:sync": "npx cap sync",
+    "cap:copy": "npx cap copy",
+    "cap:open:android": "npx cap open android",
+    "cap:dev:android": "npx cap run android -l --host=0.0.0.0",
+    "android:debug": "CAPACITOR_BUILD=true next build && npx cap copy android && cd android && ./gradlew assembleDebug",
+    "android:release:bundle": "CAPACITOR_BUILD=true next build && npx cap copy android && cd android && ./gradlew bundleRelease"
   },
   "dependencies": {
+    "@capacitor/android": "^8.4.0",
+    "@capacitor/camera": "^8.2.0",
+    "@capacitor/cli": "^8.4.0",
+    "@capacitor/core": "^8.4.0",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.107.0",
     "class-variance-authority": "^0.7.1",
@@ -23,6 +34,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
+    "@tailwindcss/postcss": "^4.3.0",
     "@types/node": "^22.10.2",
     "@types/react": "^19.2.16",
     "@types/react-dom": "^19.0.2",
@@ -30,7 +42,6 @@
     "eslint-config-next": "^15.5.18",
     "postcss": "^8.5.10",
     "tailwindcss": "^4.3.0",
-    "typescript": "^6.0.3",
-    "@tailwindcss/postcss": "^4.3.0"
+    "typescript": "^6.0.3"
   }
 }

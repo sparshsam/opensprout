@@ -11,7 +11,7 @@
 
 [Live demo](https://opensprout.vercel.app) · [Architecture](docs/architecture.md) · [Roadmap](docs/roadmap.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
-OpenSprout is built for people who want a practical plant tracker they can inspect, self-host, and improve. It currently supports authenticated plant tracking, built-in care templates, schedule-based reminders, care logs, and JSON export. It does not yet include photo uploads, push notifications, offline sync, or import/restore.
+OpenSprout is built for people who want a practical plant tracker they can inspect, self-host, and improve. It currently supports authenticated plant tracking, built-in care templates, schedule-based reminders, care logs, plant journal entries, photo uploads to private Supabase Storage, JSON export, and a standalone Android app via Capacitor. It does not yet include push notifications, offline sync, or import/restore.
 
 ## Screenshots
 
@@ -45,8 +45,9 @@ The public demo is deployed on Vercel and backed by Supabase.
 | Schedules | Available | Watering and fertilizing schedules are created from user inputs/templates. |
 | Care logs | Available | Mark plants watered or fertilized and persist logs. |
 | JSON export | Available | Exports user-owned rows currently loaded by the app/backend. |
+| Journal entries | Available | Create, edit, delete journal entries with title, body, health score, tags, and optional photo attachments. |
+| Photos | Available | Capture from camera or gallery (Android), or file picker (web). Uploaded to private Supabase Storage. Plant cover photos, journal photo attachments, and visual timelines. |
 | PWA foundation | Partial | Manifest and service worker exist; offline sync is not complete. |
-| Photos | Planned | Supabase Storage bucket exists, but UI upload flow is not implemented yet. |
 | Import/restore | Planned | Schema includes transfer metadata; restore flow is not complete yet. |
 | Push reminders | Planned | Not implemented yet. |
 
