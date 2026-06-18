@@ -6,6 +6,7 @@ import type {
   Database,
   TaskInstanceRow,
 } from "@/lib/data/types";
+import { cancelTaskReminder } from "@/lib/data/reminders";
 
 type Client = SupabaseClient<Database>;
 
@@ -275,6 +276,8 @@ export async function completeTask(
 
   if (updateError) throw updateError;
 
+  await cancelTaskReminder(taskId);
+
   // Update schedule next_due_at if linked
   if (schedule) {
     const days =
@@ -321,6 +324,8 @@ export async function skipTask(
     .eq("user_id", userId);
 
   if (error) throw error;
+
+  await cancelTaskReminder(taskId);
 }
 
 // ──────────────────────────────────────────────
@@ -345,6 +350,8 @@ export async function snoozeTask(
     .eq("user_id", userId);
 
   if (error) throw error;
+
+  await cancelTaskReminder(taskId);
 }
 
 // ──────────────────────────────────────────────
@@ -370,6 +377,8 @@ export async function rescheduleTask(
     .eq("user_id", userId);
 
   if (error) throw error;
+
+  await cancelTaskReminder(taskId);
 }
 
 // ──────────────────────────────────────────────
