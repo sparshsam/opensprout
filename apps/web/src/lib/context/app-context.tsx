@@ -186,19 +186,47 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // Deep-link handler — check URL params on mount
+  // Deep-link handler — check URL params on mount + Capacitor appUrlOpen
   useEffect(() => {
-    if (deepLinkHandled.current || typeof window === "undefined") return;
-    deepLinkHandled.current = true;
+    if (typeof window === "undefined") return;
 
-    const params = new URLSearchParams(window.location.search);
-    const taskId = params.get("taskId");
-    const plantId = params.get("plantId");
-
-    if (taskId || plantId) {
-      console.info("[app-context] deep-link detected", { taskId, plantId });
-      // Future: navigate to the relevant task/plant detail
+    function handleDeepLink(taskId?: string | null, plantId?: string | null) {
+      if (taskId) {
+        console.info("[app-context] deep-link taskId:", taskId);
+        // Navigate to plants page — user can find the task there
+        if (typeof window !== "undefined") {
+          window.location.href = "/today";
+        }
+      } else if (plantId) {
+        console.info("[app-context] deep-link plantId:", plantId);
+        if (typeof window !== "undefined") {
+          window.location.href = "/plants";
+        }
+      }
     }
+
+    // URL params (cold start from notification tap)
+    if (!deepLinkHandled.current) {
+      deepLinkHandled.current = true;
+      const params = new URLSearchParams(window.location.search);
+      handleDeepLink(params.get("taskId"), params.get("plantId"));
+    }
+
+    // Capacitor appUrlOpen (app already running or cold start via URL scheme)
+    async function setupCapacitorListener() {
+      try {
+        const { App } = await import("@capacitor/app");
+        await App.addListener("appUrlOpen", (data) => {
+          const url = new URL(data.url);
+          const taskId = url.searchParams.get("taskId");
+          const plantId = url.searchParams.get("plantId");
+          handleDeepLink(taskId, plantId);
+        });
+      } catch {
+        // Not running in Capacitor — no-op on web
+      }
+    }
+    void setupCapacitorListener();
   }, []);
 
   // Refresh dashboard data

@@ -18,6 +18,7 @@ import { TaskCard } from "@/components/cards/task-card";
 import { BottomSheet } from "@/components/sheets/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PullToRefresh } from "@/components/pull-to-refresh";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/data/types";
 
@@ -336,6 +337,8 @@ export default function CalendarPage() {
         </div>
       )}
 
+      <PullToRefresh onRefresh={loadMonth}>
+
       {/* ── Month Navigation ── */}
       <div className="mt-5 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -648,6 +651,7 @@ export default function CalendarPage() {
           </div>
         )}
       </BottomSheet>
+      </PullToRefresh>
     </>
   );
 }

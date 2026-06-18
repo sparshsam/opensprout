@@ -10,6 +10,7 @@ import { TaskCard } from "@/components/cards/task-card";
 import { BottomSheet } from "@/components/sheets/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PullToRefresh } from "@/components/pull-to-refresh";
 
 export default function TodayPage() {
   const {
@@ -23,6 +24,7 @@ export default function TodayPage() {
     handleSkipTask,
     handleSnoozeTask,
     handleRescheduleTask,
+    refreshDashboard,
   } = useApp();
 
   // ── Task action sheet state ──
@@ -123,6 +125,7 @@ export default function TodayPage() {
       )}
 
       <section className="space-y-6 py-6">
+        <PullToRefresh onRefresh={refreshDashboard}>
         {/* Stats */}
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard label="Due" value={String(totalDue)} sub={`${data.plants.length} plants`} />
@@ -184,6 +187,7 @@ export default function TodayPage() {
             )}
           </>
         )}
+        </PullToRefresh>
       </section>
 
       {/* ── Task Action Sheet ── */}
