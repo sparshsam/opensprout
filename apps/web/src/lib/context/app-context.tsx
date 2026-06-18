@@ -34,6 +34,7 @@ import { syncAll, isOnline, buildSyncStats, type SyncStats } from "@/lib/data/sy
 import {
   clearCache,
   getCacheStats,
+  queueAction,
 } from "@/lib/data/db";
 import {
   createContext,
@@ -292,12 +293,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const client = supabase;
       if (!user || !client) throw new Error("Not authenticated");
       setError(null);
+      if (!isOnlineState) {
+        await queueAction("plants", "create", "", values);
+        setNotice("Action queued — will sync when online.");
+        return {} as PlantRow;
+      }
       const created = await createPlant(client, user.id, values);
       setNotice(`${created.name} added.`);
       await refreshDashboard();
       return created;
     },
-    [supabase, user, refreshDashboard],
+    [supabase, user, refreshDashboard, isOnlineState],
   );
 
   const handleUpdatePlant = useCallback(
@@ -305,11 +311,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const client = supabase;
       if (!user || !client) throw new Error("Not authenticated");
       setError(null);
+      if (!isOnlineState) {
+        await queueAction("plants", "update", plantId, values);
+        setNotice("Action queued — will sync when online.");
+        return;
+      }
       const updated = await updatePlant(client, user.id, plantId, values);
       setNotice(`${updated.name} updated.`);
       await refreshDashboard();
     },
-    [supabase, user, refreshDashboard],
+    [supabase, user, refreshDashboard, isOnlineState],
   );
 
   const handleDeletePlant = useCallback(
@@ -317,11 +328,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const client = supabase;
       if (!user || !client) return;
       setError(null);
+      if (!isOnlineState) {
+        await queueAction("plants", "archive", plant.id);
+        setNotice("Action queued — will sync when online.");
+        return;
+      }
       await deletePlant(client, user.id, plant.id);
       setNotice(`${plant.name} deleted.`);
       await refreshDashboard();
     },
-    [supabase, user, refreshDashboard],
+    [supabase, user, refreshDashboard, isOnlineState],
   );
 
   const handleMarkCare = useCallback(
@@ -349,11 +365,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const client = supabase;
       if (!user || !client) return;
       setError(null);
+      if (!isOnlineState) {
+        await queueAction("tasks", "complete", taskId, input);
+        setNotice("Action queued — will sync when online.");
+        return;
+      }
       await completeTask(client, user.id, taskId, input);
       setNotice("Task completed.");
       await refreshDashboard();
     },
-    [supabase, user, refreshDashboard],
+    [supabase, user, refreshDashboard, isOnlineState],
   );
 
   const handleSkipTask = useCallback(
@@ -361,11 +382,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const client = supabase;
       if (!user || !client) return;
       setError(null);
+      if (!isOnlineState) {
+        await queueAction("tasks", "skip", taskId);
+        setNotice("Action queued — will sync when online.");
+        return;
+      }
       await skipTask(client, user.id, taskId);
       setNotice("Task skipped.");
       await refreshDashboard();
     },
-    [supabase, user, refreshDashboard],
+    [supabase, user, refreshDashboard, isOnlineState],
   );
 
   const handleSnoozeTask = useCallback(
@@ -373,11 +399,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const client = supabase;
       if (!user || !client) return;
       setError(null);
+      if (!isOnlineState) {
+        await queueAction("tasks", "snooze", taskId, snoozeUntil);
+        setNotice("Action queued — will sync when online.");
+        return;
+      }
       await snoozeTask(client, user.id, taskId, snoozeUntil);
       setNotice("Task snoozed.");
       await refreshDashboard();
     },
-    [supabase, user, refreshDashboard],
+    [supabase, user, refreshDashboard, isOnlineState],
   );
 
   const handleRescheduleTask = useCallback(
@@ -385,11 +416,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const client = supabase;
       if (!user || !client) return;
       setError(null);
+      if (!isOnlineState) {
+        await queueAction("tasks", "reschedule", taskId, newDueAt);
+        setNotice("Action queued — will sync when online.");
+        return;
+      }
       await rescheduleTask(client, user.id, taskId, newDueAt);
       setNotice("Task rescheduled.");
       await refreshDashboard();
     },
-    [supabase, user, refreshDashboard],
+    [supabase, user, refreshDashboard, isOnlineState],
   );
 
   const value = useMemo<AppState>(
