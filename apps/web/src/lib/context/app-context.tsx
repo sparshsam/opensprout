@@ -30,12 +30,18 @@ import {
   type CompleteTaskInput,
   type TaskWithPlant,
 } from "@/lib/data/tasks";
+import { syncAll, isOnline, buildSyncStats, type SyncStats } from "@/lib/data/sync";
+import {
+  clearCache,
+  getCacheStats,
+} from "@/lib/data/db";
 import {
   createContext,
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -76,6 +82,11 @@ export interface AppState {
   handleSnoozeTask: (taskId: string, snoozeUntil: string) => Promise<void>;
   handleRescheduleTask: (taskId: string, newDueAt: string) => Promise<void>;
   handleSignOut: () => Promise<void>;
+  isOnline: boolean;
+  syncStats: SyncStats | null;
+  cacheStats: { table: string; count: number }[];
+  handleSync: () => Promise<void>;
+  handleClearCache: () => Promise<void>;
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -119,6 +130,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     upcoming: [],
   });
 
+  // Offline / sync state
+  const [isOnlineState, setIsOnlineState] = useState(true);
+  const [syncStats, setSyncStats] = useState<SyncStats | null>(null);
+  const [cacheStats, setCacheStats] = useState<{ table: string; count: number }[]>([]);
+  const deepLinkHandled = useRef(false);
+
   // Session listener
   useEffect(() => {
     const client = supabase;
@@ -150,6 +167,38 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       listener.subscription.unsubscribe();
     };
   }, [supabase]);
+
+  // Track online/offline status
+  useEffect(() => {
+    const handleOnline = () => setIsOnlineState(true);
+    const handleOffline = () => setIsOnlineState(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    // Check real connectivity on mount
+    isOnline().then(setIsOnlineState);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  // Deep-link handler — check URL params on mount
+  useEffect(() => {
+    if (deepLinkHandled.current || typeof window === "undefined") return;
+    deepLinkHandled.current = true;
+
+    const params = new URLSearchParams(window.location.search);
+    const taskId = params.get("taskId");
+    const plantId = params.get("plantId");
+
+    if (taskId || plantId) {
+      console.info("[app-context] deep-link detected", { taskId, plantId });
+      // Future: navigate to the relevant task/plant detail
+    }
+  }, []);
 
   // Refresh dashboard data
   const refreshDashboard = useCallback(async () => {
@@ -198,6 +247,45 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       mounted = false;
     };
   }, [supabase, user]);
+
+  // ── Sync / cache handlers ──────────────────────────────────────────
+
+  /** Full sync: push pending actions, pull fresh data, update stats. */
+  const handleSync = useCallback(async () => {
+    const client = supabase;
+    if (!user || !client) return;
+    setError(null);
+    try {
+      const result = await syncAll(client, user.id);
+      const stats = await buildSyncStats(result);
+      setSyncStats(stats);
+      const cStats = await getCacheStats();
+      setCacheStats(cStats);
+    } catch (syncError) {
+      console.error("[sync] handleSync failed", syncError);
+    }
+  }, [supabase, user]);
+
+  /** Clear all local IndexedDB caches and reset sync stats. */
+  const handleClearCache = useCallback(async () => {
+    try {
+      await clearCache();
+      setSyncStats(null);
+      setCacheStats([]);
+      setNotice("Local cache cleared.");
+    } catch (cacheError) {
+      setError(errorMessage(cacheError));
+    }
+  }, [setNotice, setError]);
+
+  // Sync after dashboard refresh when online
+  useEffect(() => {
+    if (user && isOnlineState) {
+      void handleSync();
+    }
+    // Intentionally not depending on handleSync — it's stable (deps supabase/user)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, isOnlineState]);
 
   const handleCreatePlant = useCallback(
     async (values: PlantFormValues) => {
@@ -327,6 +415,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       handleSnoozeTask,
       handleRescheduleTask,
       handleSignOut,
+      isOnline: isOnlineState,
+      syncStats,
+      cacheStats,
+      handleSync,
+      handleClearCache,
     }),
     [
       supabase,
@@ -348,6 +441,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       handleSnoozeTask,
       handleRescheduleTask,
       handleSignOut,
+      isOnlineState,
+      syncStats,
+      cacheStats,
+      handleSync,
+      handleClearCache,
     ],
   );
 
