@@ -152,7 +152,11 @@ export async function updatePlant(supabase: Client, userId: string, plantId: str
 }
 
 export async function deletePlant(supabase: Client, userId: string, plantId: string) {
-  const { error } = await supabase.from("plants").delete().eq("id", plantId).eq("user_id", userId);
+  const { error } = await supabase
+    .from("plants")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", plantId)
+    .eq("user_id", userId);
   if (error) throw error;
 }
 

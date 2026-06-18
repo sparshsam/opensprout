@@ -18,6 +18,10 @@ const config: CapacitorConfig = {
     Camera: {
       // Camera plugin uses default Capacitor permissions
     },
+    LocalNotifications: {
+      smallIcon: "ic_stat_sprout",
+      iconColor: "#16784f",
+    },
   },
 };
 

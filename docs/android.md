@@ -85,23 +85,25 @@ npm run cap:open:android
 
 ## Android Permissions
 
-OpenSprout v0.4+ uses the Capacitor Camera plugin for photo capture and gallery selection. The following permissions are declared in `android/app/src/main/AndroidManifest.xml`:
+OpenSprout v0.4+ uses the Capacitor Camera plugin for photo capture and gallery selection. v0.5+ also uses the Local Notifications plugin for care reminders.
 
-| Permission | Purpose | Required |
-|---|---|---|
-| `CAMERA` | Take photos of plants | Yes, for camera capture |
-| `READ_MEDIA_IMAGES` | Select photos from gallery (Android 13+) | Yes, for gallery picker |
-| `READ_EXTERNAL_STORAGE` | Select photos from gallery (Android 12 and below) | Yes, for gallery picker |
+| Permission | Purpose | Required | Added In |
+|---|---|---|---|
+| `CAMERA` | Take photos of plants | Yes, for camera capture | v0.4 |
+| `READ_MEDIA_IMAGES` | Select photos from gallery (Android 13+) | Yes, for gallery picker | v0.4 |
+| `READ_EXTERNAL_STORAGE` | Select photos from gallery (Android 12 and below) | Yes, for gallery picker | v0.4 |
+| `POST_NOTIFICATIONS` | Schedule care reminders (Android 13+) | Yes, for reminders | v0.5 |
 
-Capacitor's Camera plugin handles permission requests at runtime. Users will see a system prompt the first time they tap the Camera button.
+Capacitor's Camera and LocalNotifications plugins handle permission requests at runtime. Users will see system prompts the first time they use each feature.
 
-If the camera feature is not needed, the permission request is never triggered — the Gallery button falls back gracefully to the file picker on web.
+If a feature is not enabled in Settings, its permission request is never triggered.
 
 ## Dependencies
 
 | Package | Purpose |
 |---|---|
 | `@capacitor/camera` ^8.x | Camera capture + gallery picker |
+| `@capacitor/local-notifications` ^8.x | Care reminder notifications |
 
 ## How Static Export Works
 
