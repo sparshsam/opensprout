@@ -1,11 +1,5 @@
-import { AppShell } from "@/components/app-shell";
-import { PwaRegister } from "@/components/pwa-register";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return (
-    <>
-      <AppShell />
-      <PwaRegister />
-    </>
-  );
+  redirect("/today");
 }

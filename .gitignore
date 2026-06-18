@@ -12,6 +12,10 @@ coverage
 .vercel
 supabase/.temp
 
+# Android build outputs
+android/app/build
+android/.gradle
+
 # local env
 .env
 .env.local

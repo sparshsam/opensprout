@@ -86,6 +86,8 @@ flowchart LR
         P[plants]
         CS[care_schedules]
         CL[care_logs]
+        JE[journal_entries]
+        JP[journal_photos]
     end
 
     SPECIES --> PS
@@ -94,9 +96,14 @@ flowchart LR
     PLANTS --> CL
     CARE --> CS
     CARE --> CL
+    JOURNAL[journal.ts] --> JE
+    PHOTOS[photos.ts] --> JP
+    PHOTOS --> STORAGE[Storage: plant-photos]
     P --> RLS[Row-Level Security]
     CS --> RLS
     CL --> RLS
+    JE --> RLS
+    JP --> RLS
 ```
 
 ## API Structure
@@ -113,11 +120,11 @@ Planned routes:
 
 - `/api/care-schedules`
 - `/api/care-logs`
-- `/api/journal`
-- `/api/photos/sign-upload`
 - `/api/import`
 - `/api/sync/pull`
 - `/api/sync/push`
+
+> Note: `journal_entries`, `journal_photos`, and photo uploads are handled client-side through the Supabase JS SDK directly — route handlers are not needed for the current architecture.
 
 ## Component Hierarchy
 

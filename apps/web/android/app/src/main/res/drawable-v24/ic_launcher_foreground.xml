@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportHeight="108"
+    android:viewportWidth="108">
+    <!-- Sprout stem -->
+    <path
+        android:fillColor="#ffffff"
+        android:pathData="M54,28L54,58" />
+    <!-- Sprout leaf left -->
+    <path
+        android:fillColor="#ffffff"
+        android:pathData="M54,35C54,35 42,30 38,38C34,46 54,46 54,46Z" />
+    <!-- Sprout leaf right -->
+    <path
+        android:fillColor="#ffffff"
+        android:pathData="M54,35C54,35 66,30 70,38C74,46 54,46 54,46Z" />
+    <!-- Pot -->
+    <path
+        android:fillColor="#ffffff"
+        android:pathData="M38,62L42,82L66,82L70,62Z" />
+</vector>

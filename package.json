@@ -10,8 +10,15 @@
   "scripts": {
     "dev": "npm --workspace apps/web run dev",
     "build": "npm --workspace apps/web run build",
+    "build:mobile": "npm --workspace apps/web run build:mobile",
+    "start": "npm --workspace apps/web run start",
     "lint": "npm --workspace apps/web run lint",
-    "typecheck": "npm --workspace apps/web run typecheck"
+    "typecheck": "npm --workspace apps/web run typecheck",
+    "cap:dev:android": "npm --workspace apps/web run cap:dev:android",
+    "cap:open:android": "npm --workspace apps/web run cap:open:android",
+    "cap:sync": "npm --workspace apps/web run cap:sync",
+    "android:debug": "npm --workspace apps/web run android:debug",
+    "android:release:bundle": "npm --workspace apps/web run android:release:bundle"
   },
   "engines": {
     "node": ">=20.11.0"
