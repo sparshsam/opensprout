@@ -29,7 +29,7 @@ import type { PlantFormValues } from "@/lib/data/plants";
 import type { TimelineEvent } from "@/lib/data/tasks";
 import { listPlantTimeline } from "@/lib/data/tasks";
 import { TimelineItem } from "@/components/cards/timeline-item";
-import { getSpeciesRecommendations, type CareRecommendation } from "@/lib/data/recommendations";
+import { getSpeciesRecommendations } from "@/lib/data/recommendations";
 import { CoverPhoto } from "@/components/cards/cover-photo";
 import { PullToRefresh } from "@/components/pull-to-refresh";
 
