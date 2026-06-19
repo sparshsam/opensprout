@@ -1,6 +1,6 @@
 "use client";
 
-import { Sprout, CalendarDays, Leaf, NotebookTabs, Settings, BookOpen } from "lucide-react";
+import { Sprout, CalendarDays, Leaf, NotebookTabs, Settings, BookOpen, Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { label: "Today", href: "/today", icon: Sprout },
   { label: "Plants", href: "/plants", icon: Leaf },
+  { label: "Identify", href: "/identify", icon: Search },
   { label: "Explore", href: "/explore", icon: BookOpen },
   { label: "Calendar", href: "/calendar", icon: CalendarDays },
   { label: "Journal", href: "/journal", icon: NotebookTabs },

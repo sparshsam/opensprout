@@ -1,3 +1,5 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type CareType = "water" | "fertilize" | "mist" | "rotate" | "prune" | "repot" | "inspect" | "custom";
@@ -507,6 +509,34 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["diagnosis_entries"]["Insert"]>;
         Relationships: [];
       };
+      identifications: {
+        Row: {
+          id: string;
+          user_id: string;
+          photo_path: string;
+          results: Json;
+          selected_species_id: string | null;
+          selected_name: string | null;
+          confidence: number | null;
+          diagnosis: Json | null;
+          source: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          photo_path: string;
+          results?: Json;
+          selected_species_id?: string | null;
+          selected_name?: string | null;
+          confidence?: number | null;
+          diagnosis?: Json | null;
+          source?: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["identifications"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -536,3 +566,8 @@ export type KnowledgeArticleUpdate = Database["public"]["Tables"]["knowledge_art
 export type DiagnosisEntryRow = Database["public"]["Tables"]["diagnosis_entries"]["Row"];
 export type DiagnosisEntryInsert = Database["public"]["Tables"]["diagnosis_entries"]["Insert"];
 export type DiagnosisEntryUpdate = Database["public"]["Tables"]["diagnosis_entries"]["Update"];
+export type IdentificationRow = Database["public"]["Tables"]["identifications"]["Row"];
+export type IdentificationInsert = Database["public"]["Tables"]["identifications"]["Insert"];
+export type IdentificationUpdate = Database["public"]["Tables"]["identifications"]["Update"];
+
+export type Client = SupabaseClient<Database>;
