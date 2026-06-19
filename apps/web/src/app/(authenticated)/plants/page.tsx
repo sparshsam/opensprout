@@ -12,6 +12,7 @@ import {
   Loader2,
   Save,
   History,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +29,7 @@ import type { PlantFormValues } from "@/lib/data/plants";
 import type { TimelineEvent } from "@/lib/data/tasks";
 import { listPlantTimeline } from "@/lib/data/tasks";
 import { TimelineItem } from "@/components/cards/timeline-item";
+import { getSpeciesRecommendations, type CareRecommendation } from "@/lib/data/recommendations";
 import { CoverPhoto } from "@/components/cards/cover-photo";
 import { PullToRefresh } from "@/components/pull-to-refresh";
 
@@ -531,6 +533,73 @@ function PlantForm({
                 <p><span className="block text-xs font-bold uppercase text-emerald-700">Difficulty</span>{selectedSpecies.difficulty ?? "Not rated"}</p>
                 <p className="md:col-span-3">{selectedSpecies.care_summary}</p>
               </div>
+            )}
+            {selectedSpecies && (
+              <>
+                {/* Care Recommendations */}
+                <details className="mt-3 rounded-md border border-emerald-200 bg-emerald-50/50">
+                  <summary className="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm font-semibold text-emerald-900">
+                    <ChevronDown size={14} className="transition-transform" />
+                    Care Recommendations
+                  </summary>
+                  <div className="space-y-2 px-3 pb-3">
+                    {getSpeciesRecommendations(selectedSpecies).length === 0 ? (
+                      <p className="text-sm text-emerald-700">No specific recommendations for this species.</p>
+                    ) : (
+                      getSpeciesRecommendations(selectedSpecies).map((rec, i) => (
+                        <div key={i} className="rounded-md border border-emerald-200 bg-white p-3 text-sm">
+                          <div className="flex items-start justify-between gap-2">
+                            <span className="font-semibold text-emerald-900">{rec.title}</span>
+                            <span className={cn(
+                              "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase",
+                              rec.priority === "high" && "bg-red-100 text-red-700",
+                              rec.priority === "medium" && "bg-amber-100 text-amber-700",
+                              rec.priority === "low" && "bg-emerald-100 text-emerald-700",
+                            )}>
+                              {rec.priority}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-emerald-800">{rec.description}</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </details>
+
+                {/* Expanded Species Info Grid */}
+                <details className="mt-2 rounded-md border border-emerald-200 bg-emerald-50/50">
+                  <summary className="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm font-semibold text-emerald-900">
+                    <ChevronDown size={14} className="transition-transform" />
+                    Species Details
+                  </summary>
+                  <div className="grid grid-cols-2 gap-3 px-3 pb-3 text-sm text-emerald-950 md:grid-cols-3">
+                    {selectedSpecies.propagation_methods?.length > 0 && (
+                      <p><span className="block text-xs font-bold uppercase text-emerald-700">Propagation</span>{selectedSpecies.propagation_methods.join(", ")}</p>
+                    )}
+                    {selectedSpecies.pruning_notes && (
+                      <p><span className="block text-xs font-bold uppercase text-emerald-700">Pruning</span>{selectedSpecies.pruning_notes}</p>
+                    )}
+                    {selectedSpecies.repotting_notes && (
+                      <p><span className="block text-xs font-bold uppercase text-emerald-700">Repotting</span>{selectedSpecies.repotting_notes}</p>
+                    )}
+                    {selectedSpecies.dormancy_period && (
+                      <p><span className="block text-xs font-bold uppercase text-emerald-700">Dormancy</span>{selectedSpecies.dormancy_period}</p>
+                    )}
+                    {selectedSpecies.bloom_time && (
+                      <p><span className="block text-xs font-bold uppercase text-emerald-700">Bloom Time</span>{selectedSpecies.bloom_time}</p>
+                    )}
+                    {selectedSpecies.growth_rate && (
+                      <p><span className="block text-xs font-bold uppercase text-emerald-700">Growth Rate</span>{selectedSpecies.growth_rate}</p>
+                    )}
+                    {selectedSpecies.mature_height && (
+                      <p><span className="block text-xs font-bold uppercase text-emerald-700">Mature Height</span>{selectedSpecies.mature_height}</p>
+                    )}
+                    {selectedSpecies.native_region && (
+                      <p><span className="block text-xs font-bold uppercase text-emerald-700">Native Region</span>{selectedSpecies.native_region}</p>
+                    )}
+                  </div>
+                </details>
+              </>
             )}
           </div>
         )}

@@ -74,6 +74,17 @@ export type Database = {
           difficulty: "beginner" | "easy" | "moderate" | "advanced" | null;
           care_summary: string | null;
           common_problems: string[];
+          propagation_methods: string[];
+          pruning_notes: string | null;
+          repotting_notes: string | null;
+          dormancy_period: string | null;
+          source_name: string | null;
+          source_url: string | null;
+          native_region: string | null;
+          growth_rate: "slow" | "moderate" | "fast" | null;
+          mature_height: string | null;
+          bloom_time: string | null;
+          pet_safe: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -93,6 +104,17 @@ export type Database = {
           difficulty?: "beginner" | "easy" | "moderate" | "advanced" | null;
           care_summary?: string | null;
           common_problems?: string[];
+          propagation_methods?: string[];
+          pruning_notes?: string | null;
+          repotting_notes?: string | null;
+          dormancy_period?: string | null;
+          source_name?: string | null;
+          source_url?: string | null;
+          native_region?: string | null;
+          growth_rate?: "slow" | "moderate" | "fast" | null;
+          mature_height?: string | null;
+          bloom_time?: string | null;
+          pet_safe?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -429,6 +451,62 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["sync_devices"]["Insert"]>;
         Relationships: [];
       };
+      knowledge_articles: {
+        Row: {
+          id: string;
+          species_id: string;
+          title: string;
+          body: string;
+          category: "care" | "diagnosis" | "propagation" | "general";
+          tags: string[];
+          source_name: string | null;
+          source_url: string | null;
+          sort_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          species_id: string;
+          title: string;
+          body: string;
+          category: "care" | "diagnosis" | "propagation" | "general";
+          tags?: string[];
+          source_name?: string | null;
+          source_url?: string | null;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["knowledge_articles"]["Insert"]>;
+        Relationships: [];
+      };
+      diagnosis_entries: {
+        Row: {
+          id: string;
+          species_id: string;
+          symptom: string;
+          cause: string;
+          solution: string;
+          severity: "minor" | "moderate" | "severe";
+          category: "watering" | "light" | "pests" | "disease" | "nutrient" | "environment";
+          sort_order: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          species_id: string;
+          symptom: string;
+          cause: string;
+          solution: string;
+          severity: "minor" | "moderate" | "severe";
+          category: "watering" | "light" | "pests" | "disease" | "nutrient" | "environment";
+          sort_order?: number;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["diagnosis_entries"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -452,3 +530,9 @@ export type JournalEntryInsert = Database["public"]["Tables"]["journal_entries"]
 export type JournalEntryUpdate = Database["public"]["Tables"]["journal_entries"]["Update"];
 export type JournalPhotoRow = Database["public"]["Tables"]["journal_photos"]["Row"];
 export type JournalPhotoInsert = Database["public"]["Tables"]["journal_photos"]["Insert"];
+export type KnowledgeArticleRow = Database["public"]["Tables"]["knowledge_articles"]["Row"];
+export type KnowledgeArticleInsert = Database["public"]["Tables"]["knowledge_articles"]["Insert"];
+export type KnowledgeArticleUpdate = Database["public"]["Tables"]["knowledge_articles"]["Update"];
+export type DiagnosisEntryRow = Database["public"]["Tables"]["diagnosis_entries"]["Row"];
+export type DiagnosisEntryInsert = Database["public"]["Tables"]["diagnosis_entries"]["Insert"];
+export type DiagnosisEntryUpdate = Database["public"]["Tables"]["diagnosis_entries"]["Update"];
