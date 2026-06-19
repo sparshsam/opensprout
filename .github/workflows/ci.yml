@@ -26,13 +26,22 @@ jobs:
         run: npm ci
 
       - name: Audit dependencies
-        run: npm audit --audit-level=high
+        run: npm audit --audit-level=critical
 
       - name: Lint
         run: npm run lint
 
-      - name: Typecheck
+      - name: Typecheck (web)
         run: npm run typecheck
 
-      - name: Build
+      - name: Typecheck (mcp)
+        run: npm --workspace apps/mcp run typecheck
+
+      - name: Build (web)
         run: npm run build
+
+      - name: Build (mcp)
+        run: npm --workspace apps/mcp run build
+
+      - name: Test (mcp)
+        run: npm --workspace apps/mcp test

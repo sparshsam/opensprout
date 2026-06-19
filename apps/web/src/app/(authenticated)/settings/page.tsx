@@ -11,6 +11,7 @@ import {
   RefreshCw,
   Database,
   Upload,
+  Key,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -161,6 +162,26 @@ export default function SettingsPage() {
               <LogOut size={16} aria-hidden />
               Logout
             </Button>
+          </div>
+        </div>
+
+        {/* MCP Access Tokens */}
+        <div className="rounded-md border border-border bg-card p-4 shadow-panel">
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <Key size={18} aria-hidden />
+            AI Agent Access
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Personal access tokens for AI agents (Claude Code, Hermes, Cursor)
+            to read and manage your plant data via MCP.
+          </p>
+          <div className="mt-4">
+            <a href="/settings/mcp">
+              <Button variant="outline">
+                <Key size={16} aria-hidden />
+                Manage Tokens
+              </Button>
+            </a>
           </div>
         </div>
 
