@@ -63,7 +63,7 @@ export async function createMcpToken(
   const tokenHash = await hashToken(rawToken);
   const prefix = getTokenPrefix(rawToken);
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await (supabase as any) // eslint-disable-line @typescript-eslint/no-explicit-any
     .from("mcp_tokens")
     .insert({
       user_id: userId,
@@ -84,7 +84,7 @@ export async function revokeMcpToken(
   tokenId: string,
   userId: string,
 ): Promise<void> {
-  const { error } = await (supabase as any)
+  const { error } = await (supabase as any) // eslint-disable-line @typescript-eslint/no-explicit-any
     .from("mcp_tokens")
     .update({ revoked_at: new Date().toISOString() })
     .eq("id", tokenId)
