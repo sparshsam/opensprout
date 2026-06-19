@@ -3,21 +3,29 @@ import type { Database } from "./types.js";
 
 export type Client = SupabaseClient<Database>;
 
-const SUPABASE_URL =
-  process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL ?? "";
-const SUPABASE_ANON_KEY =
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
-  process.env.SUPABASE_ANON_KEY ??
-  "";
+function getSuperbaseUrl(): string {
+  return process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL ?? "";
+}
+
+function getSuperbaseAnonKey(): string {
+  return (
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+    process.env.SUPABASE_ANON_KEY ??
+    ""
+  );
+}
 
 export function createSupabaseClient(token: string): Client {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  const url = getSuperbaseUrl();
+  const key = getSuperbaseAnonKey();
+
+  if (!url || !key) {
     throw new Error(
       "Missing Supabase credentials. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY.",
     );
   }
 
-  return createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  return createClient<Database>(url, key, {
     global: {
       headers: {
         Authorization: `Bearer ${token}`,
