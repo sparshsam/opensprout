@@ -43,7 +43,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Decode the base64 image and prepare multipart form data
-    const imageBuffer = Buffer.from(body.imageBase64, "base64");
+    const base64Data = body.imageBase64.replace(
+      /^data:image\/\w+;base64,/,
+      "",
+    );
+    const imageBytes = Uint8Array.from(
+      atob(base64Data),
+      (c) => c.charCodeAt(0),
+    );
 
     // Determine MIME type from base64 prefix or default to image/jpeg
     const mimeType = body.imageBase64.startsWith("data:image/")
@@ -51,8 +58,9 @@ export async function POST(request: NextRequest) {
       : "image/jpeg";
 
     const formData = new FormData();
-    const blob = new Blob([imageBuffer], { type: mimeType });
-    formData.append("images", blob, `plant.${mimeType.split("/")[1] || "jpg"}`);
+    const blob = new Blob([imageBytes], { type: mimeType });
+    const ext = mimeType.split("/")[1] || "jpg";
+    formData.append("images", blob, `plant.${ext}`);
     formData.append("organs", "leaf");
 
     const url = `${PLANTNET_API_BASE}?api-key=${apiKey}`;
