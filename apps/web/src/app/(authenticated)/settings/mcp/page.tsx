@@ -12,6 +12,7 @@ import {
   type McpToken,
   type McpTokenWithSecret,
 } from "@/lib/data/mcp-tokens";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function McpSettingsPage() {
   const { user, supabase } = useApp();
@@ -176,7 +177,17 @@ export default function McpSettingsPage() {
         <div className="rounded-md border border-border bg-card p-4 shadow-panel">
           <h2 className="text-lg font-bold">Active Tokens</h2>
           {loading ? (
-            <p className="mt-3 text-sm text-muted-foreground">Loading...</p>
+            <div className="mt-3 space-y-3">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex items-center justify-between py-3">
+                  <div className="space-y-2 flex-1">
+                    <Skeleton className="h-4 w-32 rounded-md" />
+                    <Skeleton className="h-3 w-48 rounded-md" />
+                  </div>
+                  <Skeleton className="h-8 w-8 shrink-0 rounded-md" />
+                </div>
+              ))}
+            </div>
           ) : tokens.length === 0 ? (
             <p className="mt-3 text-sm text-muted-foreground">
               No active tokens. Create one above to connect an AI agent.

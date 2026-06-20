@@ -12,6 +12,8 @@ import {
   Database,
   Upload,
   Key,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +24,7 @@ import {
 } from "@/lib/data/reminders";
 import type { ReminderPreferences } from "@/lib/data/reminders";
 import { readImportFile, executeImport, type ImportResult } from "@/lib/data/import";
+import { useTheme } from "@/lib/context/theme-context";
 
 const LEAD_TIME_OPTIONS = [
   { value: 15, label: "15 min" },
@@ -42,6 +45,7 @@ export default function SettingsPage() {
     handleSync,
     handleClearCache,
   } = useApp();
+  const { resolved, toggle } = useTheme();
 
   // ── Reminder preferences ──
   const [prefs, setPrefs] = useState<ReminderPreferences>(loadReminderPrefs);
@@ -157,7 +161,11 @@ export default function SettingsPage() {
           <p className="text-xs text-muted-foreground">
             Authentication is handled by Supabase Auth with RLS-scoped data.
           </p>
-          <div className="mt-4">
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <Button variant="outline" onClick={toggle} aria-label="Toggle dark mode">
+              {resolved === "dark" ? <Sun size={16} aria-hidden /> : <Moon size={16} aria-hidden />}
+              {resolved === "dark" ? "Light mode" : "Dark mode"}
+            </Button>
             <Button variant="outline" onClick={handleSignOut}>
               <LogOut size={16} aria-hidden />
               Logout

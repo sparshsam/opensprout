@@ -9,6 +9,7 @@ import {
   Pencil,
   Trash2,
   Search,
+  RefreshCw,
 } from "lucide-react";
 import type { JournalFeedItem } from "@/lib/data/tasks";
 import {
@@ -29,6 +30,7 @@ import {
 } from "@/components/sheets/journal-form";
 import { Button } from "@/components/ui/button";
 import type { TimelineEventType } from "@/lib/data/tasks";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function JournalPage() {
   const { supabase, user, data } = useApp();
@@ -208,7 +210,18 @@ export default function JournalPage() {
       {/* Error banner */}
       {error && (
         <div className="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800">
-          {error}
+          <div className="flex items-center justify-between gap-3">
+            <span>{error}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={loadFeed}
+              className="shrink-0 border-red-300 bg-white text-red-700 hover:bg-red-100"
+            >
+              <RefreshCw size={14} aria-hidden />
+              Retry
+            </Button>
+          </div>
         </div>
       )}
 
@@ -250,11 +263,16 @@ export default function JournalPage() {
 
         {/* Feed */}
         {loading ? (
-          <div className="grid min-h-40 place-items-center text-muted-foreground">
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <Loader2 className="animate-spin" size={18} aria-hidden />
-              Loading journal
-            </div>
+          <div className="space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-24 rounded-md" />
+                  <Skeleton className="h-20 w-full rounded-md" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : filteredFeed.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border bg-card p-8 text-center shadow-panel">

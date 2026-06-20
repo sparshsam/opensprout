@@ -36,7 +36,7 @@ function AuthenticatedLayoutInner({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-background text-foreground">
       <div className="flex min-h-screen">
         <Sidebar />
-        <main className="flex-1 px-4 py-4 sm:px-6 lg:px-8 pb-20 md:pb-8">
+        <main id="main-content" className="flex-1 px-4 py-4 sm:px-6 lg:px-8 pb-20 md:pb-8">
           {children}
         </main>
       </div>
