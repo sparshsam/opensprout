@@ -2,7 +2,7 @@
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { createSupabaseClient, getAuthUser } from "./supabase.js";
+import { authenticateToken } from "./supabase.js";
 import { registerPlantTools } from "./tools/plants.js";
 import { registerSpeciesTools } from "./tools/species.js";
 import { registerCareTools } from "./tools/care.js";
@@ -17,21 +17,18 @@ async function main() {
     process.exit(1);
   }
 
-  const supabaseClient = createSupabaseClient(token);
-  const user = await getAuthUser(token);
-
-  const getClient = () => supabaseClient;
+  const { client, userId } = await authenticateToken(token);
+  const getClient = () => client;
 
   const server = new McpServer({
     name: "opensprout",
     version: "0.1.0",
   });
 
-  // Register all tool groups
   registerPlantTools(server, getClient);
   registerSpeciesTools(server, getClient);
-  registerCareTools(server, getClient, user.id);
-  registerJournalTools(server, getClient, user.id);
+  registerCareTools(server, getClient, userId);
+  registerJournalTools(server, getClient, userId);
   registerKnowledgeTools(server, getClient);
   registerIdentifyTools(server);
 
