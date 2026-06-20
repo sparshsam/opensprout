@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
@@ -22,6 +24,9 @@
   --radius-md: 6px;
   --radius-sm: 4px;
   --shadow-panel: 0 16px 50px rgba(18, 38, 30, 0.08);
+  --shadow-panel-dark: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --color-success: hsl(var(--success));
+  --color-warning: hsl(var(--warning));
 }
 
 :root {
@@ -42,23 +47,57 @@
   --border: 154 20% 86%;
   --input: 154 20% 86%;
   --ring: 157 50% 82%;
+  --success: 145 63% 42%;
+  --warning: 38 92% 50%;
 }
 
-* {
-  box-sizing: border-box;
+/* Dark mode - respects system preference by default */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: 157 30% 10%;
+    --foreground: 150 15% 89%;
+    --card: 157 28% 14%;
+    --card-foreground: 150 15% 89%;
+    --primary: 155 55% 38%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 198 30% 20%;
+    --secondary-foreground: 196 60% 80%;
+    --muted: 157 20% 16%;
+    --muted-foreground: 157 10% 60%;
+    --accent: 12 60% 50%;
+    --accent-foreground: 12 59% 93%;
+    --destructive: 0 65% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 157 16% 24%;
+    --input: 157 16% 24%;
+    --ring: 155 40% 32%;
+    --success: 145 55% 38%;
+    --warning: 38 85% 45%;
+  }
 }
 
-html {
-  min-width: 320px;
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
-body {
-  margin: 0;
-  font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+/* Skip-to-content link (accessibility) */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 9999;
+  padding: 0.5rem 1rem;
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  text-decoration: none;
+  border-radius: 0 0 var(--radius-md) 0;
 }
-
-button,
-input {
-  font: inherit;
+.skip-to-content:focus {
+  left: 0;
 }

@@ -7,7 +7,7 @@ import { saveIdentification } from "@/lib/data/identify-history";
 import { PhotoPicker, type PickedPhoto } from "@/components/cards/photo-picker";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Camera, Leaf, Loader2, Check, AlertCircle } from "lucide-react";
+import { Camera, Leaf, Loader2, Check, AlertCircle, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 // ── Helpers ────────────────────────────────────────────────
@@ -197,7 +197,21 @@ export default function IdentifyPage() {
       {/* Error / notice */}
       {error && (
         <div className="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800">
-          {error}
+          <div className="flex items-center justify-between gap-3">
+            <span className="flex-1">{error}</span>
+            {hasPhoto && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleIdentify}
+                disabled={identifying}
+                className="shrink-0 border-red-300 bg-white text-red-700 hover:bg-red-100"
+              >
+                <RefreshCw size={14} aria-hidden />
+                Retry
+              </Button>
+            )}
+          </div>
         </div>
       )}
 

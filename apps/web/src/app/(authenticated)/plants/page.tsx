@@ -13,6 +13,8 @@ import {
   Save,
   History,
   ChevronDown,
+  Sprout,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +34,7 @@ import { TimelineItem } from "@/components/cards/timeline-item";
 import { getSpeciesRecommendations } from "@/lib/data/recommendations";
 import { CoverPhoto } from "@/components/cards/cover-photo";
 import { PullToRefresh } from "@/components/pull-to-refresh";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const careTypes: CareType[] = [
   "water", "fertilize", "mist", "rotate", "prune", "repot", "inspect", "custom",
@@ -209,7 +212,20 @@ export default function PlantsPage() {
               : "border-emerald-200 bg-emerald-50 text-emerald-800",
           )}
         >
-          {error ?? notice}
+          <div className="flex items-center justify-between gap-3">
+            <span>{error ?? notice}</span>
+            {error && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={refreshDashboard}
+                className="shrink-0 border-red-300 bg-white text-red-700 hover:bg-red-100"
+              >
+                <RefreshCw size={14} aria-hidden />
+                Retry
+              </Button>
+            )}
+          </div>
         </div>
       )}
 
@@ -243,20 +259,33 @@ export default function PlantsPage() {
           )}
 
           {dataLoading ? (
-            <div className="grid min-h-40 place-items-center text-muted-foreground">
-              <div className="flex items-center gap-2 text-sm font-semibold">
-                <Loader2 className="animate-spin" size={18} aria-hidden />
-                Loading plants
-              </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {[...Array(4)].map((_, i) => (
+                <Skeleton key={i} className="h-32 rounded-md" />
+              ))}
             </div>
           ) : visiblePlants.length === 0 ? (
-            <div className="rounded-md border border-dashed border-border bg-white p-4 text-sm text-muted-foreground">
-              {query
-                ? "No plants match that search."
-                : "No plants yet. Add your first plant to start tracking care."}
+            <div className="rounded-lg border border-dashed border-border bg-card p-8 text-center shadow-panel">
+              <Sprout
+                size={48}
+                className="mx-auto text-muted-foreground/40"
+                aria-hidden
+              />
+              <h2 className="mt-4 text-lg font-bold">No plants yet</h2>
+              <p className="mt-2 text-sm text-muted-foreground max-w-sm mx-auto">
+                {query
+                  ? "No plants match that search. Try a different search term."
+                  : "Add your first plant to start tracking watering, fertilizing, and care."}
+              </p>
+              {!query && (
+                <Button onClick={openCreateForm} className="mt-5">
+                  <Plus size={16} aria-hidden />
+                  Add your first plant
+                </Button>
+              )}
             </div>
           ) : (
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2">
               {visiblePlants.map((plant) => (
                 <PlantCard
                   key={plant.id}
@@ -289,9 +318,10 @@ export default function PlantsPage() {
                   <h2 className="text-lg font-bold">Timeline</h2>
                 </div>
                 {timelineLoading ? (
-                  <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
-                    <Loader2 className="animate-spin mr-2" size={16} aria-hidden />
-                    Loading timeline
+                  <div className="space-y-2">
+                    {[...Array(3)].map((_, i) => (
+                      <Skeleton key={i} className="h-16 w-full rounded-md" />
+                    ))}
                   </div>
                 ) : timeline.length === 0 ? (
                   <div className="rounded-md border border-dashed border-border bg-white p-4 text-sm text-muted-foreground">
@@ -321,6 +351,11 @@ export default function PlantsPage() {
                 )}
               </div>
             </>
+          ) : dataLoading ? (
+            <div className="space-y-5">
+              <Skeleton className="h-64 w-full rounded-md" />
+              <Skeleton className="h-48 w-full rounded-md" />
+            </div>
           ) : (
             <div className="rounded-md border border-border bg-card p-4 shadow-panel">
               <h2 className="text-lg font-bold">No plant selected</h2>

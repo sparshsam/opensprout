@@ -6,7 +6,7 @@ import { getSpeciesById, listCategories } from "@/lib/data/knowledge";
 import { getSpeciesRecommendations, type CareRecommendation } from "@/lib/data/recommendations";
 import { searchPlantSpecies } from "@/lib/data/species";
 import type { PlantSpeciesRow } from "@/lib/data/types";
-import { Search, Leaf, FlaskConical, AlertTriangle, BookOpen } from "lucide-react";
+import { Search, Leaf, FlaskConical, AlertTriangle, BookOpen, RefreshCw } from "lucide-react";
 import { BottomSheet } from "@/components/sheets/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -204,7 +204,18 @@ export default function ExplorePage() {
       {/* ── Error banner ── */}
       {error && (
         <div className="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800">
-          {error}
+          <div className="flex items-center justify-between gap-3">
+            <span>{error}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={loadSpecies}
+              className="shrink-0 border-red-300 bg-white text-red-700 hover:bg-red-100"
+            >
+              <RefreshCw size={14} aria-hidden />
+              Retry
+            </Button>
+          </div>
         </div>
       )}
 

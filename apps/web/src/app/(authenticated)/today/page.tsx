@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useApp } from "@/lib/context/app-context";
-import { Loader2, Check, X, Clock, Calendar } from "lucide-react";
+import { Loader2, Check, X, Clock, Calendar, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CompleteTaskInput } from "@/lib/data/tasks";
 import type { TaskWithPlant } from "@/lib/data/tasks";
@@ -11,6 +11,7 @@ import { BottomSheet } from "@/components/sheets/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PullToRefresh } from "@/components/pull-to-refresh";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function TodayPage() {
   const {
@@ -120,7 +121,20 @@ export default function TodayPage() {
               : "border-emerald-200 bg-emerald-50 text-emerald-800",
           )}
         >
-          {error ?? notice}
+          <div className="flex items-center justify-between gap-3">
+            <span>{error ?? notice}</span>
+            {error && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={refreshDashboard}
+                className="shrink-0 border-red-300 bg-white text-red-700 hover:bg-red-100"
+              >
+                <RefreshCw size={14} aria-hidden />
+                Retry
+              </Button>
+            )}
+          </div>
         </div>
       )}
 
@@ -135,10 +149,26 @@ export default function TodayPage() {
         </div>
 
         {dataLoading && tasks.overdue.length === 0 && tasks.today.length === 0 ? (
-          <div className="grid min-h-40 place-items-center text-muted-foreground">
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <Loader2 className="animate-spin" size={18} aria-hidden />
-              Loading tasks
+          <div className="space-y-6">
+            {/* Skeleton stat cards */}
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {[...Array(4)].map((_, i) => (
+                <Skeleton key={i} className="h-24 rounded-md" />
+              ))}
+            </div>
+            {/* Skeleton task group */}
+            <div className="space-y-3">
+              <Skeleton className="h-5 w-24 rounded-md" />
+              {[...Array(3)].map((_, i) => (
+                <Skeleton key={i} className="h-20 w-full rounded-md" />
+              ))}
+            </div>
+            {/* Second skeleton task group */}
+            <div className="space-y-3">
+              <Skeleton className="h-5 w-28 rounded-md" />
+              {[...Array(2)].map((_, i) => (
+                <Skeleton key={`t2-${i}`} className="h-20 w-full rounded-md" />
+              ))}
             </div>
           </div>
         ) : (

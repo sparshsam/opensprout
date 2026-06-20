@@ -11,6 +11,7 @@ import {
   X,
   Clock,
   Calendar,
+  RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { TaskWithPlant, CompleteTaskInput } from "@/lib/data/tasks";
@@ -333,7 +334,18 @@ export default function CalendarPage() {
 
       {error && (
         <div className="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800">
-          {error}
+          <div className="flex items-center justify-between gap-3">
+            <span>{error}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={loadMonth}
+              className="shrink-0 border-red-300 bg-white text-red-700 hover:bg-red-100"
+            >
+              <RefreshCw size={14} aria-hidden />
+              Retry
+            </Button>
+          </div>
         </div>
       )}
 
