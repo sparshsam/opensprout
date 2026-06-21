@@ -6,6 +6,28 @@ All notable changes to OpenSprout will be documented here. The format follows [K
 
 - No unreleased changes.
 
+## 0.9.3 — 2026-06-21
+
+### Changed
+- Complete UI overhaul from admin dashboard to mobile-first plant care companion.
+- Simplified navigation to 4 items: Home, Plants, Identify, Profile.
+- Calendar, Journal, and Explore hidden from navigation (deferred until functional).
+- Home page (formerly Today) with greeting header and simplified metrics.
+- New Profile page consolidating account, reminders, data/privacy, AI agent access, about.
+- Export/import moved into Profile → Data & privacy section.
+- Large rounded cards (24px radius), elevation over borders.
+- Green brand icon as primary visual accent throughout.
+- Sentence case for all labels.
+- Mobile-first layout constrained to max-w-2xl on desktop.
+- Warm illustrated empty states with primary CTAs.
+
+### Removed
+- All technical language from primary UI (Supabase, JSON, sync, backup, RLS).
+- "Your plants. Your data." replaced with "Plant care companion".
+- Export/import from page headers.
+- Backup metrics and sync status from dashboard.
+- Old AppShell component (dead code, never imported).
+
 ## 0.9.2 — 2026-06-21
 
 ### Added
