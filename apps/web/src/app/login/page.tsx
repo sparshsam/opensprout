@@ -40,7 +40,7 @@ export default function LoginPage() {
     const client = supabase;
     if (!client) {
       setError(
-        "Supabase configuration is missing. Check your environment variables.",
+        "App configuration is missing. Please contact support.",
       );
       return;
     }
@@ -78,15 +78,14 @@ export default function LoginPage() {
           <div>
             <p className="text-lg font-bold leading-tight">OpenSprout</p>
             <p className="text-xs font-medium text-muted-foreground">
-              Your plants. Your data.
+              Plant care companion
             </p>
           </div>
         </div>
 
         <h1 className="text-3xl font-bold">Sign in to your garden</h1>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          OpenSprout uses Supabase Auth and RLS so every plant row belongs to
-          your user.
+        <p className="text-center text-xs leading-5 text-muted-foreground">
+          Your data is private and secure. Free and open-source.
         </p>
 
         <form className="mt-6 space-y-4" onSubmit={handleAuth}>
