@@ -69,7 +69,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="grid min-h-screen place-items-center bg-background px-4 py-10 text-foreground">
+    <main className="grid min-h-screen place-items-center bg-background px-4 py-10 text-foreground" id="main-content">
       <section className="w-full max-w-md rounded-md border border-border bg-card p-6 shadow-panel">
         <div className="mb-8 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground">
@@ -115,12 +115,12 @@ export default function LoginPage() {
           </label>
 
           {error && (
-            <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-800">
+            <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-800" role="alert">
               {error}
             </p>
           )}
           {message && (
-            <p className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm font-medium text-emerald-800">
+            <p className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm font-medium text-emerald-800" role="status">
               {message}
             </p>
           )}

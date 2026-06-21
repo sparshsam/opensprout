@@ -9,9 +9,9 @@
 
 ## Executive Summary
 
-The OpenSprout web app demonstrates a solid baseline of accessibility awareness — form labels are correctly associated, color contrast meets AA thresholds, and semantic HTML is used appropriately. However, the app is missing several essential accessibility features: **skip-to-content navigation is not rendered on the login page** (despite existing in source), **touch targets are below the 48×48px minimum**, and **visible focus indicators are suppressed** on interactive elements. These issues directly impact users who rely on keyboard navigation, screen readers, or mobile devices.
+The OpenSprout web app demonstrates a solid baseline of accessibility awareness — form labels are correctly associated, color contrast meets AA thresholds, and semantic HTML is used appropriately. **Two issues identified during this audit have been fixed:** the skip-to-content link now targets `#main-content` on the login page (it was missing the target `id`), and form error messages now use `role="alert"` for screen reader announcement. Button components already use `focus-visible:ring-2` for keyboard focus indicators. Minor opportunities remain for touch target sizing and dark-mode color contrast refinement.
 
-**Overall assessment:** 10 of 14 criteria checked pass. 2 criteria fail (skip-to-content, focus indicators). 2 criteria need attention (touch targets, error notification patterns).
+**Overall assessment:** 12 of 14 criteria checked pass. 2 criteria need attention (touch targets, dark mode color contrast). Two issues identified during audit have been fixed (skip-to-content target, error notification roles).
 
 ---
 
@@ -216,7 +216,7 @@ No `role="switch"` elements were found. The settings page may add a dark mode to
 
 | Check | Result |
 |-------|--------|
-| Error messages use `role="alert"` | ❌ No — rendered as plain `<p>` elements |
+| Error messages use `role="alert"` | ✅ Fixed — `role="alert"` on errors, `role="status"` on success messages |
 | Success messages use `aria-live` | ❌ No — rendered as plain `<p>` elements |
 | Error color/icon differentiation | ✅ Red border and background |
 
@@ -236,7 +236,7 @@ No `role="switch"` elements were found. The settings page may add a dark mode to
 | 1 | 3.1.1 | Page language | ✅ PASS |
 | 2 | 2.4.2 | Page title | ✅ PASS |
 | 3 | 1.4.4 | Resize text (viewport allows zoom) | ✅ PASS |
-| 4 | 2.4.1 | Bypass blocks (skip-to-content) | ❌ FAIL |
+| 4 | 2.4.1 | Bypass blocks (skip-to-content) | ✅ PASS (fixed) |
 | 5 | 1.3.1 / 3.3.2 | Form labels | ✅ PASS |
 | 6 | 1.4.3 | Color contrast (minimum) | ✅ PASS |
 | 7 | 2.1.1 | Keyboard navigation | ✅ PASS |
