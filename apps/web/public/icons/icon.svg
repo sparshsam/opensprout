@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="OpenSprout icon">
-  <rect width="512" height="512" rx="96" fill="#16784f"/>
-  <path d="M256 376c0-72 0-118 1-136" fill="none" stroke="#fff" stroke-width="28" stroke-linecap="round"/>
-  <path d="M252 238c-58-3-104-44-111-100 62-6 111 24 129 81" fill="none" stroke="#d7f5e5" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M268 234c11-64 56-100 118-99-3 61-50 103-114 105" fill="none" stroke="#d7f5e5" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
