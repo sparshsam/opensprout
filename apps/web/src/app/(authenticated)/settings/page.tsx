@@ -50,6 +50,7 @@ export default function SettingsPage() {
   // ── Reminder preferences ──
   const [prefs, setPrefs] = useState<ReminderPreferences>(loadReminderPrefs);
   const [permRequested, setPermRequested] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   useEffect(() => {
     saveReminderPrefs(prefs);
@@ -138,6 +139,27 @@ export default function SettingsPage() {
     }
   }
 
+  async function handleDeleteAccount() {
+    if (!supabase || !user) return;
+    const confirmed = window.confirm(
+      "Are you sure you want to delete your account and ALL data? This cannot be undone. " +
+      "Your plants, schedules, logs, journal entries, photos, and MCP tokens will all be permanently removed."
+    );
+    if (!confirmed) return;
+    setDeletingAccount(true);
+    try {
+      // Delete user data via admin function
+      const { error } = await supabase.rpc("delete_account");
+      if (error) throw error;
+      await handleSignOut();
+    } catch (e) {
+      console.error("Failed to delete account:", e);
+      alert("Failed to delete account. Please contact sparshsam@gmail.com for help.");
+    } finally {
+      setDeletingAccount(false);
+    }
+  }
+
   return (
     <>
       <header className="flex flex-col gap-4 border-b border-border pb-5">
@@ -171,6 +193,22 @@ export default function SettingsPage() {
               Logout
             </Button>
           </div>
+          {user && (
+            <div className="mt-4 border-t border-border pt-4">
+              <Button
+                variant="outline"
+                className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                onClick={handleDeleteAccount}
+                disabled={deletingAccount}
+              >
+                {deletingAccount ? <Loader2 size={16} className="animate-spin" aria-hidden /> : null}
+                {deletingAccount ? "Deleting..." : "Delete Account"}
+              </Button>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Permanently removes all your data. This cannot be undone.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* MCP Access Tokens */}
@@ -336,10 +374,15 @@ export default function SettingsPage() {
         {/* About */}
         <div className="rounded-md border border-border bg-card p-4 shadow-panel">
           <h2 className="text-lg font-bold">About OpenSprout</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Version 0.1.0</p>
+          <p className="mt-1 text-sm text-muted-foreground">Version 0.9.2</p>
           <p className="mt-2 text-sm text-muted-foreground leading-6">
             OpenSprout is free, open-source plant care tracking software licensed under AGPL v3. No subscriptions, no data lock-in. Built with Next.js, Supabase, and TypeScript.
           </p>
+          <div className="mt-3 flex flex-wrap gap-3 text-sm">
+            <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>
+            <a href="/terms" className="text-primary hover:underline">Terms of Service</a>
+            <a href="/support" className="text-primary hover:underline">Support</a>
+          </div>
           <p className="mt-3 text-xs text-muted-foreground">
             <a href="https://github.com/sparshsam/opensprout" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
               github.com/sparshsam/opensprout
