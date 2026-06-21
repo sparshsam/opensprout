@@ -1,0 +1,25 @@
+wing: opensprout
+rooms:
+- name: supabase
+  description: Files from supabase/
+  keywords:
+  - supabase
+  - supabase
+- name: design
+  description: Files from assets/
+  keywords:
+  - design
+  - assets
+- name: apps
+  description: Files from apps/
+  keywords:
+  - apps
+  - apps
+- name: documentation
+  description: Files from docs/
+  keywords:
+  - documentation
+  - docs
+- name: general
+  description: Files that don't fit other rooms
+  keywords: []

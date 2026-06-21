@@ -6,6 +6,12 @@ export const metadata: Metadata = {
   title: "OpenSprout",
   description: "Free and open-source plant care tracking.",
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicon.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: "/icons/icon-192.png",
+  },
 };
 
 export const viewport: Viewport = {
