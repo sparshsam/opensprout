@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useApp } from "@/lib/context/app-context";
-import { Loader2, Check, X, Clock, Calendar, RefreshCw } from "lucide-react";
+import { Loader2, Check, X, Clock, Calendar, Sprout, Flower2, Bell, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CompleteTaskInput } from "@/lib/data/tasks";
 import type { TaskWithPlant } from "@/lib/data/tasks";
@@ -13,9 +13,15 @@ import { Input } from "@/components/ui/input";
 import { PullToRefresh } from "@/components/pull-to-refresh";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function TodayPage() {
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+export default function HomePage() {
   const {
-    user,
     data,
     tasks,
     dataLoading,
@@ -47,6 +53,7 @@ export default function TodayPage() {
   const healthyCount = data.plants.filter(
     (p) => p.health_status === "thriving" || p.health_status === "stable",
   ).length;
+  const nextReminder = tasks.today[0] ?? tasks.upcoming[0] ?? null;
 
   // ── Actions ──
   function openSheet(task: TaskWithPlant) {
@@ -100,22 +107,21 @@ export default function TodayPage() {
 
   return (
     <>
-      <header className="flex flex-col gap-4 border-b border-border pb-5 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-normal text-foreground">
-            Today
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Signed in as {user?.email}
-          </p>
-        </div>
+      {/* Greeting header */}
+      <header className="pb-6">
+        <h1 className="text-2xl font-bold tracking-normal text-foreground">
+          {greeting()}!
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Here&apos;s what your plants need today.
+        </p>
       </header>
 
       {/* Status banner */}
       {(error || notice) && (
         <div
           className={cn(
-            "mt-4 rounded-md border px-4 py-3 text-sm font-medium",
+            "mb-6 rounded-2xl border px-4 py-3 text-sm font-medium",
             error
               ? "border-red-200 bg-red-50 text-red-800"
               : "border-emerald-200 bg-emerald-50 text-emerald-800",
@@ -138,85 +144,111 @@ export default function TodayPage() {
         </div>
       )}
 
-      <section className="space-y-6 py-6">
+      <section className="space-y-6">
         <PullToRefresh onRefresh={refreshDashboard}>
-        {/* Stats */}
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard label="Due" value={String(totalDue)} sub={`${data.plants.length} plants`} />
-          <StatCard label="Overdue" value={String(tasks.overdue.length)} sub="Needs attention" />
-          <StatCard label="Today" value={String(tasks.today.length)} sub="Due today" />
-          <StatCard label="Healthy" value={String(healthyCount)} sub={`${data.plants.length} total`} />
-        </div>
-
-        {dataLoading && tasks.overdue.length === 0 && tasks.today.length === 0 ? (
-          <div className="space-y-6">
-            {/* Skeleton stat cards */}
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {[...Array(4)].map((_, i) => (
-                <Skeleton key={i} className="h-24 rounded-md" />
-              ))}
-            </div>
-            {/* Skeleton task group */}
-            <div className="space-y-3">
-              <Skeleton className="h-5 w-24 rounded-md" />
-              {[...Array(3)].map((_, i) => (
-                <Skeleton key={i} className="h-20 w-full rounded-md" />
-              ))}
-            </div>
-            {/* Second skeleton task group */}
-            <div className="space-y-3">
-              <Skeleton className="h-5 w-28 rounded-md" />
-              {[...Array(2)].map((_, i) => (
-                <Skeleton key={`t2-${i}`} className="h-20 w-full rounded-md" />
-              ))}
-            </div>
-          </div>
-        ) : (
-          <>
-            {/* Overdue */}
-            {tasks.overdue.length > 0 && (
-              <TaskGroupSection
-                label="Overdue"
-                count={tasks.overdue.length}
-                color="text-red-600"
-                tasks={tasks.overdue}
-                onTaskClick={openSheet}
-              />
-            )}
-
-            {/* Today */}
-            <TaskGroupSection
-              label="Due today"
-              count={tasks.today.length}
-              color="text-amber-600"
-              tasks={tasks.today}
-              onTaskClick={openSheet}
+          {/* Metrics cards */}
+          <div className="grid grid-cols-2 gap-4">
+            <MetricCard
+              icon={<Sprout size={20} />}
+              label="Tasks due today"
+              value={String(totalDue)}
+              color="primary"
             />
+            <MetricCard
+              icon={<Flower2 size={20} />}
+              label="Total plants"
+              value={String(data.plants.length)}
+              color="emerald"
+            />
+            <MetricCard
+              icon={<Check size={20} />}
+              label="Healthy plants"
+              value={String(healthyCount)}
+              color="green"
+            />
+            <MetricCard
+              icon={<Bell size={20} />}
+              label="Next reminder"
+              value={nextReminder ? formatTime(nextReminder.due_at) : "None"}
+              color="amber"
+            />
+          </div>
 
-            {/* Upcoming (compact) */}
-            {tasks.upcoming.length > 0 && (
+          {dataLoading && tasks.overdue.length === 0 && tasks.today.length === 0 ? (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                {[...Array(4)].map((_, i) => (
+                  <Skeleton key={i} className="h-24 rounded-2xl" />
+                ))}
+              </div>
+              <div className="space-y-3">
+                <Skeleton className="h-5 w-24 rounded-lg" />
+                {[...Array(3)].map((_, i) => (
+                  <Skeleton key={i} className="h-20 w-full rounded-2xl" />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Overdue */}
+              {tasks.overdue.length > 0 && (
+                <TaskGroupSection
+                  label="Overdue"
+                  count={tasks.overdue.length}
+                  color="text-red-600"
+                  tasks={tasks.overdue}
+                  onTaskClick={openSheet}
+                />
+              )}
+
+              {/* Today */}
               <TaskGroupSection
-                label="Upcoming"
-                count={tasks.upcoming.length}
-                color="text-muted-foreground"
-                tasks={tasks.upcoming.slice(0, 8)}
+                label="Due today"
+                count={tasks.today.length}
+                color="text-amber-600"
+                tasks={tasks.today}
                 onTaskClick={openSheet}
               />
-            )}
 
-            {/* Empty state */}
-            {tasks.overdue.length === 0 && tasks.today.length === 0 && tasks.upcoming.length === 0 && (
-              <div className="rounded-lg border border-dashed border-border bg-card p-8 text-center shadow-panel">
-                <Check size={40} className="mx-auto text-emerald-400" aria-hidden />
-                <h2 className="mt-4 text-lg font-bold">All caught up</h2>
-                <p className="mt-2 text-sm text-muted-foreground max-w-sm mx-auto">
-                  No care tasks due. Add a plant with a watering or fertilizing
-                  schedule to create tasks here.
-                </p>
-              </div>
-            )}
-          </>
-        )}
+              {/* Upcoming */}
+              {tasks.upcoming.length > 0 && (
+                <TaskGroupSection
+                  label="Upcoming"
+                  count={tasks.upcoming.length}
+                  color="text-muted-foreground"
+                  tasks={tasks.upcoming.slice(0, 8)}
+                  onTaskClick={openSheet}
+                />
+              )}
+
+              {/* Empty state */}
+              {tasks.overdue.length === 0 && tasks.today.length === 0 && tasks.upcoming.length === 0 && (
+                <div className="rounded-3xl bg-gradient-to-br from-primary/5 to-primary/10 px-8 pb-10 pt-12 text-center">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary shadow-lg shadow-primary/20">
+                    <Check size={28} className="text-primary-foreground" aria-hidden />
+                  </div>
+                  <h2 className="mt-5 text-xl font-bold">All caught up</h2>
+                  <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
+                    No care tasks due right now. Add a plant to get started.
+                  </p>
+                  <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+                    <a href="/plants">
+                      <Button className="rounded-xl">
+                        <Sprout size={16} aria-hidden />
+                        Add your first plant
+                      </Button>
+                    </a>
+                    <a href="/identify">
+                      <Button variant="outline" className="rounded-xl">
+                        <Flower2 size={16} aria-hidden />
+                        Identify a plant
+                      </Button>
+                    </a>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </PullToRefresh>
       </section>
 
@@ -229,7 +261,7 @@ export default function TodayPage() {
         {activeTask && action === "pick" && (
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground capitalize">
-              {activeTask.care_type} care · Due {activeTask.due_at?.slice(0, 10)}
+              {activeTask.care_type} care &middot; Due {activeTask.due_at?.slice(0, 10)}
             </p>
             <div className="grid grid-cols-2 gap-3">
               <ActionButton
@@ -296,7 +328,7 @@ export default function TodayPage() {
             <label className="text-sm font-semibold block">
               Notes
               <textarea
-                className="mt-1 min-h-20 w-full rounded-md border border-input bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring"
+                className="mt-1 min-h-20 w-full rounded-2xl border border-input bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring"
                 placeholder="Any observations..."
                 value={taskNotes}
                 onChange={(e) => setTaskNotes(e.target.value)}
@@ -352,22 +384,33 @@ export default function TodayPage() {
 
 // ── Sub-components ──
 
-function StatCard({
+function MetricCard({
+  icon,
   label,
   value,
-  sub,
+  color,
 }: {
+  icon: React.ReactNode;
   label: string;
   value: string;
-  sub: string;
+  color: string;
 }) {
   return (
-    <div className="rounded-md border border-border bg-card p-4 shadow-panel">
-      <p className="text-xs font-bold uppercase text-muted-foreground">
-        {label}
-      </p>
-      <p className="mt-2 text-2xl font-bold">{value}</p>
-      <p className="mt-1 text-xs text-muted-foreground">{sub}</p>
+    <div className={cn(
+      "rounded-3xl p-5 shadow-panel transition active:scale-[0.98]",
+      "bg-white",
+    )}>
+      <div className={cn(
+        "mb-3 flex h-10 w-10 items-center justify-center rounded-2xl",
+        color === "primary" && "bg-primary/10 text-primary",
+        color === "emerald" && "bg-emerald-100 text-emerald-600",
+        color === "green" && "bg-green-100 text-green-600",
+        color === "amber" && "bg-amber-100 text-amber-600",
+      )}>
+        {icon}
+      </div>
+      <p className="text-2xl font-bold tracking-tight">{value}</p>
+      <p className="mt-0.5 text-xs text-muted-foreground">{label}</p>
     </div>
   );
 }
@@ -389,7 +432,11 @@ function TaskGroupSection({
     <div>
       <div className="mb-3 flex items-center gap-2">
         <h2 className={cn("text-lg font-bold", color)}>{label}</h2>
-        <span className={cn("rounded-full px-2 py-0.5 text-xs font-bold", color.replace("text-", "bg-").replace("600", "100"), color.replace("text-", "text-").replace("600", "800"))}>
+        <span className={cn(
+          "rounded-full px-2.5 py-0.5 text-xs font-bold",
+          color.replace("text-", "bg-").replace("600", "100"),
+          color.replace("text-", "text-").replace("600", "800"),
+        )}>
           {count}
         </span>
       </div>
@@ -420,7 +467,7 @@ function ActionButton({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "flex flex-col items-center gap-2 rounded-xl border p-4 text-sm font-semibold transition active:scale-[0.97]",
+        "flex flex-col items-center gap-2 rounded-2xl border p-4 text-sm font-semibold transition active:scale-[0.97]",
         variant === "primary" &&
           "border-primary bg-primary text-primary-foreground hover:bg-primary/90",
         variant === "danger" &&
@@ -434,4 +481,16 @@ function ActionButton({
       {label}
     </button>
   );
+}
+
+function formatTime(dateStr: string | null | undefined): string {
+  if (!dateStr) return "None";
+  const d = new Date(dateStr);
+  const now = new Date();
+  const diffMs = d.getTime() - now.getTime();
+  const diffHrs = Math.round(diffMs / (1000 * 60 * 60));
+  if (diffHrs < 0) return "Overdue";
+  if (diffHrs < 24) return `In ${diffHrs}h`;
+  const diffDays = Math.round(diffHrs / 24);
+  return `In ${diffDays}d`;
 }

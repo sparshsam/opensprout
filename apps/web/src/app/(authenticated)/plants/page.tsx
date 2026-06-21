@@ -188,25 +188,27 @@ export default function PlantsPage() {
 
   return (
     <>
-      <header className="flex flex-col gap-4 border-b border-border pb-5 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-normal text-foreground">
-            Plants
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Create, edit, delete, and inspect your plants.
-          </p>
+      <header className="pb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-normal text-foreground">
+              Plants
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Your plant collection.
+            </p>
+          </div>
+          <Button onClick={openCreateForm} className="rounded-xl">
+            <Plus size={16} aria-hidden />
+            Add plant
+          </Button>
         </div>
-        <Button onClick={openCreateForm}>
-          <Plus size={16} aria-hidden />
-          Add plant
-        </Button>
       </header>
 
       {(error || notice) && (
         <div
           className={cn(
-            "mt-4 rounded-md border px-4 py-3 text-sm font-medium",
+            "mb-5 rounded-2xl border px-4 py-3 text-sm font-medium",
             error
               ? "border-red-200 bg-red-50 text-red-800"
               : "border-emerald-200 bg-emerald-50 text-emerald-800",
@@ -219,7 +221,7 @@ export default function PlantsPage() {
                 variant="outline"
                 size="sm"
                 onClick={refreshDashboard}
-                className="shrink-0 border-red-300 bg-white text-red-700 hover:bg-red-100"
+                className="shrink-0 rounded-xl border-red-300 bg-white text-red-700 hover:bg-red-100"
               >
                 <RefreshCw size={14} aria-hidden />
                 Retry
@@ -229,7 +231,7 @@ export default function PlantsPage() {
         </div>
       )}
 
-      <section className="grid gap-5 py-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+      <section className="space-y-5 lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-5 lg:space-y-0">
         <PullToRefresh onRefresh={refreshDashboard}>
         {/* Left: plant list */}
         <div className="space-y-5">
@@ -259,26 +261,24 @@ export default function PlantsPage() {
           )}
 
           {dataLoading ? (
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2">
               {[...Array(4)].map((_, i) => (
-                <Skeleton key={i} className="h-32 rounded-md" />
+                <Skeleton key={i} className="h-36 rounded-3xl" />
               ))}
             </div>
           ) : visiblePlants.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-border bg-card p-8 text-center shadow-panel">
-              <Sprout
-                size={48}
-                className="mx-auto text-muted-foreground/40"
-                aria-hidden
-              />
-              <h2 className="mt-4 text-lg font-bold">No plants yet</h2>
-              <p className="mt-2 text-sm text-muted-foreground max-w-sm mx-auto">
+            <div className="rounded-3xl bg-gradient-to-br from-primary/5 to-primary/10 px-8 pb-10 pt-12 text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary shadow-lg shadow-primary/20">
+                <Sprout size={28} className="text-primary-foreground" aria-hidden />
+              </div>
+              <h2 className="mt-5 text-xl font-bold">No plants yet</h2>
+              <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
                 {query
                   ? "No plants match that search. Try a different search term."
                   : "Add your first plant to start tracking watering, fertilizing, and care."}
               </p>
               {!query && (
-                <Button onClick={openCreateForm} className="mt-5">
+                <Button onClick={openCreateForm} className="mt-6 rounded-xl">
                   <Plus size={16} aria-hidden />
                   Add your first plant
                 </Button>
