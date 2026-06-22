@@ -2,7 +2,7 @@
 
 import { AppProvider, useApp } from "@/lib/context/app-context";
 import { BottomNav } from "@/components/shell/bottom-nav";
-import { Sidebar } from "@/components/shell/sidebar";
+import { TopBar } from "@/components/shell/top-bar";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -34,15 +34,13 @@ function AuthenticatedLayoutInner({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <div className="flex min-h-screen">
-        <Sidebar />
-        <main
-          id="main-content"
-          className="mx-auto w-full max-w-2xl flex-1 px-5 pb-24 pt-6 sm:pb-24 md:px-8 md:pb-8 lg:px-10"
-        >
-          {children}
-        </main>
-      </div>
+      <TopBar />
+      <main
+        id="main-content"
+        className="mx-auto w-full max-w-7xl px-5 pb-24 pt-6 sm:pb-24 md:pb-8 lg:px-8"
+      >
+        {children}
+      </main>
       <BottomNav />
     </div>
   );

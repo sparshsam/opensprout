@@ -23,56 +23,57 @@
   --radius-lg: 24px;
   --radius-md: 16px;
   --radius-sm: 8px;
-  --shadow-panel: 0 16px 50px rgba(18, 38, 30, 0.08);
-  --shadow-panel-dark: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 3px rgba(18, 38, 30, 0.06);
+  --shadow-md: 0 4px 12px rgba(18, 38, 30, 0.08);
+  --shadow-lg: 0 12px 40px rgba(18, 38, 30, 0.1);
   --color-success: hsl(var(--success));
   --color-warning: hsl(var(--warning));
 }
 
 :root {
-  --background: 150 35% 98%;
-  --foreground: 157 31% 13%;
+  --background: 0 0% 100%;
+  --foreground: 157 30% 10%;
   --card: 0 0% 100%;
-  --card-foreground: 157 31% 13%;
+  --card-foreground: 157 30% 10%;
   --primary: 155 68% 28%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 196 80% 91%;
-  --secondary-foreground: 198 56% 23%;
-  --muted: 150 23% 94%;
-  --muted-foreground: 158 10% 41%;
+  --secondary: 155 40% 95%;
+  --secondary-foreground: 155 60% 20%;
+  --muted: 150 20% 96%;
+  --muted-foreground: 157 15% 35%;
   --accent: 11 88% 72%;
   --accent-foreground: 12 59% 19%;
   --destructive: 0 76% 52%;
   --destructive-foreground: 0 0% 100%;
-  --border: 154 20% 86%;
-  --input: 154 20% 86%;
-  --ring: 157 50% 82%;
+  --border: 155 15% 88%;
+  --input: 155 15% 88%;
+  --ring: 155 68% 28%;
   --success: 145 63% 42%;
   --warning: 38 92% 50%;
 }
 
-/* Dark mode - respects system preference by default */
+/* Dark mode */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: 157 30% 10%;
-    --foreground: 150 15% 89%;
-    --card: 157 28% 14%;
-    --card-foreground: 150 15% 89%;
-    --primary: 155 55% 38%;
+    --background: 157 30% 8%;
+    --foreground: 150 15% 92%;
+    --card: 157 25% 12%;
+    --card-foreground: 150 15% 92%;
+    --primary: 155 55% 42%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 198 30% 20%;
-    --secondary-foreground: 196 60% 80%;
-    --muted: 157 20% 16%;
-    --muted-foreground: 157 10% 60%;
+    --secondary: 155 25% 18%;
+    --secondary-foreground: 155 50% 85%;
+    --muted: 157 20% 14%;
+    --muted-foreground: 157 12% 65%;
     --accent: 12 60% 50%;
     --accent-foreground: 12 59% 93%;
-    --destructive: 0 65% 45%;
+    --destructive: 0 65% 48%;
     --destructive-foreground: 0 0% 100%;
-    --border: 157 16% 24%;
-    --input: 157 16% 24%;
-    --ring: 155 40% 32%;
-    --success: 145 55% 38%;
-    --warning: 38 85% 45%;
+    --border: 157 15% 22%;
+    --input: 157 15% 22%;
+    --ring: 155 55% 42%;
+    --success: 145 55% 42%;
+    --warning: 38 85% 48%;
   }
 }
 
@@ -86,18 +87,26 @@
   }
 }
 
-/* Skip-to-content link (accessibility) */
+/* Skip-to-content link */
 .skip-to-content {
   position: absolute;
   left: -9999px;
   top: 0;
   z-index: 9999;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1.5rem;
   background: var(--color-primary);
   color: var(--color-primary-foreground);
   text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
   border-radius: 0 0 var(--radius-md) 0;
 }
 .skip-to-content:focus {
   left: 0;
+}
+
+/* Better scrollbar defaults */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
