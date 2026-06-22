@@ -191,16 +191,16 @@ export default function PlantsPage() {
 
   return (
     <>
-      <header className="pb-8">
+      <header className="pb-10">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight md:text-5xl">Plants</h1>
-            <p className="mt-2 text-lg text-muted-foreground">
+            <h1 className="text-5xl font-bold tracking-tight md:text-6xl">Plants</h1>
+            <p className="mt-2 text-xl text-muted-foreground">
               Your plant collection, all in one place.
             </p>
           </div>
-          <Button onClick={openCreateForm} className="rounded-xl px-5 py-2.5 text-base">
-            <Plus size={18} aria-hidden />
+          <Button onClick={openCreateForm} className="rounded-[14px] px-6 py-3 text-base font-semibold shadow-md">
+            <Plus size={20} aria-hidden />
             Add plant
           </Button>
         </div>
@@ -375,66 +375,65 @@ function PlantCard({
     <button
       onClick={onSelect}
       className={cn(
-        "group relative flex gap-5 rounded-3xl bg-white p-5 text-left shadow-sm transition hover:shadow-md active:scale-[0.99]",
+        "group relative flex flex-col gap-4 rounded-[28px] bg-white p-6 text-left shadow-sm transition hover:shadow-lg active:scale-[0.99]",
         selected && "ring-2 ring-primary",
       )}
     >
-      {/* Photo */}
-      <CoverPhoto
-        coverPhotoPath={plant.cover_photo_path}
-        className="h-28 w-28 shrink-0 rounded-2xl object-cover"
-      />
-      <div className="min-w-0 flex-1">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <p className="text-lg font-bold">{plant.name}</p>
-            {plant.species && (
-              <p className="text-sm italic text-muted-foreground">{plant.species}</p>
-            )}
+      <div className="flex gap-5">
+        <CoverPhoto
+          coverPhotoPath={plant.cover_photo_path}
+          className="h-32 w-32 shrink-0 rounded-[20px] object-cover shadow-sm"
+        />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <p className="text-xl font-bold">{plant.name}</p>
+              {plant.species && (
+                <p className="text-sm italic text-muted-foreground">{plant.species}</p>
+              )}
+            </div>
+            <div className={cn(
+              "flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold",
+              plant.health_status === "thriving" || plant.health_status === "stable"
+                ? "bg-green-100 text-green-700"
+                : plant.health_status === "watch" || plant.health_status === "struggling"
+                ? "bg-amber-100 text-amber-700"
+                : "bg-muted text-muted-foreground",
+            )}>
+              {plant.health_status ? plant.health_status.charAt(0).toUpperCase() : "?"}
+            </div>
           </div>
-          <div className={cn(
-            "flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-bold",
-            plant.health_status === "thriving" || plant.health_status === "stable"
-              ? "bg-green-100 text-green-700"
-              : plant.health_status === "watch" || plant.health_status === "struggling"
-              ? "bg-amber-100 text-amber-700"
-              : "bg-muted text-muted-foreground",
-          )}>
-            {plant.health_status ? plant.health_status.charAt(0).toUpperCase() : "?"}
-          </div>
+
+          {plant.location && (
+            <p className="mt-3 flex items-center gap-1.5 text-sm text-muted-foreground">
+              <span className="inline-block h-2 w-2 rounded-full bg-primary/40" />
+              {plant.location}
+            </p>
+          )}
+
+          {nextTask && (
+            <p className="mt-2 flex items-center gap-1.5 text-sm font-semibold text-primary">
+              <Droplets size={14} aria-hidden />
+              {nextTask.careType} &middot; {formatDueDate(nextTask.dueAt)}
+            </p>
+          )}
         </div>
+      </div>
 
-        {plant.location && (
-          <p className="mt-2 flex items-center gap-1 text-sm text-muted-foreground">
-            <MapPin size={14} aria-hidden />
-            {plant.location}
-          </p>
-        )}
-
-        {nextTask && (
-          <p className="mt-2 flex items-center gap-1.5 text-sm font-medium text-primary">
-            <Droplets size={14} aria-hidden />
-          {nextTask.careType} • {formatDueDate(nextTask.dueAt)}
-          </p>
-        )}
-
-        {/* Edit/delete on hover */}
-        <div className="mt-3 flex gap-1 opacity-0 transition group-hover:opacity-100">
-          <button
-            onClick={(e) => { e.stopPropagation(); onEdit(); }}
-            className="rounded-lg bg-muted px-2.5 py-1 text-xs font-semibold text-muted-foreground hover:bg-muted-foreground/20"
-            aria-label="Edit plant"
-          >
-            Edit
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); onDelete(); }}
-            className="rounded-lg bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
-            aria-label="Delete plant"
-          >
-            Delete
-          </button>
-        </div>
+      {/* Quick actions on hover */}
+      <div className="flex gap-2 pt-2 opacity-0 transition group-hover:opacity-100">
+        <span
+          onClick={(e) => { e.stopPropagation(); onEdit(); }}
+          className="cursor-pointer rounded-[12px] bg-muted px-4 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted-foreground/20"
+        >
+          Edit
+        </span>
+        <span
+          onClick={(e) => { e.stopPropagation(); onDelete(); }}
+          className="cursor-pointer rounded-[12px] bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-100"
+        >
+          Delete
+        </span>
       </div>
     </button>
   );
