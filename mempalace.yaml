@@ -1,14 +1,18 @@
 wing: opensprout
 rooms:
 - name: supabase
-  description: Supabase auth, database, file storage, edge functions
+  description: Supabase auth, PostgreSQL database, file storage, edge functions (identify-plant)
   keywords:
   - supabase
   - auth
   - database
+  - edge functions
   - storage
+  - rls
+  - plantnet
+  - identify-plant
 - name: design
-  description: Design system, brand identity, visual language
+  description: Design system — globals.css design tokens, Tailwind v4 @theme, Sora variable font, warm paper light mode, deep botanical dark mode
   keywords:
   - design
   - globals.css
@@ -18,18 +22,49 @@ rooms:
   - light-mode
   - typography
   - sora
-  - app-icon
+  - text-hero
+  - text-display
   - playbook
+  - brand
+  - tokens
 - name: apps/web
-  description: Next.js application source code
+  description: Next.js 15 App Router source code at apps/web/src/app/ — public pages (/ /login /about /privacy /terms /mcp) and authenticated app ((authenticated)/ today plants identify profile settings)
   keywords:
   - apps
+  - web
   - nextjs
   - react
   - components
   - pages
+  - public
+  - app-router
+  - layout
+- name: android
+  description: Capacitor v8 Android project at apps/web/android/ — appId com.sparshsam.opensprout, build API 24-36, debug APK via android:debug script, release AAB via android:release script, unsigned builds
+  keywords:
+  - android
+  - capacitor
+  - apk
+  - aab
+  - mobile
+  - java
+  - gradle
+  - package-name
+  - play-store
+- name: mcp
+  description: MCP server at apps/mcp/ — 28 tools, 112 tests, token-based SHA-256 auth, user data isolation via service-role client, public guide page at /mcp
+  keywords:
+  - mcp
+  - ai
+  - agent
+  - tools
+  - token
+  - claude
+  - hermes
+  - cursor
+  - model-context-protocol
 - name: home
-  description: Authenticated home page — editorial hero, care flow
+  description: Authenticated home page at /today — editorial hero, care flow, metrics, seasonal atmosphere
   keywords:
   - home
   - today
@@ -38,8 +73,9 @@ rooms:
   - atmosphere
   - seasonal
   - greeting
+  - dashboard
 - name: plants
-  description: Plant collection — gallery, detail, care, timeline
+  description: Plant collection CRUD — gallery, detail, care timeline, journal, photos, search, archive/restore
   keywords:
   - plants
   - collection
@@ -47,16 +83,21 @@ rooms:
   - cover-photo
   - care
   - timeline
+  - journal
+  - archive
+  - search
 - name: identify
-  description: Plant identification — photo capture, AI analysis, results
+  description: Plant identification via PlantNet API — photo capture, AI analysis, results, rate-limited to 10/min
   keywords:
   - identify
   - scanning
   - photo
   - camera
   - identification
+  - plantnet
+  - rate-limit
 - name: profile
-  description: User profile, settings, data management
+  description: User profile, settings, MCP token management, data export/import, theme toggle, reminders
   keywords:
   - profile
   - settings
@@ -64,34 +105,65 @@ rooms:
   - export
   - import
   - theme-toggle
+  - mcp-tokens
+  - delete-account
+- name: knowledge
+  description: Knowledge base (knowledge_articles table) + diagnosis library (diagnosis_entries table) — 18 articles, 30 diagnosis entries, searchable via MCP tools
+  keywords:
+  - knowledge
+  - diagnosis
+  - articles
+  - care-guide
+  - symptoms
+  - seed-data
+  - migration
+- name: packaging
+  description: RC packaging — Android build scripts, PWA manifest at /manifest.webmanifest, service worker at sw.js (network-first), CSP in vercel.json, docs/rc checklists
+  keywords:
+  - packaging
+  - rc
+  - release
+  - build
+  - pwa
+  - service-worker
+  - manifest
+  - csp
+  - vercel
+  - windows
+  - store
 - name: legal
-  description: About, Privacy, Terms pages
+  description: Public pages /about /privacy /terms /support — privacy policy, terms of service, AGPLv3 license
   keywords:
   - about
   - privacy
   - terms
   - legal
+  - agpl
+  - support
+  - license
+  - policy
 - name: navigation
-  description: Top bar, bottom nav, layout
+  description: Top bar + bottom nav — mobile bottom nav (Home/Plants/Identify/Profile), desktop top bar, public nav for unauthenticated users
   keywords:
   - navigation
   - top-bar
   - bottom-nav
   - header
   - layout
+  - mobile-nav
+  - public-nav
 - name: changelog
-  description: Version history and release notes
+  description: Version history — v0.9.13 current (RC packaging), v0.9.12 (public homepage), v0.9.11 (knowledge seed), v0.9.10 (MCP reliability)
   keywords:
   - changelog
   - version
   - release
-  - v0.9.5
-  - v0.9.6
-  - v0.9.7
-  - v0.9.8
   - v0.9.13
+  - v0.9.12
+  - v0.9.11
+  - v0.9.10
 - name: identity
-  description: Current status as of v0.9.13
+  description: OpenSprout v0.9.13 — privacy-first plant care companion, open-source AGPLv3, editorial premium design, user-owned data, no subscriptions, mcp-ready
   keywords:
   - opensprout
   - plant-care
@@ -100,3 +172,4 @@ rooms:
   - brand
   - premium
   - consumer-product
+  - indie
