@@ -14,8 +14,12 @@
     "cap:copy": "npx cap copy",
     "cap:open:android": "npx cap open android",
     "cap:dev:android": "npx cap run android -l --host=0.0.0.0",
+    "android:sync": "npx cap sync",
+    "android:open": "npx cap open android",
     "android:debug": "CAPACITOR_BUILD=true next build && npx cap copy android && cd android && ./gradlew assembleDebug",
-    "android:release:bundle": "CAPACITOR_BUILD=true next build && npx cap copy android && cd android && ./gradlew bundleRelease"
+    "android:release:bundle": "CAPACITOR_BUILD=true next build && npx cap copy android && cd android && ./gradlew bundleRelease",
+    "rc:android": "npm run android:debug",
+    "rc:web": "npm run build"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.0",

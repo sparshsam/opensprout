@@ -6,6 +6,25 @@ All notable changes to OpenSprout will be documented here. The format follows [K
 
 - No unreleased changes.
 
+## 0.9.13 — 2026-06-23
+
+### Added
+- `docs/release-candidate-test-matrix.md` — comprehensive cross-platform test matrix covering web, Android, and Windows PWA across all features.
+- `docs/android-rc-checklist.md` — Android release-candidate checklist with build commands, signing status, permissions, device test plan, and Play Store readiness.
+- `docs/windows-rc-checklist.md` — Windows PWA install/test checklist with browser support, offline behavior, and Microsoft Store packaging notes.
+
+### Changed
+- `versionName` updated to `0.9.13` in Android `app/build.gradle`; `versionCode` incremented to `2`.
+- Root `package.json` — added `android:sync`, `android:open`, `build:mobile`, `rc:android`, `rc:web` scripts.
+- `docs/project-status.md` — updated to v0.9.13 as current release.
+- `mempalace.yaml` — updated version references to v0.9.13.
+
+### Technical
+- Verified Capacitor v8.4.0 Android project at `apps/web/android/` — configured for API 24-36.
+- Verified adaptive icons (vector XML), splash screens (all densities), and deep link scheme (`opensprout://`).
+- Validated PWA manifest, service worker, and installability.
+- 112 MCP tests passing; web lint, typecheck, and build clean.
+
 ## 0.9.12 — 2026-06-22
 
 ### Added

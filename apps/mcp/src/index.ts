@@ -41,7 +41,7 @@ async function main() {
 
   const server = new McpServer({
     name: "opensprout",
-    version: "0.9.10",
+    version: "0.9.13",
   });
 
   registerPlantTools(server, getClient, userId);

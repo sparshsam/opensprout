@@ -16,9 +16,12 @@
     "typecheck": "npm --workspace apps/web run typecheck",
     "cap:dev:android": "npm --workspace apps/web run cap:dev:android",
     "cap:open:android": "npm --workspace apps/web run cap:open:android",
-    "cap:sync": "npm --workspace apps/web run cap:sync",
     "android:debug": "npm --workspace apps/web run android:debug",
-    "android:release:bundle": "npm --workspace apps/web run android:release:bundle"
+    "android:release": "npm --workspace apps/web run android:release:bundle",
+    "android:sync": "npm --workspace apps/web run cap:sync",
+    "android:open": "npm --workspace apps/web run cap:open:android",
+    "rc:android": "npm run android:debug",
+    "rc:web": "npm run build"
   },
   "engines": {
     "node": ">=20.11.0"
