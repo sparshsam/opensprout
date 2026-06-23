@@ -3,7 +3,7 @@
 import { AppProvider, useApp } from "@/lib/context/app-context";
 import { BottomNav } from "@/components/shell/bottom-nav";
 import { TopBar } from "@/components/shell/top-bar";
-import { Loader2, Sprout } from "lucide-react";
+import { Sprout } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -19,10 +19,10 @@ function AuthenticatedLayoutInner({ children }: { children: React.ReactNode }) {
 
   if (sessionLoading) {
     return (
-      <div className="grid min-h-screen place-items-center bg-background text-muted-foreground">
-        <div className="flex items-center gap-3">
+      <div className="grid min-h-screen place-items-center bg-background">
+        <div className="flex items-center gap-3 text-muted-foreground">
           <Sprout size={24} className="animate-pulse text-primary" aria-hidden />
-          <span className="text-base font-semibold">OpenSprout</span>
+          <span className="text-sm font-semibold">OpenSprout</span>
         </div>
       </div>
     );
@@ -37,7 +37,7 @@ function AuthenticatedLayoutInner({ children }: { children: React.ReactNode }) {
       <TopBar />
       <main
         id="main-content"
-        className="mx-auto w-full max-w-7xl px-6 pb-32 pt-12 md:pb-16 md:pt-16 lg:px-10"
+        className="mx-auto w-full max-w-7xl px-6 pb-32 pt-16 sm:pt-20 md:pb-16 lg:px-10"
       >
         {children}
       </main>

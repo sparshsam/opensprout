@@ -3,19 +3,14 @@
 import { useState } from "react";
 import { useApp } from "@/lib/context/app-context";
 import {
-  Loader2,
   Check,
   X,
   Clock,
   Calendar,
   Sprout,
-  Flower2,
-  Droplets,
   ArrowRight,
-  Leaf,
-  Sparkles,
+  Droplets,
   Heart,
-  Timer,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CompleteTaskInput } from "@/lib/data/tasks";
@@ -26,20 +21,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PullToRefresh } from "@/components/pull-to-refresh";
 import { Skeleton } from "@/components/ui/skeleton";
-
-function greeting() {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 17) return "Good afternoon";
-  return "Good evening";
-}
-
-function headline() {
-  const h = new Date().getHours();
-  if (h < 5) return "Your plants are sleeping too.";
-  if (h < 12) return "Your plants are waking up.";
-  return "Your plants are waiting.";
-}
 
 function formatRelTime(dateStr: string): string {
   const d = new Date(dateStr);
@@ -88,13 +69,10 @@ export default function HomePage() {
 
   const totalDue = tasks.overdue.length + tasks.today.length;
   const allUpcoming = [...tasks.overdue, ...tasks.today, ...tasks.upcoming];
-  const healthyCount = data.plants.filter(
-    (p) => p.health_status === "thriving" || p.health_status === "stable",
-  ).length;
-  const nextTask = allUpcoming[0] ?? null;
   const recentLogs = [...data.logs].sort(
     (a, b) => new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime(),
   );
+  const nextTask = allUpcoming[0] ?? null;
 
   function openSheet(task: TaskWithPlant) {
     setActiveTask(task);
@@ -122,27 +100,25 @@ export default function HomePage() {
 
   return (
     <>
-      {/* ── Status banners ── */}
+      {/* ── Status ── */}
       {(error || notice) && (
         <div
           className={cn(
-            "mb-10 rounded-2xl border px-5 py-4 text-base font-medium",
+            "mb-16 rounded-full px-6 py-3 text-sm font-semibold",
             error
-              ? "border-red-200 bg-red-50 text-red-800"
-              : "border-emerald-200 bg-emerald-50 text-emerald-800",
+              ? "bg-destructive/10 text-destructive"
+              : "bg-primary-light text-primary",
           )}
         >
           <div className="flex items-center justify-between gap-3">
             <span>{error ?? notice}</span>
             {error && (
-              <Button
-                variant="outline"
-                size="sm"
+              <button
                 onClick={refreshDashboard}
-                className="shrink-0 rounded-xl border-red-300 bg-white text-red-700 hover:bg-red-100"
+                className="rounded-full bg-destructive/20 px-4 py-1.5 text-xs font-bold tracking-wider uppercase"
               >
-                <Loader2 size={14} aria-hidden /> Retry
-              </Button>
+                Retry
+              </button>
             )}
           </div>
         </div>
@@ -150,174 +126,124 @@ export default function HomePage() {
 
       <PullToRefresh onRefresh={refreshDashboard}>
         {isLoading ? (
-          /* ── Loading skeleton ── */
-          <div className="space-y-16">
+          <div className="space-y-20">
             <div className="space-y-6">
-              <Skeleton className="h-12 w-48 rounded-lg" />
-              <Skeleton className="h-24 w-full max-w-xl rounded-2xl" />
-              <Skeleton className="h-14 w-44 rounded-xl" />
-            </div>
-            <div className="grid gap-6 md:grid-cols-3">
-              {[...Array(3)].map((_, i) => (
-                <Skeleton key={i} className="h-40 rounded-2xl" />
-              ))}
+              <Skeleton className="h-8 w-32 rounded-full" />
+              <Skeleton className="h-16 w-full max-w-xl rounded-full" />
+              <Skeleton className="h-12 w-44 rounded-full" />
             </div>
           </div>
         ) : hasContent ? (
-          /* ── Authenticated content ── */
           <>
             {/* ════════════════════════════════════ */}
-            {/* Hero — editorial headline + CTA     */}
+            {/* Hero — brand statement              */}
             {/* ════════════════════════════════════ */}
-            <section className="relative mb-24">
-              <div className="relative z-10">
-                {/* Greeting */}
-                <p className="mb-3 text-base font-semibold tracking-wide text-primary uppercase">
-                  {greeting()}
-                </p>
-
-                {/* Massive headline */}
-                <h1 className="text-hero mb-6 max-w-4xl text-foreground">
-                  {headline()}
-                </h1>
-
-                {/* CTAs */}
-                <div className="flex flex-wrap items-center gap-4">
-                  {totalDue > 0 ? (
-                    <>
-                      <button
-                        onClick={() =>
-                          document
-                            .getElementById("care-section")
-                            ?.scrollIntoView({ behavior: "smooth" })
-                        }
-                        className="inline-flex items-center gap-2.5 rounded-[16px] bg-primary px-7 py-4 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition hover:bg-primary/90 active:scale-[0.97]"
-                      >
-                        <Sprout size={20} aria-hidden />
-                        {totalDue} plant{totalDue !== 1 ? "s" : ""} need care today
-                        <ArrowRight size={18} aria-hidden />
-                      </button>
-                      <a
-                        href="/plants"
-                        className="inline-flex items-center gap-2 rounded-[16px] border border-border/60 bg-white px-6 py-4 text-base font-semibold text-foreground/70 transition hover:border-border hover:text-foreground active:scale-[0.97]"
-                      >
-                        View my collection
-                      </a>
-                    </>
-                  ) : data.plants.length > 0 ? (
-                    <>
-                      <span className="inline-flex items-center gap-2 rounded-[16px] bg-primary/8 px-7 py-4 text-base font-semibold text-primary">
-                        <Sparkles size={20} aria-hidden />
-                        All caught up!
-                      </span>
-                      <a
-                        href="/plants"
-                        className="inline-flex items-center gap-2 rounded-[16px] border border-border/60 bg-white px-6 py-4 text-base font-semibold text-foreground/70 transition hover:border-border hover:text-foreground active:scale-[0.97]"
-                      >
-                        Check on your plants
-                      </a>
-                    </>
-                  ) : (
-                    <>
-                      <a
-                        href="/plants"
-                        className="inline-flex items-center gap-2.5 rounded-[16px] bg-primary px-7 py-4 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition hover:bg-primary/90 active:scale-[0.97]"
-                      >
-                        <Sprout size={20} aria-hidden />
-                        Add your first plant
-                        <ArrowRight size={18} aria-hidden />
-                      </a>
-                      <a
-                        href="/identify"
-                        className="inline-flex items-center gap-2 rounded-[16px] border border-border/60 bg-white px-6 py-4 text-base font-semibold text-foreground/70 transition hover:border-border hover:text-foreground active:scale-[0.97]"
-                      >
-                        <Leaf size={18} aria-hidden />
-                        Identify a plant
-                      </a>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* Sprout illustration — decorative */}
-              <div className="pointer-events-none absolute right-0 top-0 select-none opacity-[0.06] dark:opacity-[0.08]">
-                <Sprout size={320} className="text-primary" aria-hidden />
+            <section className="mb-20 sm:mb-28">
+              <p className="text-label mb-4 text-primary">OpenSprout</p>
+              <h1 className="text-hero mb-6 max-w-2xl text-foreground">
+                Track, care, and grow.
+              </h1>
+              <p className="mb-8 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+                Your personal plant care station. Know what every plant needs,
+                when it needs it.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                {totalDue > 0 ? (
+                  <>
+                    <button
+                      onClick={() =>
+                        document
+                          .getElementById("care-section")
+                          ?.scrollIntoView({ behavior: "smooth" })
+                      }
+                      className="rounded-full bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground hover:brightness-110"
+                    >
+                      {totalDue} plant{totalDue !== 1 ? "s" : ""} need care
+                    </button>
+                    <a
+                      href="/plants"
+                      className="rounded-full bg-muted px-7 py-3.5 text-sm font-semibold text-foreground hover:bg-muted/80"
+                    >
+                      View collection
+                    </a>
+                  </>
+                ) : data.plants.length > 0 ? (
+                  <>
+                    <div className="rounded-full bg-primary/10 px-8 py-3.5 text-sm font-semibold text-primary">
+                      All caught up
+                    </div>
+                    <a
+                      href="/plants"
+                      className="rounded-full bg-muted px-7 py-3.5 text-sm font-semibold text-foreground hover:bg-muted/80"
+                    >
+                      Check on your plants
+                    </a>
+                  </>
+                ) : (
+                  <>
+                    <a
+                      href="/plants"
+                      className="rounded-full bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground hover:brightness-110"
+                    >
+                      Add your first plant
+                    </a>
+                    <a
+                      href="/identify"
+                      className="rounded-full bg-muted px-7 py-3.5 text-sm font-semibold text-foreground hover:bg-muted/80"
+                    >
+                      Identify a plant
+                    </a>
+                  </>
+                )}
               </div>
             </section>
 
             {/* ════════════════════════════════════ */}
-            {/* Featured plant / next care action   */}
+            {/* Today's Care                        */}
             {/* ════════════════════════════════════ */}
             {nextTask && (
-              <section id="care-section" className="mb-24">
-                <div className="mb-6 flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-primary/8 text-primary">
-                    <Heart size={20} aria-hidden />
-                  </div>
-                  <h2 className="text-display text-foreground">Next up</h2>
-                </div>
+              <section id="care-section" className="mb-20 sm:mb-28">
+                <p className="text-label mb-6 text-muted-foreground">Next care</p>
 
-                <div className="group relative overflow-hidden rounded-[28px] border border-border/30 bg-white p-8 shadow-sm transition hover:shadow-md md:p-10">
-                  <div className="relative z-10">
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-1">
-                        <p className="text-2xl font-bold tracking-tight text-foreground">
-                          {nextTask.plantName}
-                        </p>
+                <div className="border-t border-border pt-8">
+                  <div className="flex items-start justify-between gap-6">
+                    <div className="min-w-0">
+                      <p className="text-display mb-2 text-foreground">
+                        {nextTask.plantName}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                        <span className="rounded-full bg-primary/10 px-4 py-1.5 text-xs font-bold tracking-wider uppercase text-primary">
+                          {nextTask.care_type}
+                        </span>
+                        <span>
+                          {nextTask.due_at ? formatRelTime(nextTask.due_at) : ""}
+                        </span>
                       </div>
-                      <div className="flex h-16 w-16 items-center justify-center rounded-[18px] bg-primary/8 text-primary">
-                        <Droplets size={28} aria-hidden />
+                      <button
+                        onClick={() => openSheet(nextTask)}
+                        className="mt-6 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground hover:brightness-110"
+                      >
+                        Mark as done
+                      </button>
+                    </div>
+                    <div className="hidden shrink-0 sm:block">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+                        <Sprout size={28} aria-hidden />
                       </div>
                     </div>
-
-                    <div className="mt-6 flex flex-wrap items-center gap-3 text-base text-muted-foreground">
-                      <span className="inline-flex items-center gap-1.5 rounded-[10px] bg-primary/8 px-3.5 py-1.5 text-sm font-semibold text-primary">
-                        {nextTask.care_type}
-                      </span>
-                      <span className="inline-flex items-center gap-1.5 text-sm">
-                        <Timer size={14} aria-hidden />
-                        {formatRelTime(nextTask.due_at!)}
-                      </span>
-                    </div>
-
-                    <button
-                      onClick={() => openSheet(nextTask)}
-                      className="mt-8 inline-flex items-center gap-2 rounded-[14px] bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/20 transition hover:bg-primary/90 active:scale-[0.97]"
-                    >
-                      <Check size={16} aria-hidden />
-                      Mark as done
-                    </button>
-                  </div>
-
-                  {/* Decorative sprout */}
-                  <div className="pointer-events-none absolute -bottom-6 -right-6 select-none opacity-[0.04]">
-                    <Sprout size={160} className="text-primary" aria-hidden />
                   </div>
                 </div>
               </section>
             )}
 
             {/* ════════════════════════════════════ */}
-            {/* Upcoming reminders                   */}
+            {/* Upcoming reminders                  */}
             {/* ════════════════════════════════════ */}
             {(tasks.upcoming.length > 0 || totalDue > 0) && (
-              <section className="mb-24">
-                <div className="mb-8 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-primary/8 text-primary">
-                      <Clock size={20} aria-hidden />
-                    </div>
-                    <h2 className="text-display text-foreground">Upcoming</h2>
-                  </div>
-                  {totalDue > 0 && (
-                    <span className="hidden rounded-[10px] bg-primary/8 px-4 py-1.5 text-sm font-semibold text-primary sm:inline-block">
-                      {totalDue} due today
-                    </span>
-                  )}
-                </div>
+              <section className="mb-20 sm:mb-28">
+                <p className="text-label mb-6 text-muted-foreground">Upcoming</p>
 
                 <div className="space-y-3">
-                  {/* Overdue first — prominent */}
                   {tasks.overdue.slice(0, 3).map((task) => (
                     <ReminderRow
                       key={task.id}
@@ -326,8 +252,6 @@ export default function HomePage() {
                       onClick={() => openSheet(task)}
                     />
                   ))}
-
-                  {/* Today */}
                   {tasks.today.slice(0, 4).map((task) => (
                     <ReminderRow
                       key={task.id}
@@ -335,8 +259,6 @@ export default function HomePage() {
                       onClick={() => openSheet(task)}
                     />
                   ))}
-
-                  {/* Upcoming */}
                   {tasks.upcoming.slice(0, 3).map((task) => (
                     <ReminderRow
                       key={task.id}
@@ -346,115 +268,28 @@ export default function HomePage() {
                     />
                   ))}
                 </div>
-
-                {(tasks.overdue.length > 3 || tasks.today.length > 4 || tasks.upcoming.length > 3) && (
-                  <a
-                    href="/today"
-                    className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition hover:gap-2"
-                  >
-                    View all reminders <ArrowRight size={14} aria-hidden />
-                  </a>
-                )}
               </section>
             )}
 
             {/* ════════════════════════════════════ */}
-            {/* Recent activity                      */}
-            {/* ════════════════════════════════════ */}
-            {recentLogs.length > 0 && (
-              <section className="mb-24">
-                <div className="mb-8 flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-primary/8 text-primary">
-                    <Flower2 size={20} aria-hidden />
-                  </div>
-                  <h2 className="text-display text-foreground">Activity</h2>
-                </div>
-
-                <div className="space-y-3">
-                  {recentLogs.slice(0, 5).map((log) => {
-                    const plant = data.plants.find((p) => p.id === log.plant_id);
-                    return (
-                      <div
-                        key={log.id}
-                        className="flex items-center gap-4 rounded-[16px] bg-white/50 px-5 py-4 transition hover:bg-white"
-                      >
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] bg-primary/8 text-primary">
-                          <Droplets size={18} aria-hidden />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-base font-semibold text-foreground">
-                            <span className="capitalize">{log.care_type}</span>
-                            {" — "}
-                            {plant?.name ?? "Unknown plant"}
-                          </p>
-                          {log.notes && (
-                            <p className="mt-0.5 text-sm text-muted-foreground line-clamp-1">
-                              {log.notes}
-                            </p>
-                          )}
-                        </div>
-                        <time className="shrink-0 text-sm text-muted-foreground">
-                          {formatTimeAgo(log.occurred_at)}
-                        </time>
-                      </div>
-                    );
-                  })}
-                </div>
-              </section>
-            )}
-
-            {/* ════════════════════════════════════ */}
-            {/* Supporting metrics — large statements */}
+            {/* Collection snapshot                 */}
             {/* ════════════════════════════════════ */}
             {data.plants.length > 0 && (
-              <section className="mb-8">
-                <div className="grid gap-8 md:grid-cols-3">
-                  {/* Only show meaningful metrics */}
-                  {totalDue > 0 && (
-                    <MetricStatement
-                      icon={<Sprout size={28} aria-hidden />}
-                      value={String(totalDue)}
-                      label={totalDue === 1 ? "plant needs care today" : "plants need care today"}
-                      accent
-                    />
-                  )}
-                  <MetricStatement
-                    icon={<Leaf size={28} aria-hidden />}
-                    value={String(healthyCount)}
-                    label={
-                      healthyCount === 1
-                        ? "thriving plant"
-                        : `thriving of ${data.plants.length} total`
-                    }
-                  />
-                  {recentLogs.length > 0 && (
-                    <MetricStatement
-                      icon={<Heart size={28} aria-hidden />}
-                      value={String(recentLogs.length)}
-                      label="care actions logged"
-                    />
-                  )}
-                </div>
-              </section>
-            )}
-
-            {/* ════════════════════════════════════ */}
-            {/* Collection preview (if many plants)  */}
-            {/* ════════════════════════════════════ */}
-            {data.plants.length > 0 && !nextTask && (
-              <section className="mb-8">
-                <div className="mb-6 flex items-center justify-between">
-                  <h2 className="text-display text-foreground">Your collection</h2>
+              <section className="mb-20 sm:mb-28">
+                <div className="flex items-center justify-between mb-6">
+                  <p className="text-label text-muted-foreground">
+                    {data.plants.length} plant{data.plants.length !== 1 ? "s" : ""}
+                  </p>
                   <a
                     href="/plants"
-                    className="hidden text-sm font-semibold text-primary transition hover:gap-2 sm:inline-flex sm:items-center sm:gap-1.5"
+                    className="rounded-full bg-muted px-5 py-2 text-xs font-semibold text-foreground hover:bg-muted/80"
                   >
-                    View all <ArrowRight size={14} aria-hidden />
+                    View all
                   </a>
                 </div>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="space-y-3">
                   {data.plants.slice(0, 6).map((plant) => (
-                    <PlantCard
+                    <PlantCollectionRow
                       key={plant.id}
                       name={plant.name}
                       species={plant.species}
@@ -466,7 +301,7 @@ export default function HomePage() {
                 {data.plants.length > 6 && (
                   <a
                     href="/plants"
-                    className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary sm:hidden"
+                    className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary"
                   >
                     View all {data.plants.length} plants <ArrowRight size={14} />
                   </a>
@@ -475,39 +310,61 @@ export default function HomePage() {
             )}
 
             {/* ════════════════════════════════════ */}
-            {/* Empty state — first-time user        */}
+            {/* Recent care                         */}
             {/* ════════════════════════════════════ */}
+            {recentLogs.length > 0 && (
+              <section className="mb-8">
+                <p className="text-label mb-6 text-muted-foreground">Recent care</p>
+                <div className="space-y-2">
+                  {recentLogs.slice(0, 5).map((log) => {
+                    const plant = data.plants.find((p) => p.id === log.plant_id);
+                    return (
+                      <div
+                        key={log.id}
+                        className="flex items-center gap-4 rounded-full bg-muted/50 px-6 py-3"
+                      >
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                          <Droplets size={14} aria-hidden />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-foreground">
+                            <span className="capitalize">{log.care_type}</span>
+                            {" — "}
+                            {plant?.name ?? "Unknown plant"}
+                          </p>
+                        </div>
+                        <time className="shrink-0 text-xs font-semibold text-muted-foreground">
+                          {formatTimeAgo(log.occurred_at)}
+                        </time>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
           </>
         ) : (
-          /* ── Empty state (no plants, no nothing) ── */
-          <section className="pt-16">
+          /* ── Empty state (first visit) ── */
+          <section className="pt-20 sm:pt-28">
             <div className="mx-auto max-w-lg text-center">
-              <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-[32px] bg-primary shadow-xl shadow-primary/20">
-                <Sprout size={56} className="text-primary-foreground" aria-hidden />
-              </div>
-              <p className="mt-4 text-base font-semibold tracking-wide text-primary uppercase">
-                {greeting()}
-              </p>
-              <h2 className="mt-4 text-hero text-foreground">
+              <p className="text-label mb-4 text-primary">OpenSprout</p>
+              <h2 className="text-hero mb-6 text-foreground">
                 Welcome to OpenSprout
               </h2>
-              <p className="mt-6 text-xl leading-relaxed text-muted-foreground">
-                Track watering, log care, and keep your plants thriving.
+              <p className="mb-8 max-w-md mx-auto text-base leading-relaxed text-muted-foreground">
+                Track watering, log care, and keep your plants thriving. Add your first plant to start.
               </p>
-              <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+              <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
                 <a
                   href="/plants"
-                  className="inline-flex items-center gap-2.5 rounded-[16px] bg-primary px-8 py-4 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition hover:bg-primary/90 active:scale-[0.97]"
+                  className="rounded-full bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground hover:brightness-110"
                 >
-                  <Sprout size={20} aria-hidden />
                   Add your first plant
-                  <ArrowRight size={18} aria-hidden />
                 </a>
                 <a
                   href="/identify"
-                  className="inline-flex items-center gap-2 rounded-[16px] border border-border/60 bg-white px-7 py-4 text-base font-semibold text-foreground/70 transition hover:border-border hover:text-foreground active:scale-[0.97]"
+                  className="rounded-full bg-muted px-7 py-3.5 text-sm font-semibold text-foreground hover:bg-muted/80"
                 >
-                  <Leaf size={18} aria-hidden />
                   Identify a plant
                 </a>
               </div>
@@ -517,149 +374,58 @@ export default function HomePage() {
       </PullToRefresh>
 
       {/* ── Task Action Sheet ── */}
-      <BottomSheet
-        open={activeTask !== null}
-        onClose={closeSheet}
-        title={activeTask ? `${activeTask.plantName}` : undefined}
-      >
+      <BottomSheet open={activeTask !== null} onClose={closeSheet} title={activeTask ? `${activeTask.plantName}` : undefined}>
         {activeTask && action === "pick" && (
           <div className="space-y-5">
-            <p className="text-base text-muted-foreground capitalize">
-              {activeTask.care_type} care &middot;{" "}
-              {activeTask.due_at?.slice(0, 10)}
+            <p className="text-sm text-muted-foreground capitalize">
+              {activeTask.care_type} care &middot; {activeTask.due_at?.slice(0, 10)}
             </p>
             <div className="grid grid-cols-2 gap-3">
-              <ActionButton
-                icon={<Check size={22} />}
-                label="Complete"
-                variant="primary"
-                onClick={() => setAction("complete")}
-              />
-              <ActionButton
-                icon={<X size={22} />}
-                label="Skip"
-                variant="danger"
-                onClick={doSkip}
-                disabled={busyAction}
-              />
-              <ActionButton
-                icon={<Clock size={22} />}
-                label="Snooze"
-                variant="outline"
-                onClick={() => setAction("snooze")}
-              />
-              <ActionButton
-                icon={<Calendar size={22} />}
-                label="Reschedule"
-                variant="outline"
-                onClick={() => setAction("reschedule")}
-              />
+              <ActionButton icon={<Check size={22} />} label="Complete" variant="primary" onClick={() => setAction("complete")} />
+              <ActionButton icon={<X size={22} />} label="Skip" variant="danger" onClick={doSkip} disabled={busyAction} />
+              <ActionButton icon={<Clock size={22} />} label="Snooze" variant="outline" onClick={() => setAction("snooze")} />
+              <ActionButton icon={<Calendar size={22} />} label="Reschedule" variant="outline" onClick={() => setAction("reschedule")} />
             </div>
           </div>
         )}
         {activeTask && action === "complete" && (
           <div className="space-y-4">
-            <p className="text-base font-semibold text-muted-foreground">
-              Log care details (optional)
-            </p>
-            <label className="block text-base font-semibold">
+            <p className="text-sm font-semibold text-muted-foreground">Log care details (optional)</p>
+            <label className="block text-sm font-semibold">
               Water amount (ml)
-              <Input
-                className="mt-1 rounded-xl text-base"
-                type="number"
-                min={0}
-                placeholder="e.g. 200"
-                value={amountMl}
-                onChange={(e) => setAmountMl(e.target.value)}
-              />
+              <Input className="mt-1 rounded-full text-sm" type="number" min={0} placeholder="e.g. 200" value={amountMl} onChange={(e) => setAmountMl(e.target.value)} />
             </label>
-            <label className="block text-base font-semibold">
+            <label className="block text-sm font-semibold">
               Fertilizer name
-              <Input
-                className="mt-1 rounded-xl text-base"
-                placeholder="e.g. 20-20-20 liquid"
-                value={fertName}
-                onChange={(e) => setFertName(e.target.value)}
-              />
+              <Input className="mt-1 rounded-full text-sm" placeholder="e.g. 20-20-20 liquid" value={fertName} onChange={(e) => setFertName(e.target.value)} />
             </label>
-            <label className="block text-base font-semibold">
+            <label className="block text-sm font-semibold">
               Notes
-              <textarea
-                className="mt-1 min-h-24 w-full rounded-[20px] border border-input bg-white px-4 py-3 text-base outline-none focus:border-primary focus:ring-2 focus:ring-ring"
-                placeholder="Any observations..."
-                value={taskNotes}
-                onChange={(e) => setTaskNotes(e.target.value)}
-              />
+              <textarea className="mt-1 min-h-24 w-full rounded-2xl bg-muted px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-ring" placeholder="Any observations..." value={taskNotes} onChange={(e) => setTaskNotes(e.target.value)} />
             </label>
             <div className="flex gap-3">
-              <Button
-                onClick={doComplete}
-                disabled={busyAction}
-                className="rounded-[14px] px-6 py-2.5"
-              >
-                <Check size={16} aria-hidden /> Complete
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setAction("pick")}
-                className="rounded-[14px] px-6"
-              >
-                Back
-              </Button>
+              <Button onClick={doComplete} disabled={busyAction}><Check size={16} /> Complete</Button>
+              <Button variant="outline" onClick={() => setAction("pick")}>Back</Button>
             </div>
           </div>
         )}
         {activeTask && action === "snooze" && (
           <div className="space-y-4">
-            <p className="text-base text-muted-foreground">Snooze until:</p>
-            <Input
-              type="datetime-local"
-              value={pickDate}
-              onChange={(e) => setPickDate(e.target.value)}
-              className="rounded-xl text-base"
-            />
+            <p className="text-sm text-muted-foreground">Snooze until:</p>
+            <Input type="datetime-local" value={pickDate} onChange={(e) => setPickDate(e.target.value)} className="rounded-full text-sm" />
             <div className="flex gap-3">
-              <Button
-                onClick={doSnooze}
-                disabled={busyAction || !pickDate}
-                className="rounded-[14px] px-6 py-2.5"
-              >
-                Snooze
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setAction("pick")}
-                className="rounded-[14px] px-6"
-              >
-                Back
-              </Button>
+              <Button onClick={doSnooze} disabled={busyAction || !pickDate}>Snooze</Button>
+              <Button variant="outline" onClick={() => setAction("pick")}>Back</Button>
             </div>
           </div>
         )}
         {activeTask && action === "reschedule" && (
           <div className="space-y-4">
-            <p className="text-base text-muted-foreground">New due date:</p>
-            <Input
-              type="datetime-local"
-              value={pickDate}
-              onChange={(e) => setPickDate(e.target.value)}
-              className="rounded-xl text-base"
-            />
+            <p className="text-sm text-muted-foreground">New due date:</p>
+            <Input type="datetime-local" value={pickDate} onChange={(e) => setPickDate(e.target.value)} className="rounded-full text-sm" />
             <div className="flex gap-3">
-              <Button
-                onClick={doReschedule}
-                disabled={busyAction || !pickDate}
-                className="rounded-[14px] px-6 py-2.5"
-              >
-                Reschedule
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setAction("pick")}
-                className="rounded-[14px] px-6"
-              >
-                Back
-              </Button>
+              <Button onClick={doReschedule} disabled={busyAction || !pickDate}>Reschedule</Button>
+              <Button variant="outline" onClick={() => setAction("pick")}>Back</Button>
             </div>
           </div>
         )}
@@ -670,183 +436,79 @@ export default function HomePage() {
 
 // ── Sub-components ──
 
-/** Large statement-style metric — no card, just text */
-function MetricStatement({
-  icon,
-  value,
-  label,
-  accent,
-}: {
-  icon: React.ReactNode;
-  value: string;
-  label: string;
-  accent?: boolean;
-}) {
-  return (
-    <div className={cn(accent && "md:col-span-1")}>
-      <div className="mb-3 flex items-center gap-2">
-        <div
-          className={cn(
-            "flex h-10 w-10 items-center justify-center rounded-[12px]",
-            accent
-              ? "bg-primary text-primary-foreground"
-              : "bg-primary/8 text-primary",
-          )}
-        >
-          {icon}
-        </div>
-      </div>
-      <p className="text-stat text-foreground">{value}</p>
-      <p className="mt-2 text-lg text-muted-foreground">{label}</p>
-    </div>
-  );
-}
-
-/** Minimal reminder row */
-function ReminderRow({
-  task,
-  overdue,
-  subdued,
-  onClick,
-}: {
-  task: TaskWithPlant;
-  overdue?: boolean;
-  subdued?: boolean;
-  onClick: () => void;
+function ReminderRow({ task, overdue, subdued, onClick }: {
+  task: TaskWithPlant; overdue?: boolean; subdued?: boolean; onClick: () => void;
 }) {
   return (
     <button
       onClick={onClick}
       className={cn(
-        "flex w-full items-center gap-4 rounded-[16px] px-5 py-4 text-left transition hover:bg-white active:scale-[0.99]",
-        overdue && "bg-red-50/60",
-        !overdue && !subdued && "bg-white/50",
-        subdued && "bg-transparent",
+        "flex w-full items-center gap-4 rounded-full px-6 py-3.5 text-left transition hover:bg-muted/70 active:scale-[0.99]",
+        overdue && "bg-destructive/5",
+        !overdue && !subdued && "bg-muted/30",
       )}
     >
-      <div
-        className={cn(
-          "flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px]",
-          overdue
-            ? "bg-red-100 text-red-600"
-            : "bg-primary/8 text-primary",
-        )}
-      >
-        <Droplets size={18} aria-hidden />
+      <div className={cn(
+        "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
+        overdue ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary",
+      )}>
+        <Droplets size={16} aria-hidden />
       </div>
       <div className="min-w-0 flex-1">
-        <p
-          className={cn(
-            "text-base font-semibold",
-            overdue && "text-red-700",
-            subdued && "text-muted-foreground",
-            !overdue && !subdued && "text-foreground",
-          )}
-        >
+        <p className={cn("text-sm font-semibold", overdue && "text-destructive", subdued && "text-muted-foreground/70")}>
           {task.plantName}
         </p>
-        <p className="mt-0.5 text-sm text-muted-foreground capitalize">
-          {task.care_type}
-        </p>
+        <p className="mt-0.5 text-xs text-muted-foreground capitalize">{task.care_type}</p>
       </div>
       <div className="shrink-0 text-right">
-        <span
-          className={cn(
-            "block text-sm font-semibold",
-            overdue && "text-red-600",
-            subdued && "text-muted-foreground/60",
-            !overdue && !subdued && "text-foreground",
-          )}
-        >
+        <span className={cn("block text-sm font-semibold", overdue && "text-destructive", subdued && "text-muted-foreground/50")}>
           {task.due_at ? formatRelTime(task.due_at) : ""}
         </span>
-        {overdue && (
-          <span className="text-xs font-semibold text-red-500">Overdue</span>
-        )}
+        {overdue && <span className="text-xs font-bold text-destructive">Overdue</span>}
       </div>
     </button>
   );
 }
 
-/** Minimal plant card for collection preview */
-function PlantCard({
-  name,
-  species,
-  health,
-  location,
-}: {
-  name: string;
-  species: string | null;
-  health: string | null;
-  location: string | null;
+function PlantCollectionRow({ name, species, health, location }: {
+  name: string; species: string | null; health: string | null; location: string | null;
 }) {
   return (
-    <a
-      href="/plants"
-      className="group block rounded-[20px] border border-border/20 bg-white p-6 transition hover:shadow-sm active:scale-[0.99]"
-    >
-      <div className="flex items-center justify-between">
-        <div className="min-w-0 flex-1">
-          <p className="text-lg font-bold text-foreground">{name}</p>
-          {species && (
-            <p className="mt-0.5 text-sm italic text-muted-foreground">
-              {species}
-            </p>
-          )}
-        </div>
-        <div
-          className={cn(
-            "flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold shadow-sm",
-            health === "thriving" || health === "stable"
-              ? "bg-green-100 text-green-700"
-              : health === "watch" || health === "struggling"
-                ? "bg-amber-100 text-amber-700"
-                : "bg-muted text-muted-foreground",
-          )}
-        >
-          {health ? health.charAt(0).toUpperCase() : "?"}
-        </div>
+    <a href="/plants" className="flex items-center gap-4 rounded-full bg-muted/30 px-6 py-3.5 transition hover:bg-muted/70">
+      <div className={cn(
+        "flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold",
+        health === "thriving" || health === "stable"
+          ? "bg-primary/10 text-primary"
+          : health === "watch" || health === "struggling"
+          ? "bg-destructive/10 text-destructive"
+          : "bg-muted text-muted-foreground",
+      )}>
+        {health ? health.charAt(0).toUpperCase() : "?"}
       </div>
-      {location && (
-        <p className="mt-3 flex items-center gap-1.5 text-sm text-muted-foreground">
-          <span className="inline-block h-2 w-2 rounded-full bg-primary/40" />
-          {location}
-        </p>
-      )}
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-foreground">{name}</p>
+        {species && <p className="text-xs text-muted-foreground">{species}</p>}
+      </div>
+      {location && <span className="shrink-0 text-xs text-muted-foreground">{location}</span>}
     </a>
   );
 }
 
-function ActionButton({
-  icon,
-  label,
-  variant,
-  onClick,
-  disabled,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  variant: "primary" | "danger" | "outline";
-  onClick: () => void;
-  disabled?: boolean;
+function ActionButton({ icon, label, variant, onClick, disabled }: {
+  icon: React.ReactNode; label: string; variant: "primary" | "danger" | "outline"; onClick: () => void; disabled?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "flex flex-col items-center gap-2 rounded-[20px] border p-5 text-base font-semibold transition active:scale-[0.97]",
-        variant === "primary" &&
-          "border-primary bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm",
-        variant === "danger" &&
-          "border-red-200 bg-red-50 text-red-700 hover:bg-red-100",
-        variant === "outline" &&
-          "border-border bg-white text-foreground hover:bg-muted",
-        disabled && "pointer-events-none opacity-50",
-      )}
-    >
-      {icon}
-      {label}
+        "flex flex-col items-center gap-2 rounded-2xl border p-5 text-sm font-semibold transition active:scale-[0.97]",
+        variant === "primary" && "border-primary bg-primary text-primary-foreground hover:brightness-110",
+        variant === "danger" && "border-destructive/20 bg-destructive/5 text-destructive hover:bg-destructive/10",
+        variant === "outline" && "border-border bg-white text-foreground hover:bg-muted",
+        disabled && "opacity-40 pointer-events-none",
+      )}>
+      {icon}{label}
     </button>
   );
 }

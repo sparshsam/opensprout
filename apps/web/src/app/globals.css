@@ -15,35 +15,27 @@
   --color-muted-foreground: hsl(var(--muted-foreground));
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
   --color-success: hsl(var(--success));
   --color-warning: hsl(var(--warning));
 
-  /* Softer, more dimensional shadows */
   --shadow-xs: 0 1px 3px rgba(18, 38, 30, 0.04);
   --shadow-sm: 0 2px 8px rgba(18, 38, 30, 0.05);
   --shadow-md: 0 8px 28px rgba(18, 38, 30, 0.07);
   --shadow-lg: 0 20px 60px rgba(18, 38, 30, 0.10);
   --shadow-xl: 0 32px 80px rgba(18, 38, 30, 0.14);
 
-  /* Premium radius system */
   --radius-xs: 8px;
   --radius-sm: 14px;
   --radius-md: 20px;
   --radius-lg: 28px;
   --radius-xl: 40px;
   --radius-full: 9999px;
-
-  /* Editorial typography */
-  --font-hero: 600;
 }
 
+/* ── Light mode (default) ── */
 :root {
   --background: 0 0% 100%;
   --foreground: 157 35% 6%;
-  --card: 0 0% 100%;
-  --card-foreground: 157 35% 6%;
   --primary: 155 68% 28%;
   --primary-light: 155 68% 94%;
   --primary-foreground: 0 0% 100%;
@@ -51,28 +43,27 @@
   --muted-foreground: 157 16% 42%;
   --destructive: 0 76% 52%;
   --destructive-foreground: 0 0% 100%;
-  --border: 155 18% 88%;
+  --border: 157 18% 88%;
   --input: 155 18% 86%;
   --ring: 155 68% 28%;
   --success: 145 63% 42%;
   --warning: 38 92% 50%;
 }
 
+/* ── Dark mode ── */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: 157 30% 6%;
-    --foreground: 150 12% 94%;
-    --card: 157 25% 10%;
-    --card-foreground: 150 12% 94%;
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
     --primary: 155 52% 44%;
     --primary-light: 155 40% 14%;
     --primary-foreground: 0 0% 100%;
-    --muted: 157 18% 12%;
-    --muted-foreground: 157 10% 68%;
+    --muted: 0 0% 7%;
+    --muted-foreground: 0 0% 55%;
     --destructive: 0 65% 52%;
     --destructive-foreground: 0 0% 100%;
-    --border: 157 12% 22%;
-    --input: 157 12% 20%;
+    --border: 0 0% 12%;
+    --input: 0 0% 12%;
     --ring: 155 52% 44%;
     --success: 145 55% 44%;
     --warning: 38 85% 50%;
@@ -110,36 +101,36 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Hero sizing utility classes */
+/* ── Type scale utilities ── */
 @utility text-hero {
-  font-size: clamp(3rem, 8vw, 6rem);
-  font-weight: 700;
-  line-height: 0.95;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 900;
+  line-height: 1.05;
   letter-spacing: -0.03em;
 }
 
-@utility text-hero-sub {
-  font-size: clamp(1.5rem, 3vw, 2.25rem);
-  font-weight: 600;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-}
-
 @utility text-display {
-  font-size: clamp(2rem, 4vw, 2.5rem);
-  font-weight: 600;
+  font-size: clamp(1.75rem, 3.5vw, 2.25rem);
+  font-weight: 900;
   line-height: 1.1;
   letter-spacing: -0.02em;
 }
 
 @utility text-stat {
-  font-size: clamp(3rem, 5vw, 4rem);
-  font-weight: 700;
+  font-size: clamp(2.5rem, 4vw, 3.5rem);
+  font-weight: 800;
   line-height: 1;
   letter-spacing: -0.02em;
 }
 
-/* Full-bleed container helper */
+@utility text-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── Full-bleed helper ── */
 @utility full-bleed {
   width: 100vw;
   margin-left: calc(-50vw + 50%);

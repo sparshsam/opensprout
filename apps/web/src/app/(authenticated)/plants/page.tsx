@@ -11,10 +11,10 @@ import {
   Leaf,
   Loader2,
   History,
-  ChevronDown,
   Sprout,
-  RefreshCw,
   MapPin,
+  ArrowRight,
+  Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,7 +30,6 @@ import type {
 import type { PlantFormValues } from "@/lib/data/plants";
 import type { TimelineEvent } from "@/lib/data/tasks";
 import { listPlantTimeline } from "@/lib/data/tasks";
-import { TimelineItem } from "@/components/cards/timeline-item";
 import { getSpeciesRecommendations } from "@/lib/data/recommendations";
 import { CoverPhoto } from "@/components/cards/cover-photo";
 import { PullToRefresh } from "@/components/pull-to-refresh";
@@ -180,7 +179,6 @@ export default function PlantsPage() {
     }
   }
 
-  // Compute next task for each plant
   function getPlantNextTask(plantId: string): { careType: string; dueAt: string } | null {
     const schedule = data.schedules.find(
       (s) => s.plant_id === plantId && s.active,
@@ -191,87 +189,91 @@ export default function PlantsPage() {
 
   return (
     <>
-      <header className="pb-10">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-5xl font-bold tracking-tight md:text-6xl">Plants</h1>
-            <p className="mt-2 text-xl text-muted-foreground">
-              Your plant collection, all in one place.
-            </p>
-          </div>
-          <Button onClick={openCreateForm} className="rounded-[14px] px-6 py-3 text-base font-semibold shadow-md">
-            <Plus size={20} aria-hidden />
-            Add plant
-          </Button>
-        </div>
-      </header>
-
+      {/* ── Status ── */}
       {(error || notice) && (
-        <div className={cn("mb-6 rounded-2xl border px-5 py-4 text-base font-medium", error ? "border-red-200 bg-red-50 text-red-800" : "border-emerald-200 bg-emerald-50 text-emerald-800")}>
-          <div className="flex items-center justify-between gap-3">
-            <span>{error ?? notice}</span>
-            {error && (
-              <Button variant="outline" size="sm" onClick={refreshDashboard} className="shrink-0 rounded-xl border-red-300 bg-white text-red-700 hover:bg-red-100">
-                <RefreshCw size={14} aria-hidden /> Retry
-              </Button>
-            )}
-          </div>
+        <div className={cn(
+          "mb-10 rounded-full px-6 py-3 text-sm font-semibold",
+          error ? "bg-destructive/10 text-destructive" : "bg-primary-light text-primary",
+        )}>
+          <span>{error ?? notice}</span>
         </div>
       )}
 
-      <section className="space-y-6 lg:grid lg:grid-cols-[1fr_400px] lg:gap-8 lg:space-y-0">
-        <PullToRefresh onRefresh={refreshDashboard}>
-          <div className="space-y-5">
-            <label className="relative block">
-              <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-              <Input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search plants"
-                className="h-12 rounded-2xl pl-11 text-base"
-              />
-            </label>
+      {/* ── Header ── */}
+      <div className="mb-12 flex items-center justify-between">
+        <div>
+          <p className="text-label mb-2 text-primary">Collection</p>
+          <h1 className="text-hero text-foreground">Plants</h1>
+        </div>
+        <button
+          onClick={openCreateForm}
+          className="rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground hover:brightness-110"
+        >
+          <Plus size={16} className="inline" aria-hidden /> Add plant
+        </button>
+      </div>
 
-            {showForm && (
-              <PlantForm
-                editing={Boolean(editingPlant)}
-                values={formValues}
-                speciesList={speciesList}
-                saving={savingPlant}
-                onChange={setFormValues}
-                onCancel={() => { setShowForm(false); setEditingPlant(null); }}
-                onSubmit={handleSavePlant}
-              />
-            )}
+      {/* ── Search ── */}
+      <div className="mb-10">
+        <div className="relative max-w-sm">
+          <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search plants"
+            className="h-12 w-full rounded-full pl-10 text-sm bg-muted"
+          />
+        </div>
+      </div>
 
-            {dataLoading ? (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+      {/* ── Create/Edit form ── */}
+      {showForm && (
+        <section className="mb-12 border-t border-border pt-8">
+          <PlantForm
+            editing={Boolean(editingPlant)}
+            values={formValues}
+            speciesList={speciesList}
+            saving={savingPlant}
+            onChange={setFormValues}
+            onCancel={() => { setShowForm(false); setEditingPlant(null); }}
+            onSubmit={handleSavePlant}
+          />
+        </section>
+      )}
+
+      <PullToRefresh onRefresh={refreshDashboard}>
+        <div className="lg:grid lg:grid-cols-[1fr_400px] lg:gap-10">
+          {/* ── Plant list ── */}
+          <div>
+            {dataLoading && visiblePlants.length === 0 ? (
+              <div className="space-y-3">
                 {[...Array(4)].map((_, i) => (
-                  <Skeleton key={i} className="h-40 rounded-3xl" />
+                  <Skeleton key={i} className="h-16 rounded-full" />
                 ))}
               </div>
             ) : visiblePlants.length === 0 ? (
-              <div className="rounded-3xl bg-white px-8 pb-10 pt-12 text-center shadow-sm">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary shadow-md">
-                  <Sprout size={28} className="text-primary-foreground" aria-hidden />
-                </div>
-                <h2 className="mt-5 text-2xl font-bold">No plants yet</h2>
-                <p className="mx-auto mt-2 max-w-sm text-base text-muted-foreground">
+              <div className="py-12 text-center">
+                <p className="text-xl font-bold text-foreground">
+                  {query ? "No plants match that search." : "No plants yet"}
+                </p>
+                <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto">
                   {query
-                    ? "No plants match that search."
+                    ? "Try a different search term."
                     : "Add your first plant to start tracking care."}
                 </p>
                 {!query && (
-                  <Button onClick={openCreateForm} className="mt-6 rounded-xl px-6 py-3 text-base">
-                    <Plus size={18} aria-hidden />
-                    Add your first plant
-                  </Button>
+                  <button
+                    onClick={openCreateForm}
+                    className="mt-8 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground hover:brightness-110"
+                  >
+                    <Plus size={16} className="inline" aria-hidden /> Add your first plant
+                  </button>
                 )}
               </div>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+              <div className="space-y-2">
                 {visiblePlants.map((plant) => (
-                  <PlantCard
+                  <PlantRow
                     key={plant.id}
                     plant={plant}
                     nextTask={getPlantNextTask(plant.id)}
@@ -285,153 +287,74 @@ export default function PlantsPage() {
             )}
           </div>
 
-          {/* Detail panel */}
+          {/* ── Detail panel (desktop) ── */}
           <aside className="hidden lg:block">
             {selectedPlant ? (
-              <div className="space-y-5 sticky top-24">
+              <div className="sticky top-20">
                 <PlantDetail
                   plant={selectedPlant}
                   schedules={selectedSchedules}
+                  timeline={timeline}
+                  timelineLoading={timelineLoading}
                   careLoading={careLoading}
                   onEdit={() => openEditForm(selectedPlant)}
                   onDelete={() => onDelete(selectedPlant)}
                   onQuickCare={onQuickCare}
                 />
-                <div className="rounded-2xl bg-white p-5 shadow-sm">
-                  <div className="mb-4 flex items-center gap-2">
-                    <History size={18} className="text-muted-foreground" aria-hidden />
-                    <h2 className="text-lg font-bold">Timeline</h2>
-                  </div>
-                  {timelineLoading ? (
-                    <div className="space-y-2">
-                      {[...Array(3)].map((_, i) => (
-                        <Skeleton key={i} className="h-16 w-full rounded-xl" />
-                      ))}
-                    </div>
-                  ) : timeline.length === 0 ? (
-                    <p className="rounded-xl bg-muted p-4 text-sm text-muted-foreground">
-                      No care events yet. Mark this plant watered or fertilized to start the timeline.
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      {timeline.map((event) => (
-                        <TimelineItem
-                          key={event.id}
-                          type={event.type}
-                          careType={event.careType}
-                          occurredAt={event.occurredAt}
-                          notes={event.notes}
-                          amount_ml={event.amount_ml}
-                          fertilizer_name={event.fertilizer_name}
-                          title={event.title}
-                          body={event.body}
-                          health_score={event.health_score}
-                          tags={event.tags}
-                          object_path={event.object_path}
-                          photoCount={event.photoCount}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
               </div>
             ) : dataLoading ? (
-              <div className="space-y-5">
-                <Skeleton className="h-72 w-full rounded-3xl" />
-                <Skeleton className="h-48 w-full rounded-3xl" />
+              <div className="space-y-4">
+                <Skeleton className="h-64 rounded-2xl" />
+                <Skeleton className="h-32 rounded-2xl" />
               </div>
             ) : (
-              <div className="rounded-2xl bg-white p-6 text-center shadow-sm">
-                <p className="text-lg font-semibold text-muted-foreground">
+              <div className="py-12 text-center">
+                <p className="text-sm text-muted-foreground">
                   Select a plant to see details
                 </p>
               </div>
             )}
           </aside>
-        </PullToRefresh>
-      </section>
+        </div>
+      </PullToRefresh>
     </>
   );
 }
 
-// ── Plant Card (visual) ──
+// ── Plant row ──
 
-function PlantCard({
-  plant,
-  nextTask,
-  selected,
-  onSelect,
-  onEdit,
-  onDelete,
-}: {
-  plant: PlantRow;
-  nextTask: { careType: string; dueAt: string } | null;
-  selected: boolean;
-  onSelect: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
+function PlantRow({ plant, nextTask, selected, onSelect, onEdit, onDelete }: {
+  plant: PlantRow; nextTask: { careType: string; dueAt: string } | null; selected: boolean; onSelect: () => void; onEdit: () => void; onDelete: () => void;
 }) {
   return (
     <button
       onClick={onSelect}
       className={cn(
-        "group relative flex flex-col gap-4 rounded-[28px] bg-white p-6 text-left shadow-sm transition hover:shadow-lg active:scale-[0.99]",
-        selected && "ring-2 ring-primary",
+        "flex w-full items-center gap-4 rounded-full px-6 py-3.5 text-left transition hover:bg-muted/70 active:scale-[0.99]",
+        selected && "bg-muted",
       )}
     >
-      <div className="flex gap-5">
-        <CoverPhoto
-          coverPhotoPath={plant.cover_photo_path}
-          className="h-32 w-32 shrink-0 rounded-[20px] object-cover shadow-sm"
-        />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <div>
-              <p className="text-xl font-bold">{plant.name}</p>
-              {plant.species && (
-                <p className="text-sm italic text-muted-foreground">{plant.species}</p>
-              )}
-            </div>
-            <div className={cn(
-              "flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold",
-              plant.health_status === "thriving" || plant.health_status === "stable"
-                ? "bg-green-100 text-green-700"
-                : plant.health_status === "watch" || plant.health_status === "struggling"
-                ? "bg-amber-100 text-amber-700"
-                : "bg-muted text-muted-foreground",
-            )}>
-              {plant.health_status ? plant.health_status.charAt(0).toUpperCase() : "?"}
-            </div>
-          </div>
-
-          {plant.location && (
-            <p className="mt-3 flex items-center gap-1.5 text-sm text-muted-foreground">
-              <span className="inline-block h-2 w-2 rounded-full bg-primary/40" />
-              {plant.location}
-            </p>
-          )}
-
-          {nextTask && (
-            <p className="mt-2 flex items-center gap-1.5 text-sm font-semibold text-primary">
-              <Droplets size={14} aria-hidden />
-              {nextTask.careType} &middot; {formatDueDate(nextTask.dueAt)}
-            </p>
-          )}
-        </div>
+      <CoverPhoto
+        coverPhotoPath={plant.cover_photo_path}
+        className="h-12 w-12 shrink-0 rounded-full object-cover"
+      />
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-foreground">{plant.name}</p>
+        <p className="text-xs text-muted-foreground">
+          {plant.species ?? "Unknown"}
+          {plant.location && ` · ${plant.location}`}
+        </p>
       </div>
-
-      {/* Quick actions on hover */}
-      <div className="flex gap-2 pt-2 opacity-0 transition group-hover:opacity-100">
-        <span
-          onClick={(e) => { e.stopPropagation(); onEdit(); }}
-          className="cursor-pointer rounded-[12px] bg-muted px-4 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted-foreground/20"
-        >
+      {nextTask && (
+        <span className="shrink-0 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold tracking-wider uppercase text-primary">
+          {nextTask.careType}
+        </span>
+      )}
+      <div className="hidden shrink-0 items-center gap-2 group-hover:flex sm:flex">
+        <span onClick={(e) => { e.stopPropagation(); onEdit(); }} className="rounded-full bg-muted px-3 py-1.5 text-xs font-semibold text-muted-foreground cursor-pointer hover:bg-muted-foreground/20">
           Edit
         </span>
-        <span
-          onClick={(e) => { e.stopPropagation(); onDelete(); }}
-          className="cursor-pointer rounded-[12px] bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-100"
-        >
+        <span onClick={(e) => { e.stopPropagation(); onDelete(); }} className="rounded-full bg-destructive/5 px-3 py-1.5 text-xs font-semibold text-destructive cursor-pointer hover:bg-destructive/10">
           Delete
         </span>
       </div>
@@ -439,230 +362,164 @@ function PlantCard({
   );
 }
 
-// ── Plant Detail (desktop side panel) ──
+// ── Plant Detail ──
 
-function PlantDetail({
-  plant,
-  schedules,
-  careLoading,
-  onEdit,
-  onDelete,
-  onQuickCare,
-}: {
-  plant: PlantRow;
-  schedules: CareScheduleRow[];
-  careLoading: string | null;
-  onEdit: () => void;
-  onDelete: () => void;
-  onQuickCare: (careType: CareType) => void;
+function PlantDetail({ plant, schedules, timeline, timelineLoading, careLoading, onEdit, onDelete, onQuickCare }: {
+  plant: PlantRow; schedules: CareScheduleRow[]; timeline: TimelineEvent[]; timelineLoading: boolean; careLoading: string | null; onEdit: () => void; onDelete: () => void; onQuickCare: (careType: CareType) => void;
 }) {
   return (
-    <div className="rounded-3xl bg-white p-6 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-bold">{plant.name}</h2>
-          <p className="text-sm italic text-muted-foreground">
-            {plant.species ?? "Unknown species"}
-          </p>
-        </div>
-        <div className="flex gap-1">
-          <Button variant="ghost" size="icon" aria-label="Edit" onClick={onEdit}>
-            <Pencil size={18} aria-hidden />
-          </Button>
-          <Button variant="ghost" size="icon" aria-label="Delete" onClick={onDelete}>
-            <Trash2 size={18} aria-hidden />
-          </Button>
-        </div>
-      </div>
-
+    <div className="space-y-8">
+      {/* Photo */}
       <CoverPhoto
         coverPhotoPath={plant.cover_photo_path}
-        className="mt-5 aspect-[4/3] w-full rounded-2xl"
+        className="aspect-[4/3] w-full rounded-2xl object-cover"
       />
 
-      {/* Quick care */}
-      <div className="mt-5 grid grid-cols-2 gap-2">
-        {careTypes.slice(0, 4).map((ct) => (
-          <Button
-            key={ct}
-            variant="outline"
-            size="sm"
-            onClick={() => onQuickCare(ct)}
-            disabled={careLoading !== null}
-            className="rounded-xl capitalize"
-          >
-            {careLoading === ct ? <Loader2 className="animate-spin mr-1" size={14} /> : ct === "water" ? <Droplets size={14} className="mr-1" /> : ct === "fertilize" ? <Leaf size={14} className="mr-1" /> : null}
-            {ct}
-          </Button>
-        ))}
+      {/* Name + actions */}
+      <div>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-display text-foreground">{plant.name}</p>
+            {plant.species && (
+              <p className="mt-1 text-sm italic text-muted-foreground">{plant.species}</p>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <button onClick={onEdit} className="rounded-full bg-muted px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted/80">
+              <Pencil size={14} className="inline" aria-hidden /> Edit
+            </button>
+            <button onClick={onDelete} className="rounded-full bg-destructive/5 px-4 py-2 text-xs font-semibold text-destructive hover:bg-destructive/10">
+              <Trash2 size={14} className="inline" aria-hidden /> Delete
+            </button>
+          </div>
+        </div>
       </div>
 
-      <dl className="mt-5 grid grid-cols-2 gap-4 text-sm">
-        <div>
-          <dt className="font-semibold text-muted-foreground">Location</dt>
-          <dd>{plant.location ?? "Not set"}</dd>
+      {/* Quick care */}
+      <div>
+        <p className="text-label mb-4 text-muted-foreground">Quick care</p>
+        <div className="flex flex-wrap gap-2">
+          {careTypes.slice(0, 4).map((ct) => (
+            <button
+              key={ct}
+              onClick={() => onQuickCare(ct)}
+              disabled={careLoading !== null}
+              className="rounded-full bg-muted px-5 py-2.5 text-xs font-bold tracking-wider uppercase text-foreground hover:bg-muted/80 disabled:opacity-40"
+            >
+              {careLoading === ct ? <Loader2 className="animate-spin inline" size={12} /> : null}
+              {ct}
+            </button>
+          ))}
         </div>
-        <div>
-          <dt className="font-semibold text-muted-foreground">Status</dt>
-          <dd className="capitalize">{plant.health_status ?? "stable"}</dd>
-        </div>
-        <div>
-          <dt className="font-semibold text-muted-foreground">Water</dt>
-          <dd>{formatSchedule(schedules, "water")}</dd>
-        </div>
-        <div>
-          <dt className="font-semibold text-muted-foreground">Fertilize</dt>
-          <dd>{formatSchedule(schedules, "fertilize")}</dd>
-        </div>
-      </dl>
+      </div>
+
+      {/* Schedule strip */}
+      <div className="border-t border-border pt-6">
+        <p className="text-label mb-4 text-muted-foreground">Schedule</p>
+        {schedules.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No care schedule set.</p>
+        ) : (
+          <div className="space-y-3">
+            {schedules.filter((s) => s.active).map((s) => (
+              <div key={s.id} className="flex items-center justify-between gap-4">
+                <span className="text-sm font-semibold capitalize text-foreground">{s.care_type}</span>
+                <span className="text-xs text-muted-foreground">
+                  {s.next_due_at ? `Due ${formatDueDate(s.next_due_at)}` : "No upcoming"}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Notes */}
       {plant.notes && (
-        <p className="mt-4 rounded-xl bg-muted p-4 text-sm leading-6 text-muted-foreground">
-          {plant.notes}
-        </p>
+        <div className="border-t border-border pt-6">
+          <p className="text-label mb-3 text-muted-foreground">Notes</p>
+          <p className="text-sm leading-relaxed text-foreground">{plant.notes}</p>
+        </div>
       )}
+
+      {/* Timeline */}
+      <div className="border-t border-border pt-6">
+        <p className="text-label mb-4 text-muted-foreground">Timeline</p>
+        {timelineLoading ? (
+          <div className="space-y-2">
+            {[...Array(3)].map((_, i) => (
+              <Skeleton key={i} className="h-12 w-full rounded-full" />
+            ))}
+          </div>
+        ) : timeline.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No care events yet.</p>
+        ) : (
+          <div className="space-y-2">
+            {timeline.slice(0, 8).map((event) => (
+              <div key={event.id} className="flex items-center gap-3 rounded-full bg-muted/50 px-5 py-2.5">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Droplets size={12} aria-hidden />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-foreground capitalize">
+                    {event.careType ?? event.type}
+                  </p>
+                </div>
+                <span className="shrink-0 text-xs text-muted-foreground">
+                  {event.occurredAt.slice(0, 10)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-// ── PlantForm (unchanged functionally) ──
+// ── Plant Form ──
 
-function PlantForm({
-  editing,
-  values,
-  speciesList,
-  saving,
-  onChange,
-  onCancel,
-  onSubmit,
-}: {
-  editing: boolean;
-  values: PlantFormValues;
-  speciesList: PlantSpeciesRow[];
-  saving: boolean;
-  onChange: (values: PlantFormValues) => void;
-  onCancel: () => void;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+function PlantForm({ editing, values, speciesList, saving, onChange, onCancel, onSubmit }: {
+  editing: boolean; values: PlantFormValues; speciesList: PlantSpeciesRow[]; saving: boolean;
+  onChange: (v: PlantFormValues) => void; onCancel: () => void; onSubmit: (e: FormEvent<HTMLFormElement>) => void;
 }) {
-  const [templateQuery, setTemplateQuery] = useState("");
-  const selectedSpecies = speciesList.find((s) => s.id === values.species_id) ?? null;
-  const visibleSpecies = speciesList.filter((species) => {
-    const q = templateQuery.trim().toLowerCase();
-    if (!q) return true;
-    return [species.common_name, species.scientific_name ?? "", ...species.aliases].some(
-      (v) => v.toLowerCase().includes(q),
-    );
-  });
-
-  function applySpeciesTemplate(speciesId: string) {
-    const species = speciesList.find((s) => s.id === speciesId);
-    if (!species) { onChange({ ...values, species_id: "", species: "" }); return; }
-    onChange({
-      ...values,
-      name: values.name || species.common_name,
-      species_id: species.id,
-      species: species.scientific_name ?? species.common_name,
-      water_every_days: suggestedWaterDays(species) ?? values.water_every_days,
-      fertilize_every_days: species.fertilizing_frequency_days ?? values.fertilize_every_days,
-    });
-  }
+  const set = (partial: Partial<PlantFormValues>) => onChange({ ...values, ...partial });
 
   return (
-    <form className="rounded-3xl bg-white p-6 shadow-sm" onSubmit={onSubmit}>
-      <div className="grid gap-4 md:grid-cols-2">
-        {!editing && (
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 md:col-span-2">
-            <div className="grid gap-4 md:grid-cols-[1fr_1fr]">
-              <label className="text-sm font-semibold text-emerald-950">
-                Care Templates
-                <Input className="mt-2 rounded-xl bg-white" value={templateQuery}
-                  onChange={(e) => setTemplateQuery(e.target.value)}
-                  placeholder="Search snake plant, pothos, basil..." />
-              </label>
-              <label className="text-sm font-semibold text-emerald-950">
-                Choose a plant
-                <select className="mt-2 h-11 w-full rounded-xl border border-input bg-white px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring"
-                  value={values.species_id ?? ""}
-                  onChange={(e) => applySpeciesTemplate(e.target.value)}>
-                  <option value="">Custom or unknown plant</option>
-                  {visibleSpecies.map((s) => (
-                    <option key={s.id} value={s.id}>{s.common_name}{s.scientific_name ? ` (${s.scientific_name})` : ""}</option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            {selectedSpecies && (
-              <div className="mt-4 grid gap-3 text-sm text-emerald-950 md:grid-cols-3">
-                <p><span className="block text-xs font-bold uppercase text-emerald-700">Light</span>{selectedSpecies.light_preference ?? "No light note yet."}</p>
-                <p><span className="block text-xs font-bold uppercase text-emerald-700">Water</span>{formatWaterRange(selectedSpecies)}</p>
-                <p><span className="block text-xs font-bold uppercase text-emerald-700">Difficulty</span>{selectedSpecies.difficulty ?? "Not rated"}</p>
-                <p className="md:col-span-3">{selectedSpecies.care_summary}</p>
-              </div>
-            )}
-            {selectedSpecies && (
-              <details className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50/50">
-                <summary className="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm font-semibold text-emerald-900">
-                  <ChevronDown size={14} className="transition-transform" />
-                  Care Recommendations
-                </summary>
-                <div className="space-y-2 px-3 pb-3">
-                  {getSpeciesRecommendations(selectedSpecies).length === 0 ? (
-                    <p className="text-sm text-emerald-700">No specific recommendations for this species.</p>
-                  ) : (
-                    getSpeciesRecommendations(selectedSpecies).map((rec, i) => (
-                      <div key={i} className="rounded-xl border border-emerald-200 bg-white p-3 text-sm">
-                        <div className="flex items-start justify-between gap-2">
-                          <span className="font-semibold text-emerald-900">{rec.title}</span>
-                          <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase", rec.priority === "high" && "bg-red-100 text-red-700", rec.priority === "medium" && "bg-amber-100 text-amber-700", rec.priority === "low" && "bg-emerald-100 text-emerald-700")}>
-                            {rec.priority}
-                          </span>
-                        </div>
-                        <p className="mt-1 text-emerald-800">{rec.description}</p>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </details>
-            )}
-          </div>
-        )}
-
-        <label className="text-sm font-semibold block">
-          Plant name
-          <Input className="mt-1 rounded-xl text-base" required value={values.name} onChange={(e) => onChange({ ...values, name: e.target.value })} placeholder="e.g. My Monstera" />
-        </label>
-        <label className="text-sm font-semibold block">
-          Location
-          <Input className="mt-1 rounded-xl text-base" value={values.location ?? ""} onChange={(e) => onChange({ ...values, location: e.target.value })} placeholder="e.g. Living room" />
-        </label>
-        <label className="text-sm font-semibold block">
-          Water every (days)
-          <Input className="mt-1 rounded-xl text-base" type="number" min={1} value={values.water_every_days} onChange={(e) => onChange({ ...values, water_every_days: Number(e.target.value) })} />
-        </label>
-        <label className="text-sm font-semibold block">
-          Fertilize every (days)
-          <Input className="mt-1 rounded-xl text-base" type="number" min={0} value={values.fertilize_every_days} onChange={(e) => onChange({ ...values, fertilize_every_days: Number(e.target.value) })} />
-        </label>
-        <label className="text-sm font-semibold block md:col-span-2">
-          Notes
-          <textarea className="mt-1 min-h-20 w-full rounded-xl border border-input bg-white px-4 py-3 text-base outline-none focus:border-primary focus:ring-2 focus:ring-ring" value={values.notes ?? ""} onChange={(e) => onChange({ ...values, notes: e.target.value })} placeholder="Any care notes..." />
-        </label>
-        <label className="text-sm font-semibold block">
-          Health status
-          <select className="mt-2 h-11 w-full rounded-xl border border-input bg-white px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring" value={values.health_status ?? "stable"} onChange={(e) => onChange({ ...values, health_status: e.target.value as HealthStatus })}>
-            {healthOptions.map((h) => (
-              <option key={h} value={h}>{h}</option>
-            ))}
-          </select>
-        </label>
-        <div className="flex items-end gap-3 md:col-span-2">
-          <Button type="submit" disabled={saving} className="rounded-xl px-6 py-2.5 text-base">
-            {saving ? <Loader2 className="animate-spin" size={16} aria-hidden /> : null}
-            {editing ? "Save changes" : "Add plant"}
-          </Button>
-          <Button type="button" variant="outline" onClick={onCancel} className="rounded-xl px-6 py-2.5 text-base">
-            Cancel
-          </Button>
-        </div>
+    <form onSubmit={onSubmit} className="max-w-lg space-y-6">
+      <p className="text-display text-foreground">{editing ? "Edit plant" : "New plant"}</p>
+      <div>
+        <label className="text-label block mb-2 text-muted-foreground">Name</label>
+        <Input
+          value={values.name}
+          onChange={(e) => set({ name: e.target.value })}
+          placeholder="e.g. Monstera Deliciosa"
+          className="h-12 w-full rounded-full px-5 text-sm bg-muted"
+          required
+          autoFocus
+        />
+      </div>
+      <div>
+        <label className="text-label block mb-2 text-muted-foreground">Species</label>
+        <Input
+          value={values.species ?? ""}
+          onChange={(e) => set({ species: e.target.value })}
+          placeholder="e.g. Monstera deliciosa"
+          className="h-12 w-full rounded-full px-5 text-sm bg-muted"
+        />
+      </div>
+      <div>
+        <label className="text-label block mb-2 text-muted-foreground">Location</label>
+        <Input
+          value={values.location ?? ""}
+          onChange={(e) => set({ location: e.target.value })}
+          placeholder="e.g. Living room"
+          className="h-12 w-full rounded-full px-5 text-sm bg-muted"
+        />
+      </div>
+      <div className="flex gap-3">
+        <Button type="submit" disabled={saving || !values.name.trim()}>
+          {saving ? "Saving..." : editing ? "Save changes" : "Create plant"}
+        </Button>
+        <Button type="button" variant="secondary" onClick={onCancel}>Cancel</Button>
       </div>
     </form>
   );
@@ -671,28 +528,11 @@ function PlantForm({
 // ── Helpers ──
 
 function scheduleCadence(schedules: CareScheduleRow[], type: CareType): number | null {
-  const s = schedules.find((s) => s.care_type === type && s.active);
-  if (!s) return null;
-  return s.cadence_value;
-}
-
-function formatSchedule(schedules: CareScheduleRow[], type: CareType): string {
-  const s = schedules.find((s) => s.care_type === type && s.active);
-  if (!s) return "Not set";
-  return `Every ${s.cadence_value} ${s.cadence_unit}${s.cadence_value > 1 ? "s" : ""}`;
-}
-
-function formatWaterRange(species: PlantSpeciesRow): string {
-  if (species.watering_min_days && species.watering_max_days) {
-    return `Every ${species.watering_min_days}-${species.watering_max_days} days`;
-  }
-  if (species.watering_min_days) return `Every ${species.watering_min_days} days`;
-  return "Not specified";
-}
-
-function suggestedWaterDays(species: PlantSpeciesRow): number | null {
-  if (species.watering_min_days && species.watering_max_days) {
-    return Math.round((species.watering_min_days + species.watering_max_days) / 2);
-  }
-  return species.watering_min_days ?? null;
+  const schedule = schedules.find((s) => s.active && s.care_type === type);
+  if (!schedule) return null;
+  // Convert cadence_value to days based on unit
+  if (schedule.cadence_unit === "day") return schedule.cadence_value;
+  if (schedule.cadence_unit === "week") return schedule.cadence_value * 7;
+  if (schedule.cadence_unit === "month") return schedule.cadence_value * 30;
+  return schedule.cadence_value;
 }

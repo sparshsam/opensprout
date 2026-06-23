@@ -17,7 +17,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-xl md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl md:hidden"
       aria-label="Mobile navigation"
     >
       <div className="mx-auto flex max-w-lg items-center justify-around px-2 pb-safe">
@@ -32,7 +32,7 @@ export function BottomNav() {
                 "flex flex-col items-center gap-0.5 px-3 pb-2 pt-2.5 text-xs font-semibold transition",
                 active
                   ? "text-primary"
-                  : "text-muted-foreground/50 hover:text-foreground/70",
+                  : "text-muted-foreground/40 hover:text-foreground/60",
               )}
             >
               <item.icon size={20} aria-hidden />
