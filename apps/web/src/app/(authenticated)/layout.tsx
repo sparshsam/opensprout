@@ -3,6 +3,7 @@
 import { AppProvider, useApp } from "@/lib/context/app-context";
 import { BottomNav } from "@/components/shell/bottom-nav";
 import { TopBar } from "@/components/shell/top-bar";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Sprout } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -37,11 +38,12 @@ function AuthenticatedLayoutInner({ children }: { children: React.ReactNode }) {
       <TopBar />
       <main
         id="main-content"
-        className="mx-auto w-full max-w-7xl px-6 pb-32 pt-16 sm:pt-20 md:pb-16 lg:px-10"
+        className="mx-auto w-full max-w-7xl px-6 pb-32 pt-28 sm:pt-36 md:pb-16 lg:px-10"
       >
         {children}
       </main>
       <BottomNav />
+      <ThemeToggle />
     </div>
   );
 }
