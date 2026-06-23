@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, type FormEvent } from "react";
-import { Sprout, Loader2 } from "lucide-react";
+import { Sprout, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { signInWithEmail, signUpWithEmail } from "@/lib/data/auth";
@@ -9,6 +9,9 @@ import { createClient } from "@/lib/supabase/browser";
 import { useRouter } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/data/types";
+import { PublicNav } from "@/components/public-nav";
+import { PublicFooter } from "@/components/public-footer";
+import Link from "next/link";
 
 function errorMessage(error: unknown) {
   if (error instanceof Error) return error.message;
@@ -69,80 +72,108 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="grid min-h-screen place-items-center bg-background px-4 py-10 text-foreground" id="main-content">
-      <section className="w-full max-w-md rounded-md border border-border bg-card p-6 shadow-panel">
-        <div className="mb-8 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <Sprout size={22} aria-hidden />
+    <div className="min-h-screen bg-background text-foreground">
+      <PublicNav />
+      <main id="main-content">
+        <section className="px-6 py-20 sm:py-28">
+          <div className="mx-auto max-w-md">
+            {/* Back link */}
+            <Link
+              href="/"
+              className="mb-8 inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground transition hover:text-foreground"
+            >
+              <ArrowLeft size={16} aria-hidden />
+              Back to home
+            </Link>
+
+            {/* Logo header */}
+            <div className="mb-8 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <Sprout size={22} aria-hidden />
+              </div>
+              <div>
+                <p className="text-lg font-bold leading-tight text-foreground">
+                  OpenSprout
+                </p>
+                <p className="text-xs font-medium text-muted-foreground">
+                  Plant care companion
+                </p>
+              </div>
+            </div>
+
+            <h1 className="text-display mb-2 text-foreground">
+              {mode === "login" ? "Welcome back" : "Create your garden"}
+            </h1>
+            <p className="mb-8 text-sm leading-relaxed text-muted-foreground">
+              {mode === "login"
+                ? "Sign in to your garden."
+                : "Start tracking your plants."}
+            </p>
+
+            <form className="space-y-4" onSubmit={handleAuth}>
+              <label className="block text-sm font-semibold text-foreground">
+                Email
+                <Input
+                  className="mt-2"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </label>
+              <label className="block text-sm font-semibold text-foreground">
+                Password
+                <Input
+                  className="mt-2"
+                  type="password"
+                  autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                  minLength={8}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </label>
+
+              {error && (
+                <p
+                  className="rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive"
+                  role="alert"
+                >
+                  {error}
+                </p>
+              )}
+              {message && (
+                <p
+                  className="rounded-xl border border-success/20 bg-success/10 p-3 text-sm font-medium text-success"
+                  role="status"
+                >
+                  {message}
+                </p>
+              )}
+
+              <Button className="w-full" disabled={busy}>
+                {busy && <Loader2 className="animate-spin" size={16} aria-hidden />}
+                {mode === "signup" ? "Create account" : "Login"}
+              </Button>
+            </form>
+
+            <button
+              className="mt-6 w-full text-center text-sm font-semibold text-primary transition hover:underline"
+              onClick={() => {
+                setMode(mode === "signup" ? "login" : "signup");
+                setError(null);
+                setMessage(null);
+              }}
+            >
+              {mode === "signup"
+                ? "Already have an account? Login"
+                : "Need an account? Sign up"}
+            </button>
           </div>
-          <div>
-            <p className="text-lg font-bold leading-tight">OpenSprout</p>
-            <p className="text-xs font-medium text-muted-foreground">
-              Plant care companion
-            </p>
-          </div>
-        </div>
-
-        <h1 className="text-3xl font-bold">Sign in to your garden</h1>
-        <p className="text-center text-xs leading-5 text-muted-foreground">
-          Your data is private and secure. Free and open-source.
-        </p>
-
-        <form className="mt-6 space-y-4" onSubmit={handleAuth}>
-          <label className="block text-sm font-semibold">
-            Email
-            <Input
-              className="mt-2"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </label>
-          <label className="block text-sm font-semibold">
-            Password
-            <Input
-              className="mt-2"
-              type="password"
-              autoComplete={mode === "signup" ? "new-password" : "current-password"}
-              minLength={8}
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </label>
-
-          {error && (
-            <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-800" role="alert">
-              {error}
-            </p>
-          )}
-          {message && (
-            <p className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm font-medium text-emerald-800" role="status">
-              {message}
-            </p>
-          )}
-
-          <Button className="w-full" disabled={busy}>
-            {busy && <Loader2 className="animate-spin" size={16} aria-hidden />}
-            {mode === "signup" ? "Create account" : "Login"}
-          </Button>
-        </form>
-
-        <button
-          className="mt-4 text-sm font-semibold text-primary hover:underline"
-          onClick={() => {
-            setMode(mode === "signup" ? "login" : "signup");
-            setError(null);
-            setMessage(null);
-          }}
-        >
-          {mode === "signup"
-            ? "Already have an account? Login"
-            : "Need an account? Sign up"}
-        </button>
-      </section>
-    </main>
+        </section>
+      </main>
+      <PublicFooter />
+    </div>
   );
 }
