@@ -18,7 +18,7 @@ export default function AboutPage() {
       >
         <article className="mx-auto max-w-2xl">
           <img
-            src="/app-icon.png"
+            src="/opensprout-icon.png"
             alt=""
             className="mb-6 h-12 w-12"
             aria-hidden

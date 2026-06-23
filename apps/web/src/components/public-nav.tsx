@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Sprout } from "lucide-react";
 import { useTheme } from "@/lib/context/theme-context";
 import { Sun, Moon } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -25,7 +26,7 @@ export function PublicNav() {
           href="/"
           className="flex items-center gap-2 text-sm font-bold text-foreground"
         >
-          <img src="/app-icon.png" alt="" className="h-5 w-5" aria-hidden />
+          <Sprout size={20} className="text-primary" aria-hidden />
           OpenSprout
         </Link>
 

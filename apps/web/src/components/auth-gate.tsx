@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/browser";
+import { Sprout } from "lucide-react";
 
 /**
  * AuthGate checks the Supabase session on mount.
@@ -43,7 +44,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     return (
       <div className="grid min-h-screen place-items-center bg-background">
         <div className="flex items-center gap-3 text-muted-foreground">
-          <img src="/app-icon.png" alt="" className="h-6 w-6 animate-pulse" aria-hidden />
+          <Sprout size={24} className="animate-pulse text-primary" aria-hidden />
           <span className="text-sm font-semibold">OpenSprout</span>
         </div>
       </div>
