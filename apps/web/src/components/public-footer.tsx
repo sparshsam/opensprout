@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Sprout } from "lucide-react";
 
 export function PublicFooter() {
   return (
@@ -8,7 +7,7 @@ export function PublicFooter() {
         <div className="flex flex-col gap-10 sm:flex-row sm:items-start sm:justify-between">
           {/* Brand */}
           <div className="flex items-start gap-3">
-            <Sprout size={20} className="mt-0.5 shrink-0 text-primary" aria-hidden />
+            <img src="/app-icon.png" alt="" className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
             <div>
               <p className="text-sm font-bold text-foreground">OpenSprout</p>
               <p className="mt-1 text-xs text-muted-foreground max-w-xs">

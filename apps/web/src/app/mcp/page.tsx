@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicNav } from "@/components/public-nav";
 import { PublicFooter } from "@/components/public-footer";
-import { Sprout, Bot, Terminal, Settings, Key, MessageSquare } from "lucide-react";
+import { Bot, Terminal, Settings, Key, MessageSquare } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "AI Access \u2014 OpenSprout",
@@ -250,7 +250,7 @@ export default function McpPage() {
             </h2>
             <div className="grid gap-6 sm:grid-cols-2">
               <div className="rounded-xl border border-border/40 p-5">
-                <Sprout size={20} className="mb-3 text-primary" aria-hidden />
+                <img src="/app-icon.png" alt="" className="mb-3 h-5 w-5" aria-hidden />
                 <h3 className="mb-1 text-sm font-bold text-foreground">Manage your collection</h3>
                 <p className="text-xs leading-relaxed text-muted-foreground">
                   Add, update, search, and organize your plants. Track species, locations, and health status.

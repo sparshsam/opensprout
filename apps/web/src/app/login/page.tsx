@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, type FormEvent } from "react";
-import { Sprout, Loader2, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { signInWithEmail, signUpWithEmail } from "@/lib/data/auth";
@@ -89,7 +89,7 @@ export default function LoginPage() {
             {/* Logo header */}
             <div className="mb-8 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <Sprout size={22} aria-hidden />
+              <img src="/app-icon.png" alt="" className="h-5.5 w-5.5" aria-hidden />
               </div>
               <div>
                 <p className="text-lg font-bold leading-tight text-foreground">

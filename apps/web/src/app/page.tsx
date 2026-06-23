@@ -4,8 +4,8 @@ import { PublicNav } from "@/components/public-nav";
 import { PublicFooter } from "@/components/public-footer";
 import { AuthGate } from "@/components/auth-gate";
 import {
-  Sprout,
   Bell,
+  Folder,
   Scan,
   BookOpen,
   Stethoscope,
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
 const features = [
   {
     number: "01",
-    icon: Sprout,
+    icon: Folder,
     title: "Plant collection",
     description:
       "Build a living catalog of your plants. Add names, species, locations, and photos. Your garden, organized your way.",
@@ -205,7 +205,7 @@ function CtaSection() {
             href="/login"
             className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 text-base font-semibold text-primary-foreground transition hover:brightness-110"
           >
-            <Sprout size={18} aria-hidden />
+            <img src="/app-icon.png" alt="" className="h-4.5 w-4.5" aria-hidden />
             Sign in to OpenSprout
           </Link>
           <a
@@ -247,7 +247,7 @@ export default function HomePage() {
                     href="/login"
                     className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground transition hover:brightness-110"
                   >
-                    <Sprout size={16} aria-hidden />
+                    <img src="/app-icon.png" alt="" className="h-4 w-4" aria-hidden />
                     Sign in
                   </Link>
                   <a
