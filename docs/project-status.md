@@ -1,7 +1,8 @@
 # OpenSprout Project Status
 
 ## Release History
-- **v0.9.11** (current, Jun 22) — Knowledge & Diagnosis Foundation: 18 knowledge articles for 10 popular species, 15 new diagnosis entries (sunburn, low humidity, nutrient deficiency, pest damage, overwatering, underwatering), migration applied and validated.
+- **v0.9.12** (current, Jun 22) — Public Homepage & Launch Surface: editorial hero, 7 feature sections, trust section, public nav/footer, auth-aware routing. All public pages unified.
+- **v0.9.11** (Jun 22) — Knowledge & Diagnosis Foundation: 18 knowledge articles for 10 popular species, 15 new diagnosis entries, migration applied and validated.
 - **v0.9.10** (Jun 22) — MCP reliability release: user data isolation fix, 9 new tools, comprehensive tests, agent-ready docs, improved error messages.
 - **v0.9.5** (Jun 22) — Brand identity overhaul: Cash App-style design, 32px radius, near-black text, bold navigation, hero sections, premium feel
 - **v0.9.4** (Jun 22) — Brand experience: sidebar→top bar, 1200px layout, larger typography, flat surfaces

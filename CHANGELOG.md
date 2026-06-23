@@ -6,6 +6,25 @@ All notable changes to OpenSprout will be documented here. The format follows [K
 
 - No unreleased changes.
 
+## 0.9.12 — 2026-06-22
+
+### Added
+- **Public homepage at `/`** — editorial launch surface with hero, 7 feature sections, trust section, and CTA.
+- **Public navigation** — sticky header with Home, About, Privacy, Terms, GitHub, and Sign in links. Theme toggle included. Mobile-responsive with bottom nav strip.
+- **Public footer** — brand tagline, links, and AGPLv3 license notice across all public pages.
+- **Auth-aware routing** — signed-in users are redirected to `/today`; signed-out users see the public homepage.
+- `components/public-nav.tsx` — shared public navigation component.
+- `components/public-footer.tsx` — shared public footer component.
+- `components/auth-gate.tsx` — client-side auth detection for public/authenticated routing.
+
+### Changed
+- `/about`, `/privacy`, `/terms` — updated with public navigation and footer for visual consistency.
+- Updated `<Link>` targets from `← OpenSprout` to `← Home` for clarity.
+- `/` no longer redirects to `/today` — public homepage is served for unauthenticated visitors.
+
+### Removed
+- Removed bare redirect from `page.tsx` component (replaced by auth-aware routing).
+
 ## 0.9.11 — 2026-06-22
 
 ### Added

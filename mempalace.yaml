@@ -89,10 +89,9 @@ rooms:
   - v0.9.6
   - v0.9.7
   - v0.9.8
-  - v0.9.10
-  - v0.9.9
+  - v0.9.12
 - name: identity
-  description: Current status as of v0.9.10
+  description: Current status as of v0.9.12
   keywords:
   - opensprout
   - plant-care
