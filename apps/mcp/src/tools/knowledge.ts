@@ -8,7 +8,7 @@ export function registerKnowledgeTools(
 ) {
   server.tool(
     "search_knowledge",
-    "Search the plant knowledge base for care tips, diagnosis information, and general articles.",
+    "Search the plant knowledge base for care tips, diagnosis information, propagation guides, and general articles. Use this to find advice about a specific topic.",
     {
       query: z.string().describe("Search query"),
       category: z
@@ -28,7 +28,7 @@ export function registerKnowledgeTools(
 
       const { data, error } = await dbQuery.limit(20);
 
-      if (error) throw error;
+      if (error) throw new Error("Failed to search knowledge base: " + error.message);
       return {
         content: [
           { type: "text" as const, text: JSON.stringify(data ?? [], null, 2) },
@@ -39,11 +39,11 @@ export function registerKnowledgeTools(
 
   server.tool(
     "diagnose_plant",
-    "Get possible plant diagnosis information for a given symptom. Returns potential causes and solutions.",
+    "Look up possible causes and solutions for a plant symptom. Use this when you notice issues like yellow leaves, wilting, brown spots, or drooping.",
     {
       symptom: z
         .string()
-        .describe("The symptom to look up (e.g., 'yellow leaves', 'wilting')"),
+        .describe("The symptom to diagnose (e.g., 'yellow leaves', 'wilting', 'brown spots')"),
     },
     async ({ symptom }) => {
       const { data, error } = await getClient()
@@ -53,7 +53,7 @@ export function registerKnowledgeTools(
         .order("sort_order")
         .limit(20);
 
-      if (error) throw error;
+      if (error) throw new Error("Failed to look up diagnosis: " + error.message);
       return {
         content: [
           { type: "text" as const, text: JSON.stringify(data ?? [], null, 2) },

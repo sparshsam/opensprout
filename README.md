@@ -11,7 +11,7 @@
 
 [Live demo](https://opensprout.vercel.app) · [Architecture](docs/architecture.md) · [Roadmap](docs/roadmap.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
-OpenSprout is built for people who want a practical plant tracker they can inspect, self-host, and improve. It currently supports authenticated plant tracking, built-in care templates, schedule-based reminders, care logs, plant journal entries, photo uploads to private Supabase Storage, JSON export, and a standalone Android app via Capacitor. It does not yet include push notifications, offline sync, or import/restore.
+OpenSprout is built for people who want a practical plant tracker they can inspect, self-host, and improve. It currently supports authenticated plant tracking, built-in care templates, schedule-based reminders, care logs, plant journal entries, photo uploads to private Supabase Storage, JSON export, a standalone Android app via Capacitor, and **AI agent integration via MCP**. It does not yet include push notifications, offline sync, or import/restore.
 
 ## Screenshots
 
@@ -128,13 +128,24 @@ CI runs `npm ci`, `npm audit --audit-level=high`, lint, typecheck, and build on 
 ```text
 opensprout/
 |-- apps/web              # Next.js 15 app
+|-- apps/mcp              # MCP server for AI agent integration
 |-- packages/             # Future shared packages
-|-- docs/                 # Architecture, roadmap, license notes, screenshots
+|-- docs/                 # Architecture, MCP, roadmap, license notes, screenshots
 |-- supabase/migrations   # PostgreSQL schema, RLS, seeds
 |-- .github/              # Workflows, issue templates, project docs
 |-- SECURITY.md           # Vulnerability disclosure policy
 |-- CONTRIBUTING.md       # Contributor guide
 `-- LICENSE               # AGPLv3
+
+## AI Agent Integration (MCP)
+
+OpenSprout includes an [MCP server](apps/mcp) that lets AI agents like Claude Code, Hermes Agent, and Cursor read your plant data and perform actions on your behalf.
+
+**25 tools** are available covering plant management, care tracking, journal entries, species knowledge, and plant identification.
+
+- [`docs/mcp-integration.md`](docs/mcp-integration.md) — Setup guide for connecting AI agents
+- [`docs/mcp-agent-prompts.md`](docs/mcp-agent-prompts.md) — Ready-to-use natural-language prompt pack
+- [`docs/mcp-reliability-audit.md`](docs/mcp-reliability-audit.md) — Step-by-step reliability audit guide
 ```
 
 ## Deployment

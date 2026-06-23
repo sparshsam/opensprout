@@ -6,6 +6,31 @@ All notable changes to OpenSprout will be documented here. The format follows [K
 
 - No unreleased changes.
 
+## 0.9.10 — 2026-06-22
+
+### Added
+- 9 new MCP tools: `add_plant`, `delete_plant`, `archive_plant`, `restore_plant`, `create_care_schedule`, `skip_task`, `snooze_task`, `update_journal_entry`, `delete_journal_entry`.
+- `docs/mcp-reliability-audit.md` — step-by-step reliability audit guide for AI agents.
+- `docs/mcp-agent-prompts.md` — ready-to-use natural-language prompt pack for common plant care workflows.
+- MCP architecture diagram to `docs/architecture.md` — shows AI agent ↔ MCP integration.
+
+### Changed
+- **User data isolation**: All MCP read tools now filter by `user_id` — critical fix that prevents cross-user data access via the service-role client.
+- **Ownership enforcement**: All MCP write tools now verify the user owns the target resource before acting.
+- **Error messages**: All MCP tools now return descriptive, actionable error messages instead of generic `throw error`.
+- **Auth errors**: Differentiated "invalid token" from "revoked token" with clear resolution instructions.
+- **Tool descriptions**: All 25 tool descriptions rewritten for natural-language agent understanding with realistic parameter descriptions.
+- MCP server name/version: `opensprout` v0.1.0 (app version: 0.9.10).
+
+### Fixed
+- `list_plants` was missing `user_id` filter — any valid PAT could read every user's plants. Fixed.
+- Auth token validation now properly differentiates between tokens that never existed and tokens that were revoked.
+- Generic `throw error` replaced with contextual error messages across all tool files.
+
+### Security
+- MCP server now enforces user data isolation on every read and write query.
+- Token validation rejects revoked tokens with a specific error message.
+
 ## 0.9.3 — 2026-06-21
 
 ### Changed

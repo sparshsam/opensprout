@@ -8,7 +8,7 @@ export function registerSpeciesTools(
 ) {
   server.tool(
     "search_species",
-    "Search plant species by common name or scientific name. Returns matching species with their care requirements.",
+    "Search plant species by common name or scientific name. Returns matching species with their light, water, and care requirements. Use this to find species information when adding a new plant or researching care needs.",
     {
       query: z.string().describe("Search query (common or scientific name)"),
     },
@@ -19,7 +19,7 @@ export function registerSpeciesTools(
         .or(`common_name.ilike.%${query}%,scientific_name.ilike.%${query}%`)
         .limit(20);
 
-      if (error) throw error;
+      if (error) throw new Error("Failed to search species: " + error.message);
       return {
         content: [
           { type: "text" as const, text: JSON.stringify(data ?? [], null, 2) },
@@ -30,7 +30,7 @@ export function registerSpeciesTools(
 
   server.tool(
     "get_species",
-    "Get comprehensive care guide for a plant species by its ID, including care requirements and knowledge articles.",
+    "Get a complete care guide for a plant species by its ID. Returns care requirements, growing tips, common problems, and any associated knowledge articles.",
     {
       speciesId: z.string().describe("The ID of the species to retrieve"),
     },
@@ -42,7 +42,7 @@ export function registerSpeciesTools(
         .eq("id", speciesId)
         .single();
 
-      if (speciesError) throw speciesError;
+      if (speciesError) throw new Error("Failed to get species: " + speciesError.message);
       if (!species) {
         return {
           content: [{ type: "text" as const, text: "Species not found" }],

@@ -1,11 +1,12 @@
 # OpenSprout MCP Server
 
-AI agents (Claude Code, Hermes, Cursor, etc.) can read your plant data and perform actions on your behalf through the OpenSprout MCP server.
+AI agents (Claude Code, Hermes Agent, Cursor, etc.) can read your plant data and perform actions on your behalf through the OpenSprout MCP server. The server exposes 25 tools covering plant management, care tracking, journal entries, species knowledge, and plant identification.
 
 ## Quick Start
 
 1. **Generate an access token** in OpenSprout Settings → MCP Access Tokens → Create Token
-2. **Configure your AI agent** to connect to the MCP server
+2. **Configure your AI agent** to connect to the MCP server (see below)
+3. **Start using natural-language commands** like "Show me plants that need watering today" or "Log that I watered my monstera"
 
 ### Claude Code
 
@@ -28,8 +29,9 @@ AI agents (Claude Code, Hermes, Cursor, etc.) can read your plant data and perfo
 
 ### Hermes Agent
 
+Add to `~/.hermes/config.yaml`:
+
 ```yaml
-# ~/.hermes/config.yaml
 mcp_servers:
   opensprout:
     command: "node"
@@ -50,25 +52,34 @@ Settings → MCP → Add server → Command: `node /path/to/opensprout/apps/mcp/
 
 Then add the environment variables in the Cursor MCP server settings.
 
-## Available Tools
+## Available Tools (25)
 
 | Tool | Description | Auth Required |
-|---|---|---|
-| `list_plants` | List all plants in your collection | Yes |
-| `get_plant` | Get detailed info about a specific plant | Yes |
+||---|---|---|
+| `list_plants` | List all your plants | Yes |
+| `get_plant` | Get complete details for one plant | Yes |
+| `add_plant` | Add a new plant to your collection | Yes |
 | `update_plant` | Update a plant's name, location, notes, or health | Yes |
+| `delete_plant` | Soft-delete a plant | Yes |
+| `archive_plant` | Archive a plant (hide from active list) | Yes |
+| `restore_plant` | Restore an archived plant | Yes |
 | `search_species` | Search plant species by name | Yes |
-| `get_species` | Get care guide + knowledge articles for a species | Yes |
-| `list_care_schedules` | List care schedules for your plants | Yes |
-| `list_care_logs` | List recent care activity for a plant | Yes |
-| `list_task_instances` | List pending or completed care tasks | Yes |
-| `log_care_activity` | Log a care action (water, fertilize, etc.) | Yes |
+| `get_species` | Get care guide + knowledge for a species | Yes |
+| `create_care_schedule` | Create a recurring care schedule | Yes |
+| `list_care_schedules` | List care schedules | Yes |
+| `list_care_logs` | List recent care activity | Yes |
+| `list_task_instances` | List pending/completed care tasks | Yes |
+| `log_care_activity` | Log watering, fertilizing, etc. | Yes |
 | `complete_task` | Mark a care task as done | Yes |
+| `skip_task` | Skip a pending care task | Yes |
+| `snooze_task` | Snooze a task until a specific date | Yes |
 | `list_journal_entries` | List journal entries for a plant | Yes |
 | `get_journal_entry` | Get a specific journal entry | Yes |
-| `create_journal_entry` | Create a journal entry for a plant | Yes |
-| `search_knowledge` | Search the plant knowledge base | Yes |
-| `diagnose_plant` | Get possible diagnoses for a symptom | Yes |
+| `create_journal_entry` | Create a journal entry | Yes |
+| `update_journal_entry` | Update an existing journal entry | Yes |
+| `delete_journal_entry` | Soft-delete a journal entry | Yes |
+| `search_knowledge` | Search plant knowledge base | Yes |
+| `diagnose_plant` | Get diagnosis for a symptom | Yes |
 | `identify_plant` | Identify a plant from a photo | Yes (rate-limited) |
 
 ## Example Queries

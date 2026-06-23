@@ -9,11 +9,19 @@ flowchart TB
         AUTH[Auth UI]
     end
 
+    subgraph Agent [AI Agents]
+        MCP[MCP Server<br/>apps/mcp]
+        CLAUDE[Claude Code]
+        HERMES[Hermes Agent]
+        CURSOR[Cursor]
+    end
+
     subgraph Supabase [Supabase]
         DB[(PostgreSQL)]
         RLS[Row-Level Security]
         SVC[Auth Service]
         STORAGE[Storage Bucket]
+        EF[Edge Functions<br/>identify-plant]
     end
 
     A --> AUTH
@@ -21,6 +29,13 @@ flowchart TB
     A --> DB
     DB --> RLS
     A -.-> STORAGE
+
+    CLAUDE --> MCP
+    HERMES --> MCP
+    CURSOR --> MCP
+    MCP --> DB
+    MCP --> STORAGE
+    MCP --> EF
 ```
 
 ```mermaid
@@ -49,14 +64,21 @@ sequenceDiagram
 ```text
 opensprout/
 |-- apps/
-|   `-- web/                  # Next.js 15 PWA
-|       |-- public/           # manifest, service worker, app icons
-|       `-- src/
-|           |-- app/          # App Router pages and route handlers
-|           |-- components/   # Product and UI components
-|           `-- lib/
-|               |-- data/     # Supabase query and domain helpers
-|               `-- supabase/ # Browser/server clients
+|   |-- web/                  # Next.js 15 PWA
+|   |   |-- public/           # manifest, service worker, app icons
+|   |   `-- src/
+|   |       |-- app/          # App Router pages and route handlers
+|   |       |-- components/   # Product and UI components
+|   |       `-- lib/
+|   |           |-- data/     # Supabase query and domain helpers
+|   |           `-- supabase/ # Browser/server clients
+|   `-- mcp/                  # MCP server for AI agent integration
+|       |-- src/
+|       |   |-- index.ts      # MCP server entry point
+|       |   |-- supabase.ts   # Auth + Supabase client setup
+|       |   |-- types.ts      # Database type definitions
+|       |   `-- tools/        # Tool registrations (plants, care, journal, etc.)
+|       `-- __tests__/        # Vitest test suite
 |-- packages/
 |   |-- ui/                   # Future shared shadcn/ui package
 |   |-- database/             # Future generated DB types and helpers

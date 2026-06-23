@@ -33,7 +33,7 @@ const SUPABASE_URL =
 export function registerIdentifyTools(server: McpServer) {
   server.tool(
     "identify_plant",
-    "Identify a plant species from a photo. Sends the image to PlantNet AI for identification. Rate-limited to 10 calls per minute.",
+    "Identify a plant species from a photo. Sends the image to PlantNet AI for identification. Pass a base64-encoded image (JPEG or PNG). Rate-limited to 10 calls per minute to manage API costs.",
     {
       imageBase64: z
         .string()
@@ -45,17 +45,33 @@ export function registerIdentifyTools(server: McpServer) {
 
       if (!SUPABASE_URL) {
         throw new Error(
-          "Supabase URL not configured. Set NEXT_PUBLIC_SUPABASE_URL.",
+          "Supabase URL not configured for plant identification. Set NEXT_PUBLIC_SUPABASE_URL environment variable. The identify-plant edge function cannot be reached without it.",
         );
       }
 
       const functionUrl = `${SUPABASE_URL.replace(/\/$/, "")}/functions/v1/identify-plant`;
 
-      const response = await fetch(functionUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageBase64 }),
-      });
+      let response: Response;
+      try {
+        response = await fetch(functionUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ imageBase64 }),
+        });
+      } catch (fetchError) {
+        throw new Error(
+          "Failed to reach the identify-plant service: " +
+            (fetchError instanceof Error ? fetchError.message : String(fetchError)) +
+            ". Check that the Supabase edge function is deployed and the URL is correct.",
+        );
+      }
+
+      if (!response.ok) {
+        const errorBody = await response.text().catch(() => "unknown error");
+        throw new Error(
+          `Plant identification failed with status ${response.status} (${response.statusText}): ${errorBody}`,
+        );
+      }
 
       const data = await response.json();
 

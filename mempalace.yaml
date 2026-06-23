@@ -1,25 +1,103 @@
 wing: opensprout
 rooms:
 - name: supabase
-  description: Files from supabase/
+  description: Supabase auth, database, file storage, edge functions
   keywords:
   - supabase
-  - supabase
+  - auth
+  - database
+  - storage
 - name: design
-  description: Files from assets/
+  description: Design system, brand identity, visual language
   keywords:
   - design
-  - assets
-- name: apps
-  description: Files from apps/
+  - globals.css
+  - tailwind
+  - theme
+  - dark-mode
+  - light-mode
+  - typography
+  - sora
+  - app-icon
+  - playbook
+- name: apps/web
+  description: Next.js application source code
   keywords:
   - apps
-  - apps
-- name: documentation
-  description: Files from docs/
+  - nextjs
+  - react
+  - components
+  - pages
+- name: home
+  description: Authenticated home page — editorial hero, care flow
   keywords:
-  - documentation
-  - docs
-- name: general
-  description: Files that don't fit other rooms
-  keywords: []
+  - home
+  - today
+  - hero
+  - care
+  - atmosphere
+  - seasonal
+  - greeting
+- name: plants
+  description: Plant collection — gallery, detail, care, timeline
+  keywords:
+  - plants
+  - collection
+  - gallery
+  - cover-photo
+  - care
+  - timeline
+- name: identify
+  description: Plant identification — photo capture, AI analysis, results
+  keywords:
+  - identify
+  - scanning
+  - photo
+  - camera
+  - identification
+- name: profile
+  description: User profile, settings, data management
+  keywords:
+  - profile
+  - settings
+  - reminders
+  - export
+  - import
+  - theme-toggle
+- name: legal
+  description: About, Privacy, Terms pages
+  keywords:
+  - about
+  - privacy
+  - terms
+  - legal
+- name: navigation
+  description: Top bar, bottom nav, layout
+  keywords:
+  - navigation
+  - top-bar
+  - bottom-nav
+  - header
+  - layout
+- name: changelog
+  description: Version history and release notes
+  keywords:
+  - changelog
+  - version
+  - release
+  - v0.9.5
+  - v0.9.6
+  - v0.9.7
+  - v0.9.8
+  - v0.9.10
+  - v0.9.9
+- name: identity
+  description: Current status as of v0.9.10
+  keywords:
+  - opensprout
+  - plant-care
+  - privacy-first
+  - open-source
+  - brand
+  - premium
+  - consumer-product

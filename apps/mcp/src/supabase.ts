@@ -51,16 +51,26 @@ export async function authenticateToken(
   // Look up the token hash
   const { data: records, error: lookupError } = await (admin
     .from("mcp_tokens") as any)
-    .select("user_id, id")
-    .eq("token_hash", tokenHash)
-    .is("revoked_at", null);
+    .select("user_id, id, revoked_at")
+    .eq("token_hash", tokenHash);
 
-  if (lookupError) throw new Error(`Token lookup failed: ${lookupError.message}`);
+  if (lookupError)
+    throw new Error(
+      `Token validation failed: unable to verify access token. ${lookupError.message}`,
+    );
   if (!records || records.length === 0) {
-    throw new Error("Authentication failed: Invalid or revoked token");
+    throw new Error(
+      "Authentication failed: Invalid access token. The token provided does not match any active token. Generate a new token from Settings > MCP Access Tokens.",
+    );
   }
 
-  const record = records[0] as { user_id: string; id: string };
+  const record = records[0] as { user_id: string; id: string; revoked_at: string | null };
+
+  if (record.revoked_at) {
+    throw new Error(
+      "Authentication failed: This access token has been revoked. Generate a new token from Settings > MCP Access Tokens.",
+    );
+  }
 
   // Update last_used_at
   await (admin.from("mcp_tokens") as any)
