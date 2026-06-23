@@ -6,6 +6,20 @@ All notable changes to OpenSprout will be documented here. The format follows [K
 
 - No unreleased changes.
 
+## 0.9.11 — 2026-06-22
+
+### Added
+- **18 knowledge articles** for 10 popular houseplants: Monstera deliciosa, Pothos, Snake Plant, ZZ Plant, Peace Lily, Rubber Plant, Fiddle Leaf Fig, Philodendron, Aloe Vera, Spider Plant.
+- **4 general articles**: Beginner Houseplant Care Checklist, Understanding Light Levels, Watering 101, Common Houseplant Pests.
+- **15 new diagnosis entries** covering: sunburn (2), low humidity (2), nutrient deficiency — chlorosis, slow growth, nitrogen deficiency (3), overwatering — moderate + severe (2), underwatering — minor + moderate (2), pest damage — general, scale, aphids, thrips (4).
+- `supabase/migrations/20260622000000_seed_knowledge_diagnosis.sql` — comprehensive seed data migration.
+
+### Changed
+- `search_knowledge()` now returns useful content for common queries (monstera, yellow leaves, watering, pests).
+- `diagnose_plant()` now returns useful diagnoses for all 10 requested symptoms.
+- `docs/v0.9.11-plan.md` updated with completed checklist.
+- `docs/project-status.md` updated to reflect v0.9.11 as current release.
+
 ## 0.9.10 — 2026-06-22
 
 ### Added
