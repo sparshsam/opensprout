@@ -3,6 +3,9 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
+  --font-sans: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, monospace;
+
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
@@ -32,7 +35,7 @@
   --radius-full: 9999px;
 }
 
-/* ── Light mode — warm paper (default, no class) ── */
+/* ── Light mode — warm paper ── */
 :root {
   --background: 40 20% 94%;
   --foreground: 157 35% 8%;
@@ -50,7 +53,7 @@
   --warning: 38 92% 50%;
 }
 
-/* ── Dark mode — deep botanical (applied via .dark class) ── */
+/* ── Dark mode — deep botanical ── */
 .dark {
   --background: 155 35% 4%;
   --foreground: 120 10% 90%;
@@ -99,36 +102,41 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Type scale utilities ── */
+/* ── Type scale — Sora variable font ── */
+
+/* Hero: 48-72px, font-black, tight leading */
 @utility text-hero {
   font-size: clamp(2.5rem, 6vw, 4.5rem);
-  font-weight: 900;
+  font-weight: 800;
   line-height: 1.05;
   letter-spacing: -0.03em;
 }
 
+/* Display: 28-36px, font-bold */
 @utility text-display {
   font-size: clamp(1.75rem, 3.5vw, 2.25rem);
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.02em;
 }
 
+/* Stat numbers: large, bold */
 @utility text-stat {
   font-size: clamp(2.5rem, 4vw, 3.5rem);
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1;
   letter-spacing: -0.02em;
 }
 
+/* Label: small, uppercase, semibold (not bold — Sora's semibold is distinctive) */
 @utility text-label {
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-/* ── Full-bleed helper ── */
+/* Full-bleed helper */
 @utility full-bleed {
   width: 100vw;
   margin-left: calc(-50vw + 50%);

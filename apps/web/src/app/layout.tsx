@@ -1,6 +1,15 @@
 import type { Metadata, Viewport } from "next";
+import { Sora } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/context/theme-context";
+
+const sora = Sora({
+  subsets: ["latin"],
+  variable: "--font-sora",
+  display: "swap",
+  preload: true,
+  weight: ["300", "400", "500", "600", "700", "800"],
+});
 
 export const metadata: Metadata = {
   title: "OpenSprout",
@@ -27,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={sora.variable}>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -44,7 +53,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body>
+      <body className="font-sans">
         <a href="#main-content" className="skip-to-content">
           Skip to content
         </a>
