@@ -17,12 +17,16 @@ export function TopBar() {
   return (
     <header className="sticky top-0 z-50 bg-background/90 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-10">
-        {/* Wordmark */}
-        <Link
-          href="/today"
-          className="text-lg font-bold tracking-tight text-foreground"
-        >
-          OpenSprout
+        {/* Wordmark + icon */}
+        <Link href="/today" className="flex items-center gap-2.5">
+          <img
+            src="/opensprout-icon.png"
+            alt="OpenSprout"
+            className="h-7 w-7"
+          />
+          <span className="text-lg font-bold tracking-tight text-foreground">
+            OpenSprout
+          </span>
         </Link>
 
         {/* Desktop nav — pill style */}

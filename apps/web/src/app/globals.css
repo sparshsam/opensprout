@@ -32,53 +32,33 @@
   --radius-full: 9999px;
 }
 
-/* ── Light mode — warm paper ── */
+/* ── Light mode — warm paper (default, no class) ── */
 :root {
-  --background: 40 20% 96%;
-  --foreground: 157 35% 6%;
+  --background: 40 20% 94%;
+  --foreground: 157 35% 8%;
   --primary: 155 68% 28%;
-  --primary-light: 155 50% 92%;
+  --primary-light: 155 50% 90%;
   --primary-foreground: 0 0% 100%;
-  --muted: 40 15% 90%;
-  --muted-foreground: 155 10% 38%;
+  --muted: 40 15% 88%;
+  --muted-foreground: 155 12% 40%;
   --destructive: 0 76% 52%;
   --destructive-foreground: 0 0% 100%;
-  --border: 155 10% 82%;
-  --input: 155 10% 82%;
+  --border: 155 10% 78%;
+  --input: 155 10% 78%;
   --ring: 155 68% 28%;
   --success: 145 63% 42%;
   --warning: 38 92% 50%;
 }
 
-/* ── Dark mode — deep botanical ── */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: 155 35% 4%;
-    --foreground: 120 10% 88%;
-    --primary: 155 52% 44%;
-    --primary-light: 155 40% 12%;
-    --primary-foreground: 0 0% 100%;
-    --muted: 155 20% 8%;
-    --muted-foreground: 120 5% 52%;
-    --destructive: 0 65% 52%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 155 15% 14%;
-    --input: 155 15% 14%;
-    --ring: 155 52% 44%;
-    --success: 145 55% 44%;
-    --warning: 38 85% 50%;
-  }
-}
-
-/* ── Explicit dark class override ── */
+/* ── Dark mode — deep botanical (applied via .dark class) ── */
 .dark {
   --background: 155 35% 4%;
-  --foreground: 120 10% 88%;
+  --foreground: 120 10% 90%;
   --primary: 155 52% 44%;
   --primary-light: 155 40% 12%;
   --primary-foreground: 0 0% 100%;
   --muted: 155 20% 8%;
-  --muted-foreground: 120 5% 52%;
+  --muted-foreground: 120 5% 55%;
   --destructive: 0 65% 52%;
   --destructive-foreground: 0 0% 100%;
   --border: 155 15% 14%;

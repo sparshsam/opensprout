@@ -10,6 +10,12 @@ export default function AboutPage() {
   return (
     <main className="min-h-screen bg-background text-foreground px-6 py-28 sm:py-36 lg:px-10">
       <article className="mx-auto max-w-2xl">
+        <img
+          src="/opensprout-icon.png"
+          alt=""
+          className="mb-6 h-12 w-12"
+          aria-hidden
+        />
         <p className="text-label mb-4 text-primary">About</p>
         <h1 className="text-hero mb-6 text-foreground">OpenSprout</h1>
         <p className="text-lg leading-relaxed text-muted-foreground mb-16 max-w-xl">
