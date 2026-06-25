@@ -13,7 +13,7 @@
     "build:mobile": "npm --workspace apps/web run build:mobile",
     "start": "npm --workspace apps/web run start",
     "lint": "npm --workspace apps/web run lint",
-    "typecheck": "npm --workspace apps/web run typecheck",
+    "typecheck": "npm run -w @opensprout/mcp build && npm --workspace apps/web run typecheck",
     "cap:dev:android": "npm --workspace apps/web run cap:dev:android",
     "cap:open:android": "npm --workspace apps/web run cap:open:android",
     "android:debug": "npm --workspace apps/web run android:debug",
