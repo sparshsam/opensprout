@@ -73,8 +73,8 @@ const SUPABASE_URL =
  * Quick connectivity check.
  *
  * Returns `true` immediately when `navigator.onLine` is `false` (known
- * offline), otherwise attempts a lightweight HEAD request against the
- * Supabase project URL.
+ * offline), otherwise attempts a lightweight fetch against the Supabase
+ * auth endpoint (which responds with proper CORS headers).
  */
 export async function isOnline(): Promise<boolean> {
   if (typeof navigator !== "undefined" && navigator.onLine === false) {
@@ -84,12 +84,13 @@ export async function isOnline(): Promise<boolean> {
   try {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), 5_000);
-    const res = await fetch(SUPABASE_URL, {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/settings`, {
       method: "HEAD",
       signal: controller.signal,
     });
     clearTimeout(id);
-    return res.ok || res.status < 500;
+    // Any response (including 404/401) means we have connectivity
+    return true;
   } catch {
     return false;
   }
