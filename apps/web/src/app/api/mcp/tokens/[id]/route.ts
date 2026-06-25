@@ -29,8 +29,8 @@ export async function DELETE(
 
   // Verify the token belongs to the current user
   const admin = createAdminClient();
-  const { data: existing, error: lookupError } = await (admin
-    .from("mcp_tokens") as any)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: existing, error: lookupError } = await (admin.from("mcp_tokens") as any)
     .select("id, user_id, revoked_at")
     .eq("id", id)
     .single();
@@ -57,9 +57,9 @@ export async function DELETE(
     );
   }
 
-  await (admin
-    .from("mcp_tokens") as any)
-    .update({ revoked_at: new Date().toISOString() } as any)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (admin.from("mcp_tokens") as any)
+    .update({ revoked_at: new Date().toISOString() })
     .eq("id", id);
 
   return NextResponse.json({ message: "Token revoked successfully." });
