@@ -101,7 +101,7 @@ export default function LoginPage() {
             <button
               onClick={handleGoogleSignIn}
               disabled={busy}
-              className="flex h-12 w-full items-center justify-center gap-3 rounded-full border border-border/60 bg-white text-sm font-semibold text-foreground shadow-sm transition hover:bg-muted disabled:opacity-50"
+              className="flex h-12 w-full items-center justify-center gap-3 rounded-full border border-border/60 bg-background text-sm font-semibold text-foreground shadow-sm transition hover:bg-muted disabled:opacity-50"
             >
               {busy ? (
                 <Loader2 className="animate-spin" size={18} />
