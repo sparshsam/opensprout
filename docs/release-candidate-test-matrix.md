@@ -11,7 +11,7 @@
 
 | # | Platform | Target | Notes |
 |---|----------|--------|-------|
-| P1 | **Web** | opensprout.vercel.app — Chrome 125+, Firefox 127+, Safari 17.5+, Edge 125+ | Latest browser versions. Responsive: 1440px desktop, 768px tablet, 375px mobile. |
+| P1 | **Web** | sprout.kovina.org — Chrome 125+, Firefox 127+, Safari 17.5+, Edge 125+ | Latest browser versions. Responsive: 1440px desktop, 768px tablet, 375px mobile. |
 | P2 | **Android** | Capacitor APK/AAB — API 24–36 (Android 6.0–15) | Physical devices + emulator. Navigation = bottom tab bar. |
 | P3 | **Windows PWA** | Microsoft Edge 125+ / Google Chrome 125+ — Installed PWA | Installed via "Install OpenSprout" browser prompt. Windowed mode. |
 

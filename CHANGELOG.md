@@ -2,9 +2,38 @@
 
 All notable changes to OpenSprout will be documented here. The format follows [Keep a Changelog](https://keepachangelog.com/). OpenSprout uses [Semantic Versioning](https://semver.org/).
 
-## Unreleased
+## 0.9.14 — 2026-06-25
 
-- No unreleased changes.
+### Added
+- **Production Android signing** — release keystore generated (RSA 2048, 10,000 days), Gradle signing config wired via gitignored `keystore.properties`.
+- **Signed release builds** — `android:release:bundle` (signed AAB, 4.3 MB) and `android:release:apk` (signed APK, 3.8 MB via R8 minification).
+- **Bundle optimization** — `minifyEnabled true`, `shrinkResources true`, Capacitor-safe ProGuard rules. APK reduced 52% (7.9 → 3.8 MB).
+- **Release version automation** — `scripts/bump-version.mjs` bumps versionCode + versionName across `build.gradle`, `apps/web/package.json`, and root `package.json`.
+- **PWA install prompt** — new `PwaInstall` component with `beforeinstallprompt` handler for cross-browser install UX.
+- **App update detection** — new `AppUpdate` component with service worker `updatefound` + `controllerchange` listener.
+- **Notification icon** — `ic_stat_sprout.xml` vector drawable for Android notification bar icon (was missing).
+- **Service worker improvements** — removed broken icon.svg ref, origin-based cache filter, proper cache versioning, `SKIP_WAITING` message handler.
+- **Manifest enhancements** — added `scope`, `display_override`, `orientation`, `lang` fields.
+- **Sync reliability** — exponential backoff retry (30s→8m), max 5 retry limit, `user_id` guard on UPDATE/DELETE push operations, user-scoped guard on import `client_id` lookup.
+- **Play Store readiness** — `docs/data-safety.md` with full data collection disclosure, `docs/store-listing.md` updated with assets checklist.
+- **Windows packaging guide** — `docs/windows-packaging-guide.md` covering PWABuilder and manual MSIX generation.
+- **Microsoft Store prep** — `docs/microsoft-store-submission.md` with full submission checklist.
+- **Secret rotation documentation** — `docs/secret-rotation.md` with rotation procedures for all credentials.
+- **Documentation** — `docs/faq.md`, `docs/troubleshooting.md`, `docs/offline-behavior.md`, `docs/v1-migration.md`.
+- **Accessibility fixes** — `aria-required="true"` on login form inputs, `focus-visible:ring-2` verified on all interactive elements.
+
+### Changed
+- `capacitor.config.ts` — `launchAutoHide` set to `true` (was `false`, causing splash screen to hang).
+- `apps/web/android/app/build.gradle` — added signing config, minification, resource shrinking.
+- `apps/web/package.json` — added `android:release:apk` and composite `android:release` scripts.
+- `CLAUDE.md` — updated to v0.9.14.
+- `versionName` to `0.9.14`, `versionCode` to `3`.
+
+### Security
+- Added `user_id` filter to sync UPDATE/DELETE push operations (defense-in-depth).
+- Added `user_id` filter to import client_id lookup.
+- Created comprehensive secret rotation documentation.
+- All Supabase RLS policies verified — every table has `auth.uid() = user_id` guard.
 
 ## 0.9.13 — 2026-06-23
 
@@ -164,7 +193,7 @@ All notable changes to OpenSprout will be documented here. The format follows [K
 ## 0.1.0 — 2026-05-29
 
 ### Added
-- Public Vercel deployment at `https://opensprout.vercel.app`.
+- Public Vercel deployment at `https://sprout.kovina.org`.
 - Supabase Auth-backed dashboard.
 - Persisted plant create, edit, and delete flows.
 - Care Templates with 30 built-in plant species.

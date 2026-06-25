@@ -1,6 +1,6 @@
 {
   "name": "opensprout",
-  "version": "0.1.0",
+  "version": "0.9.14",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "workspaces": [
@@ -17,10 +17,13 @@
     "cap:dev:android": "npm --workspace apps/web run cap:dev:android",
     "cap:open:android": "npm --workspace apps/web run cap:open:android",
     "android:debug": "npm --workspace apps/web run android:debug",
-    "android:release": "npm --workspace apps/web run android:release:bundle",
+    "android:release:bundle": "npm --workspace apps/web run android:release:bundle",
+    "android:release:apk": "npm --workspace apps/web run android:release:apk",
+    "android:release": "npm --workspace apps/web run android:release",
+    "version:bump": "node scripts/bump-version.mjs",
     "android:sync": "npm --workspace apps/web run cap:sync",
     "android:open": "npm --workspace apps/web run cap:open:android",
-    "rc:android": "npm run android:debug",
+    "rc:android": "npm run android:release:bundle && npm run android:release:apk",
     "rc:web": "npm run build"
   },
   "engines": {

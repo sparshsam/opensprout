@@ -1,6 +1,6 @@
 {
   "name": "@opensprout/web",
-  "version": "0.1.0",
+  "version": "0.9.14",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "scripts": {
@@ -18,7 +18,9 @@
     "android:open": "npx cap open android",
     "android:debug": "CAPACITOR_BUILD=true next build && npx cap copy android && cd android && ./gradlew assembleDebug",
     "android:release:bundle": "CAPACITOR_BUILD=true next build && npx cap copy android && cd android && ./gradlew bundleRelease",
-    "rc:android": "npm run android:debug",
+    "android:release:apk": "CAPACITOR_BUILD=true next build && npx cap copy android && cd android && ./gradlew assembleRelease",
+    "android:release": "npm run android:release:bundle && npm run android:release:apk",
+    "rc:android": "npm run android:debug && echo '--- Release artifacts ---' && npm run android:release",
     "rc:web": "npm run build"
   },
   "dependencies": {

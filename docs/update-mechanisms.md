@@ -8,7 +8,7 @@
 
 ### Primary Flow
 
-The web app at [opensprout.vercel.app](https://opensprout.vercel.app) is automatically deployed via Vercel on every push to `main`:
+The web app at [sprout.kovina.org](https://sprout.kovina.org) is automatically deployed via Vercel on every push to `main`:
 
 1. Push to `main` on GitHub
 2. Vercel detects the push (linked to the GitHub repository)

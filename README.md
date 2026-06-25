@@ -9,7 +9,7 @@
 
 **OpenSprout is a privacy-minded, open-source plant care dashboard for tracking plants, care schedules, and watering or fertilizing logs without subscriptions or data lock-in.**
 
-[Live demo](https://opensprout.vercel.app) · [Architecture](docs/architecture.md) · [Roadmap](docs/roadmap.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
+[Live demo](https://sprout.kovina.org) · [Architecture](docs/architecture.md) · [Roadmap](docs/roadmap.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
 OpenSprout is built for people who want a practical plant tracker they can inspect, self-host, and improve. It currently supports authenticated plant tracking, built-in care templates, schedule-based reminders, care logs, plant journal entries, photo uploads to private Supabase Storage, JSON export, a standalone Android app via Capacitor, and **AI agent integration via MCP**. It does not yet include push notifications, offline sync, or import/restore.
 
@@ -152,7 +152,7 @@ OpenSprout includes an [MCP server](apps/mcp) that lets AI agents like Claude Co
 
 The public demo is deployed on Vercel:
 
-[https://opensprout.vercel.app](https://opensprout.vercel.app)
+[https://sprout.kovina.org](https://sprout.kovina.org)
 
 Vercel needs the same Supabase environment variables listed above. Production and Development variables are configured for the current demo project. Preview deployments may need Supabase variables configured separately in Vercel, depending on whether they apply to all branches or a specific branch.
 

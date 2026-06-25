@@ -4,6 +4,7 @@ const isExport = process.env.CAPACITOR_BUILD === "true";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  transpilePackages: ["@opensprout/mcp"],
   output: isExport ? "export" : undefined,
   images: isExport ? { unoptimized: true } : undefined,
   trailingSlash: isExport,

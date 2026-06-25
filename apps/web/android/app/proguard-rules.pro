@@ -1,21 +1,44 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# OpenSprout ProGuard / R8 Rules
+# minSdkVersion 24, targetSdkVersion 36
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# ── Capacitor Core ────────────────────────────────────────────────────────────
+# Capacitor bridges JS<->Java via reflection — keep all plugin classes
+-keep class com.getcapacitor.** { *; }
+-keep class * extends com.getcapacitor.Plugin { *; }
+-keep class * extends com.getcapacitor.BridgeActivity { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Capacitor plugins
+-keep class com.getcapacitor.plugin.** { *; }
+-keep class com.getcapacitor.community.** { *; }
+-keep class com.capacitorjs.** { *; }
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# ── Plugin-specific keep rules ───────────────────────────────────────────────
+# Camera
+-keep class com.getcapacitor.plugin.camera.** { *; }
+
+# Local Notifications
+-keep class com.getcapacitor.plugin.localnotifications.** { *; }
+
+# App
+-keep class com.getcapacitor.plugin.app.** { *; }
+
+# ── WebView / JavaScript Interface ───────────────────────────────────────────
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
+
+# ── Supabase / Kotlin serialization ──────────────────────────────────────────
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.AnnotationsKt
+
+# ── General Android ──────────────────────────────────────────────────────────
+-keepattributes Signature
+-keepattributes Exceptions
+
+# Keep source file info and line numbers for crash reporting
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
+
+# Keep annotations on all classes
+-keepattributes RuntimeVisibleAnnotations
+-keepattributes RuntimeInvisibleAnnotations

@@ -13,7 +13,7 @@ const config: CapacitorConfig = {
   },
   plugins: {
     SplashScreen: {
-      launchAutoHide: false,
+      launchAutoHide: true,
       backgroundColor: "#f8fbf9",
     },
     Camera: {

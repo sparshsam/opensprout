@@ -3,6 +3,8 @@
 import { AppProvider, useApp } from "@/lib/context/app-context";
 import { BottomNav } from "@/components/shell/bottom-nav";
 import { TopBar } from "@/components/shell/top-bar";
+import { PwaInstall } from "@/components/shell/pwa-install";
+import { AppUpdate } from "@/components/shell/app-update";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Sprout } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -43,6 +45,8 @@ function AuthenticatedLayoutInner({ children }: { children: React.ReactNode }) {
         {children}
       </main>
       <BottomNav />
+      <PwaInstall />
+      <AppUpdate />
       <ThemeToggle />
     </div>
   );

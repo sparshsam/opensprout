@@ -1,6 +1,6 @@
-# OpenSprout Windows RC Checklist — v0.9.13
+# OpenSprout Windows RC Checklist — v0.9.14
 
-**Version:** 0.9.13  
+**Version:** 0.9.14  
 **Platform:** Windows (PWA via Edge / Chrome)  
 **Status:** ⬜ Not Started
 
@@ -14,11 +14,11 @@
 
 - Windows 10 or 11
 - Microsoft Edge (recommended) or Google Chrome
-- Latest build deployed at https://opensprout.vercel.app
+- Latest build deployed at https://sprout.kovina.org
 
 ### Installation Steps — Edge
 
-1. Open https://opensprout.vercel.app in Microsoft Edge
+1. Open https://sprout.kovina.org in Microsoft Edge
 2. Click the **Install** icon in the address bar (or ⋮ → Apps → Install this site as an app)
 3. Confirm the app name "OpenSprout" and click **Install**
 4. The PWA opens in a standalone window
@@ -26,7 +26,7 @@
 
 ### Installation Steps — Chrome
 
-1. Open https://opensprout.vercel.app in Google Chrome
+1. Open https://sprout.kovina.org in Google Chrome
 2. Click the **Install** icon in the address bar (or ⋮ → Cast, save, and share → Install page as app)
 3. Confirm the app name "OpenSprout" and click **Install**
 4. The PWA opens in a standalone window
@@ -154,7 +154,7 @@ Users rely on the web app's in-app task list for care reminders.
 [PWABuilder](https://pwabuilder.com/) can package the PWA for Microsoft Store:
 
 1. Go to https://pwabuilder.com
-2. Enter URL: `https://opensprout.vercel.app`
+2. Enter URL: `https://sprout.kovina.org`
 3. Generate Windows package (.appx or .msix)
 4. Sign with a code signing certificate
 5. Submit to Microsoft Partner Center

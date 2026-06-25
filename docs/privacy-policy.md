@@ -76,7 +76,7 @@ We retain your data as long as your account is active. See Section 6 for deletio
 |---------|---------|-------------|
 | **Supabase** | Authentication, database, file storage, edge functions | Email, plant records, photos |
 | **PlantNet API** | AI plant identification (optional feature) | Submitted plant photo, no account data |
-| Vercel | Web hosting (opensprout.vercel.app) | None — static hosting |
+| Vercel | Web hosting (sprout.kovina.org) | None — static hosting |
 
 **Supabase Privacy Policy:** [supabase.com/privacy](https://supabase.com/privacy)  
 **PlantNet Privacy Policy:** [plantnet.org/privacy](https://plantnet.org/privacy/)  

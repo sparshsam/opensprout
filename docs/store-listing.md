@@ -1,8 +1,8 @@
 # OpenSprout Store Listing
 
-**Prepared:** June 21, 2026  
-**Version:** 0.9.2  
-**Platform:** Google Play, Apple App Store (future), Microsoft Store (future)
+**Prepared:** June 25, 2026  
+**Version:** 0.9.14  
+**Platform:** Google Play, Microsoft Store (future)
 
 ---
 
@@ -105,12 +105,39 @@ See `docs/age-rating.md` for full questionnaire responses.
 
 ## Screenshots Required
 
-- Desktop dashboard (landscape, 1280×800)
-- Mobile plant list (portrait, 390×844)
-- Mobile plant detail (portrait, 390×844)
-- Care schedule view (portrait, 390×844)
-- Calendar view (portrait, 390×844)
-- Journal entry (portrait, 390×844)
-- Plant identification (portrait, 390×844)
+| Type | Size | Status | Source |
+|------|------|--------|--------|
+| Phone screenshot (dashboard) | 390×844 portrait | ⬜ Need higher-res | Run app, screenshot in device emulator |
+| Phone screenshot (plant list) | 390×844 portrait | ⬜ Need higher-res | Run app, screenshot in device emulator |
+| Phone screenshot (plant detail) | 390×844 portrait | ⬜ Need higher-res | Run app, screenshot in device emulator |
+| Phone screenshot (care schedule) | 390×844 portrait | ⬜ Need higher-res | Run app, screenshot in device emulator |
+| Phone screenshot (calendar) | 390×844 portrait | ⬜ Need higher-res | Run app, screenshot in device emulator |
+| Phone screenshot (identify) | 390×844 portrait | ⬜ Need higher-res | Run app, screenshot in device emulator |
+| 7" tablet screenshot | 2048×1536 landscape | ⬜ Not yet | Android emulator with tablet skin |
+| 10" tablet screenshot | 2560×1600 landscape | ⬜ Not yet | Android emulator with tablet skin |
 
-See `docs/assets/store-screenshots/` for production screenshots.
+See `docs/assets/store-screenshots/` for current (low-res) screenshots — regenerate from running app.
+
+## Store Assets Checklist
+
+- [ ] **High-res icon (512×512)** — `public/icon-512.png` ✅
+- [ ] **Feature graphic (1024×500)** — Needs design tool (Canva/Figma)
+- [ ] **Phone screenshots (2 minimum)** — Need high-res captures from emulator
+- [ ] **Tablet screenshots (7" + 10")** — Need emulator captures
+- [ ] **Feature graphic** — Branded banner, sprout icon + tagline
+- [ ] **Privacy policy URL** — Host at `/privacy` on production domain ✅
+- [ ] **Data safety answers** — Documented in `docs/data-safety.md` ✅
+- [ ] **Content rating** — Documented in `docs/age-rating.md` ✅
+- [ ] **Release notes** — Draft from CHANGELOG.md ✅
+
+## Release Notes (What's New)
+
+```
+OpenSprout v0.9.14
+
+• Production release signing configured
+• Android App Bundle (AAB) and APK signed with release key
+• Release version automation via scripts/bump-version.mjs
+• Data safety documentation for Play Store
+• Performance and packaging improvements
+```
