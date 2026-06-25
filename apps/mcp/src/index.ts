@@ -3,13 +3,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { authenticateToken } from "./supabase.js";
-import { registerPlantTools } from "./tools/plants.js";
-import { registerSpeciesTools } from "./tools/species.js";
-import { registerCareTools } from "./tools/care.js";
-import { registerJournalTools } from "./tools/journal.js";
-import { registerKnowledgeTools } from "./tools/knowledge.js";
-import { registerIdentifyTools } from "./tools/identify.js";
-import { registerExportTools } from "./tools/export.js";
+import { registerAllTools } from "./register-tools.js";
 
 async function main() {
   const token = process.env.OPENSPROUT_ACCESS_TOKEN;
@@ -44,13 +38,7 @@ async function main() {
     version: "0.9.13",
   });
 
-  registerPlantTools(server, getClient, userId);
-  registerSpeciesTools(server, getClient);
-  registerCareTools(server, getClient, userId);
-  registerJournalTools(server, getClient, userId);
-  registerKnowledgeTools(server, getClient);
-  registerIdentifyTools(server);
-  registerExportTools(server, getClient, userId);
+  registerAllTools(server, getClient, userId);
 
   const transport = new StdioServerTransport();
   await server.connect(transport);

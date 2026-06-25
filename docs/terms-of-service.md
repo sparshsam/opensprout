@@ -10,7 +10,7 @@
 
 By using OpenSprout ("the app", "the service"), you agree to these Terms of Service. If you do not agree, do not use the app.
 
-OpenSprout is provided as a free, open-source application. These terms govern your use of the hosted instance at [opensprout.vercel.app](https://opensprout.vercel.app) and any Android app built from this project.
+OpenSprout is provided as a free, open-source application. These terms govern your use of the hosted instance at [sprout.kovina.org](https://sprout.kovina.org) and any Android app built from this project.
 
 ## 2. Description of Service
 

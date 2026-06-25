@@ -166,6 +166,19 @@ export async function getPendingActions(): Promise<PendingAction[]> {
 }
 
 /**
+ * Increment the retry count for a pending action.
+ */
+export async function markPendingRetry(id: number): Promise<void> {
+  const db = await getDb();
+  const existing = await db.get(PENDING_STORE, id);
+  if (existing) {
+    existing.retryCount = (existing.retryCount ?? 0) + 1;
+    existing.createdAt = new Date().toISOString();
+    await db.put(PENDING_STORE, existing);
+  }
+}
+
+/**
  * Remove a completed (or failed) pending action by its auto-increment id.
  */
 export async function removePendingAction(id: number): Promise<void> {

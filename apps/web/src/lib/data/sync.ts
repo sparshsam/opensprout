@@ -1,12 +1,24 @@
 import {
   cacheTable,
   getPendingActions,
+  markPendingRetry,
   removePendingAction,
   getLastSyncTime,
   setLastSyncTime,
+  type PendingAction,
 } from "@/lib/data/db";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/data/types";
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+/** Max times a pending action will be retried before being discarded. */
+const MAX_RETRIES = 5;
+
+/** Base delay (ms) for exponential backoff — doubles each retry. */
+const BACKOFF_BASE_MS = 30_000; // 30s, then 60s, 2m, 4m, 8m
 
 // ---------------------------------------------------------------------------
 // Exported types
@@ -93,26 +105,70 @@ export async function isOnline(): Promise<boolean> {
  * Successfully replayed actions are removed from the queue. Failing
  * actions are left in place (they can be retried on the next sync) and
  * their error messages are collected.
+ *
+ * Retry policy:
+ * - Each attempt increments the action's retryCount in memory.
+ * - Exponential backoff: an action is skipped if less than
+ *   BACKOFF_BASE_MS × 2^retryCount has elapsed since its last attempt.
+ * - After MAX_RETRIES the action is discarded with a logged warning.
  */
+/**
+ * Increment the retry counter on a pending action in the queue.
+ * If the action can no longer be found (e.g. it was removed externally)
+ * this is a no-op.
+ */
+async function markRetry(action: PendingAction, table: string): Promise<void> {
+  await markPendingRetry(action.id);
+  const updated: PendingAction = {
+    ...action,
+    retryCount: action.retryCount + 1,
+    createdAt: new Date().toISOString(),
+  };
+  console.warn(
+    `[sync] retry ${updated.retryCount}/${MAX_RETRIES} for ${table}/${action.recordId} (action ${action.id})`,
+  );
+}
+
 export async function pushPendingActions(
   supabase: SupabaseClient<Database>,
+  userId: string,
 ): Promise<{ pushed: number; errors: string[] }> {
   const pending = await getPendingActions();
   let pushed = 0;
   const errors: string[] = [];
+  const now = Date.now();
 
   for (const action of pending) {
     const table = action.table as keyof Database["public"]["Tables"];
+
+    // ── Exponential backoff check ──────────────────────────────────────
+    const elapsed = action.createdAt
+      ? now - new Date(action.createdAt).getTime()
+      : Infinity;
+    const minWait = BACKOFF_BASE_MS * Math.pow(2, action.retryCount);
+    if (action.retryCount > 0 && elapsed < minWait) {
+      // Not enough time has passed — skip this action for now
+      continue;
+    }
+
+    // ── Max retries guard ──────────────────────────────────────────────
+    if (action.retryCount >= MAX_RETRIES) {
+      errors.push(
+        `[push:${action.id}] ${table}/${action.recordId}: dropped after ${MAX_RETRIES} failed attempts`,
+      );
+      await removePendingAction(action.id);
+      continue;
+    }
+
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const q: any = supabase.from(table);
 
       switch (action.action) {
         case "create": {
-          const { error } = await supabase
-            .from(table)
-            .insert(action.data as never)
-            .select()
-            .single();
+          const { error } = await q.insert(action.data).select().single();
           if (error) {
+            await markRetry(action, table);
             errors.push(
               `[push:${action.id}] create ${table}/${action.recordId}: ${error.message}`,
             );
@@ -122,11 +178,9 @@ export async function pushPendingActions(
         }
 
         case "update": {
-          const { error } = await supabase
-            .from(table)
-            .update(action.data as never)
-            .eq("id", action.recordId);
+          const { error } = await q.update(action.data).eq("user_id", userId).eq("id", action.recordId);
           if (error) {
+            await markRetry(action, table);
             errors.push(
               `[push:${action.id}] update ${table}/${action.recordId}: ${error.message}`,
             );
@@ -136,11 +190,9 @@ export async function pushPendingActions(
         }
 
         case "delete": {
-          const { error } = await supabase
-            .from(table)
-            .delete()
-            .eq("id", action.recordId);
+          const { error } = await q.delete().eq("user_id", userId).eq("id", action.recordId);
           if (error) {
+            await markRetry(action, table);
             errors.push(
               `[push:${action.id}] delete ${table}/${action.recordId}: ${error.message}`,
             );
@@ -163,6 +215,7 @@ export async function pushPendingActions(
     } catch (err) {
       const message =
         err instanceof Error ? err.message : String(err);
+      await markRetry(action, table);
       errors.push(`[push:${action.id}] ${table}/${action.recordId}: ${message}`);
     }
   }
@@ -240,7 +293,7 @@ export async function syncAll(
   const errors: string[] = [];
 
   // ── Push phase ──────────────────────────────────────────────────────
-  const pushResult = await pushPendingActions(supabase);
+  const pushResult = await pushPendingActions(supabase, userId);
   errors.push(...pushResult.errors);
 
   // ── Pull phase ──────────────────────────────────────────────────────

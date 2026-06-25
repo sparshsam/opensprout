@@ -1,7 +1,7 @@
 # OpenSprout — WCAG AA Accessibility Audit
 
 **Audit date:** June 21, 2026  
-**Scope:** Login/sign-up page (`https://opensprout.vercel.app/`), source code review for authenticated dashboard  
+**Scope:** Login/sign-up page (`https://sprout.kovina.org/`), source code review for authenticated dashboard  
 **Standard:** WCAG 2.2 Level AA  
 **Tooling:** Browser accessibility tree inspection, computed style analysis, contrast ratio calculation, keyboard navigation testing, source code review
 
@@ -284,7 +284,7 @@ No `role="switch"` elements were found. The settings page may add a dark mode to
 
 ## Testing Methodology
 
-- **Page URL:** `https://opensprout.vercel.app/`
+- **Page URL:** `https://sprout.kovina.org/`
 - **Browser:** Chromium-based headless browser
 - **Checks performed:**
   - Accessibility tree inspection via browser snapshot

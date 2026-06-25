@@ -8,6 +8,35 @@ function env(key: string): string {
 }
 
 /**
+ * Computes the SHA-256 hex digest of a string.
+ * Reusable — used by both the auth layer and token creation endpoints.
+ */
+export async function sha256Hex(input: string): Promise<string> {
+  const hashBuffer = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(input),
+  );
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/**
+ * Generates a cryptographically random MCP access token.
+ * Format: osp_<32-random-hex-chars>
+ * Reusable — used by both the CLI and token creation API.
+ */
+export function generateToken(): string {
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "osp_";
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  for (let i = 0; i < 32; i++) {
+    result += chars[array[i] % chars.length];
+  }
+  return result;
+}
+
+/**
  * Authenticates an osp_ access token:
  * 1. SHA-256 hash the raw token
  * 2. Look up the hash in mcp_tokens (via service-role client)
@@ -35,15 +64,7 @@ export async function authenticateToken(
     throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY for token validation.");
   }
 
-  // SHA-256 hash the raw token
-  const hashBuffer = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(rawToken),
-  );
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const tokenHash = hashArray
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+  const tokenHash = await sha256Hex(rawToken);
 
   // Create service-role client for auth-only queries
   const admin = createClient(supabaseUrl, serviceKey);

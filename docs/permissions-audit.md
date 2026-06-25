@@ -59,7 +59,7 @@ OpenSprout does not use location services. Plant care schedules use user-configu
 |-------------|---------|-----------|-----|
 | `*.supabase.co` | Authentication, database, storage, edge functions | Auth tokens, plant data, photos | Yes |
 | `identify.plantnet.org` | Plant identification API (if enabled) | Plant photo in request | Yes |
-| `opensprout.vercel.app` | Web app hosting (static assets) | None (static site) | Yes |
+| `sprout.kovina.org` | Web app hosting (static assets) | None (static site) | Yes |
 
 ## 5. iOS Permissions (Future)
 

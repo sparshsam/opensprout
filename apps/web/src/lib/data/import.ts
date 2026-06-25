@@ -249,6 +249,7 @@ export async function executeImport(
       const { data: fetched } = await supabase
         .from("plants")
         .select("id, client_id")
+        .eq("user_id", userId)
         .in("client_id", clientIds);
 
       if (fetched) {
