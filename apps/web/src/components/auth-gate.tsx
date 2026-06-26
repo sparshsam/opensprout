@@ -18,7 +18,10 @@ import { createClient } from "@/lib/supabase/browser";
 /** True when running inside a Capacitor native shell (Android / iOS). */
 function isNativeApp(): boolean {
   if (typeof window === "undefined") return false;
-  return !!(window as any).Capacitor?.isNativePlatform();
+  const win = window as typeof window & {
+    Capacitor?: { isNativePlatform?: () => boolean };
+  };
+  return !!win.Capacitor?.isNativePlatform?.();
 }
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
