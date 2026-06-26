@@ -19,24 +19,48 @@ npm run test:mcp       # MCP server tests (112 tests)
 
 ```
 apps/web/              # Next.js + Capacitor Android
-  ├── src/app/         # App Router pages
-  │   ├── page.tsx     # Public homepage
-  │   ├── login/       # Auth page
-  │   ├── (authenticated)/  # App pages (today, plants, identify, etc.)
-  │   ├── about/       # About page
-  │   ├── privacy/     # Privacy policy
-  │   ├── terms/       # Terms of service
-  │   ├── mcp/         # AI Access guide
-  │   └── globals.css  # Design tokens
-  ├── android/         # Capacitor Android project
-  └── public/          # Static assets, PWA manifest, icons
+  ├── src/app/
+  │   ├── page.tsx           # Public homepage
+  │   ├── login/             # Google OAuth sign-in (no email/password)
+  │   ├── auth/callback/     # OAuth PKCE callback handler
+  │   ├── api/mcp/           # MCP HTTP endpoint + token CRUD
+  │   ├── (authenticated)/   # App pages (today, plants, identify, etc.)
+  │   ├── about/             # About page
+  │   ├── privacy/           # Privacy policy
+  │   ├── terms/             # Terms of service
+  │   ├── mcp/               # AI Access guide
+  │   └── globals.css        # Design tokens
+  ├── android/               # Capacitor Android project
+  └── public/                # Static assets, PWA manifest, icons
 
 apps/mcp/              # MCP server (28 tools, 112 tests)
+  ├── src/
+  │   ├── index.ts           # Stdio entry point
+  │   ├── vercel-handler.ts  # Streamable HTTP transport
+  │   ├── register-tools.ts  # Centralized tool registration
+  │   ├── supabase.ts        # Auth (SHA-256 token) + client factory
+  │   ├── tools/             # 7 tool modules (plants, care, journal, etc.)
+  │   └── __tests__/         # auth.test.ts + tools.test.ts
 
-supabase/migrations/   # Database migrations
-
-docs/                  # RC checklists, test matrix, integration docs
+docs/                  # 35+ docs (see docs/ directory)
+scripts/               # bump-version.mjs, package-windows.ps1
+supabase/migrations/   # Database migrations (shared project)
 ```
+
+## Key Commands
+
+| Command | What it does |
+|---------|-------------|
+| `npm run dev` | Dev server at localhost:3000 |
+| `npm run build` | Web production build |
+| `npm run typecheck` | TypeScript check (builds MCP first) |
+| `npm run lint` | ESLint |
+| `npm run android:debug` | Debug APK |
+| `npm run android:release:bundle` | Signed release AAB |
+| `npm run android:release:apk` | Signed release APK |
+| `npm run android:release` | Both AAB + APK |
+| `npm run version:bump` | Interactive version bump |
+| `npm run -w @opensprout/mcp test` | MCP tests (112) |
 
 ## Design Conventions
 
@@ -49,26 +73,29 @@ docs/                  # RC checklists, test matrix, integration docs
 - **Icons:** lucide-react (consistent stroke set)
 - **Theme:** CSS variables in globals.css, `.dark` class via ThemeProvider
 
-## Key Commands
+## Auth
 
-| Command | What it does |
-|---------|-------------|
-| `npm run dev` | Start dev server |
-| `npm run build` | Web production build |
-| `npm run typecheck` | TypeScript check |
-| `npm run lint` | ESLint |
-| `npm run android:debug` | Build debug APK |
-| `npm run android:release` | Build release AAB |
-| `npm run rc:web` | RC web validation |
-| `npm run rc:android` | RC Android validation |
-| `cd apps/mcp && npm run test` | Run MCP tests |
+- **Provider:** Google OAuth only (email/password disabled)
+- **Supabase Auth** with PKCE flow
+- **Callback:** `/auth/callback` route handles code exchange
+- **Session:** Auto-refreshed via `@supabase/ssr`
+
+## MCP Server
+
+Located at `apps/mcp/`. 28 tools across 7 domains.
+Two transport modes:
+- **Local stdio:** `OPENSPROUT_ACCESS_TOKEN` env var
+- **Remote HTTP:** `https://sprout.kovina.org/api/mcp` + Bearer token
+
+Architecture follows the MCP Build Guide: SHA-256 token auth, centralized registration, Streamable HTTP, user-scoped service-role client, token CRUD API routes.
 
 ## Release History
 
-- **v0.9.13** (current) — Platform RC Packaging & Test Prep. Android RC checklist, Windows PWA checklist, 193-test matrix, packaging scripts, version bump.
-- **v0.9.12** — Public homepage, nav/footer, auth-aware routing, /mcp guide.
-- **v0.9.11** — Knowledge & diagnosis foundation, 18 articles, 15 diagnosis entries.
-- **v0.9.10** — MCP reliability: user data isolation, 28 tools, 112 tests.
+- **v0.9.14** (current, Jun 25) — Production signing, PWA hardening, reliability fixes, MCP transport, Google OAuth, domain migration to sprout.kovina.org.
+- **v0.9.13** (Jun 23) — Platform RC Packaging & Test Prep.
+- **v0.9.12** (Jun 22) — Public homepage, nav/footer, auth-aware routing.
+- **v0.9.11** (Jun 22) — Knowledge & diagnosis foundation.
+- **v0.9.10** (Jun 22) — MCP reliability: user data isolation, 28 tools.
 - **v0.9.0–v0.9.9** — Brand identity, UI overhaul, MCP server foundation.
 
 ## App Identity
