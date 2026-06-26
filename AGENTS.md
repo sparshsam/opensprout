@@ -2,7 +2,7 @@
 
 ## Current Release
 
-**v0.9.14** — Production Signing, PWA Hardening, MCP Transport, Google OAuth (2026-06-25)
+**v0.9.15** — Auth Loop Fix, CSP Dev-Mode Fix, Platform-Aware AuthGate (2026-06-26)
 
 ## Product Identity
 
@@ -55,6 +55,22 @@ opensprout/
 | `/identify` | Plant identification |
 | `/profile` | Profile & settings |
 | `/settings/mcp` | MCP token management |
+
+## Key Changes in v0.9.15
+
+### Auth Loop Fix (Critical)
+- **Root cause:** `/auth/callback` used `NextResponse.redirect("/today")` without exchanging the PKCE auth code — the redirect stripped `?code=...` from the URL, so `detectSessionInUrl` never fired, causing an infinite sign-in loop.
+- **Fix:** Server-side code exchange via `createServerClient` + `exchangeCodeForSession()`, writing session cookies onto the redirect response.
+
+### CSP Dev-Mode Fix
+- **Root cause:** `script-src 'self' 'unsafe-inline'` blocked `eval()` used by Next.js HMR — page hung on splash.
+- **Fix:** Skip security headers in `NODE_ENV !== 'production'` (production Vercel builds get strict CSP).
+- `.env.local` symlinked into `apps/web/` so npm workspaces resolves it.
+
+### Platform-Aware AuthGate
+- **Web browser:** Public homepage renders for everyone (signed in or out). Logo links to `/`. "Sign in" button checks session — if already authed, goes to `/today`.
+- **Native app (Capacitor):** Detects `window.Capacitor.isNativePlatform()` — redirects to `/login` or `/today` (if session exists).
+- All three nav components (TopBar, Sidebar, BottomNav) now label the home tab "Dashboard" instead of "Home".
 
 ## Key Changes in v0.9.14
 

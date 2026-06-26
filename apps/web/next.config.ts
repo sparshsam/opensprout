@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const isExport = process.env.CAPACITOR_BUILD === "true";
+const isDev = process.env.NODE_ENV !== "production";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -9,7 +10,7 @@ const nextConfig: NextConfig = {
   images: isExport ? { unoptimized: true } : undefined,
   trailingSlash: isExport,
   skipTrailingSlashRedirect: isExport,
-  ...(isExport
+  ...(isExport || isDev
     ? {}
     : {
         async headers() {

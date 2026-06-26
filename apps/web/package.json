@@ -4,7 +4,7 @@
   "private": true,
   "license": "AGPL-3.0-or-later",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 9999",
     "build": "next build",
     "build:mobile": "CAPACITOR_BUILD=true next build && npx cap sync",
     "start": "next start",

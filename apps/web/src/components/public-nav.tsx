@@ -4,8 +4,9 @@ import Link from "next/link";
 import { Sprout } from "lucide-react";
 import { useTheme } from "@/lib/context/theme-context";
 import { Sun, Moon } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/browser";
 
 const links = [
   { href: "/", label: "Home" },
@@ -16,7 +17,22 @@ const links = [
 export function PublicNav() {
   const { resolved, toggle } = useTheme();
   const pathname = usePathname();
+  const router = useRouter();
   const isHome = pathname === "/";
+
+  async function handleSignIn() {
+    try {
+      const supabase = createClient();
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        router.push("/today");
+      } else {
+        router.push("/login");
+      }
+    } catch {
+      router.push("/login");
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md">
@@ -82,12 +98,12 @@ export function PublicNav() {
               View on GitHub
             </a>
           )}
-          <Link
-            href="/login"
+          <button
+            onClick={handleSignIn}
             className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition hover:brightness-110"
           >
             Sign in
-          </Link>
+          </button>
         </div>
       </div>
 

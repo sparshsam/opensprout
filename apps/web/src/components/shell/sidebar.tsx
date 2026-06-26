@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { label: "Home", href: "/today", icon: Sprout },
+  { label: "Dashboard", href: "/today", icon: Sprout },
   { label: "Plants", href: "/plants", icon: Leaf },
   { label: "Identify", href: "/identify", icon: Search },
   { label: "Profile", href: "/profile", icon: User },
@@ -17,7 +17,7 @@ export function Sidebar() {
 
   return (
     <aside className="hidden border-r border-border/40 bg-white md:flex md:w-56 md:flex-col lg:w-64">
-      <Link href="/today" className="flex items-center gap-3 px-6 pb-5 pt-6">
+      <Link href="/" className="flex items-center gap-3 px-6 pb-5 pt-6">
         <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
           <Sprout size={22} aria-hidden />
         </div>
