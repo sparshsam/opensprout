@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { label: "Home", href: "/today" },
+  { label: "Dashboard", href: "/today" },
   { label: "Plants", href: "/plants" },
   { label: "Identify", href: "/identify" },
   { label: "Profile", href: "/profile" },
@@ -18,7 +18,7 @@ export function TopBar() {
     <header className="sticky top-0 z-50 bg-background/90 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-10">
         {/* Wordmark + icon */}
-        <Link href="/today" className="flex items-center gap-2.5">
+        <Link href="/" className="flex items-center gap-2.5">
           <img
             src="/opensprout-icon.png"
             alt="OpenSprout"
@@ -27,6 +27,7 @@ export function TopBar() {
           <span className="text-lg font-bold tracking-tight text-foreground">
             OpenSprout
           </span>
+          <span className="sr-only">Go to homepage</span>
         </Link>
 
         {/* Desktop nav — pill style */}

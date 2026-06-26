@@ -1,35 +1,51 @@
+/**
+ * AuthGate wraps the public homepage content.
+ *
+ * - **Web browser:** Shows the public marketing page to everyone.
+ *   Signed-in users use the "Sign in" button (smart-redirects to /today)
+ *   to reach their dashboard.
+ *
+ * - **Native app (Capacitor):** Redirects to /login on mount —
+ *   the native first screen is the auth flow, not the marketing page.
+ */
+
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/browser";
 import { Sprout } from "lucide-react";
+import { createClient } from "@/lib/supabase/browser";
 
-/**
- * AuthGate checks the Supabase session on mount.
- * If the user is signed in, it redirects to /today.
- * If not, it renders the public children.
- */
+/** True when running inside a Capacitor native shell (Android / iOS). */
+function isNativeApp(): boolean {
+  if (typeof window === "undefined") return false;
+  return !!(window as any).Capacitor?.isNativePlatform();
+}
+
 export function AuthGate({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<"loading" | "authenticated" | "public">(
-    "loading",
-  );
+  const [state, setState] = useState<
+    "loading" | "public" | "redirecting"
+  >("loading");
 
   useEffect(() => {
     let cancelled = false;
 
     async function check() {
-      try {
-        const supabase = createClient();
-        const { data } = await supabase.auth.getSession();
-        if (cancelled) return;
-
-        if (data.session) {
-          setState("authenticated");
-          window.location.href = "/today";
-        } else {
-          setState("public");
+      if (isNativeApp()) {
+        // Native app: check session, redirect to /login or /today
+        try {
+          const supabase = createClient();
+          const { data } = await supabase.auth.getSession();
+          if (cancelled) return;
+          window.location.href = data.session ? "/today" : "/login";
+          if (!cancelled) setState("redirecting");
+        } catch {
+          if (!cancelled) {
+            window.location.href = "/login";
+            setState("redirecting");
+          }
         }
-      } catch {
+      } else {
+        // Web browser: always show the public page
         if (!cancelled) setState("public");
       }
     }
@@ -51,9 +67,6 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (state === "authenticated") {
-    return null;
-  }
-
+  // web browser — render the public homepage
   return <>{children}</>;
 }
