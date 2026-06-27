@@ -5,7 +5,6 @@ import { BottomNav } from "@/components/shell/bottom-nav";
 import { TopBar } from "@/components/shell/top-bar";
 import { PwaInstall } from "@/components/shell/pwa-install";
 import { AppUpdate } from "@/components/shell/app-update";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Sprout } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -47,7 +46,6 @@ function AuthenticatedLayoutInner({ children }: { children: React.ReactNode }) {
       <BottomNav />
       <PwaInstall />
       <AppUpdate />
-      <ThemeToggle />
     </div>
   );
 }

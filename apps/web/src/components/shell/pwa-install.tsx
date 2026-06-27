@@ -20,10 +20,15 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
+const PWA_DISMISSED_KEY = "opensprout-pwa-dismissed";
+
 export function PwaInstall() {
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed, setDismissed] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return localStorage.getItem(PWA_DISMISSED_KEY) === "true";
+  });
 
   // Capture the install prompt event
   useEffect(() => {
@@ -79,7 +84,7 @@ export function PwaInstall() {
         Install
       </button>
       <button
-        onClick={() => setDismissed(true)}
+        onClick={() => { localStorage.setItem(PWA_DISMISSED_KEY, "true"); setDismissed(true); }}
         className="shrink-0 rounded-full p-1 text-muted-foreground transition-colors hover:text-foreground"
         aria-label="Dismiss install prompt"
       >
