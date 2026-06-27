@@ -43,7 +43,7 @@ apps/mcp/              # MCP server (28 tools, 112 tests)
   │   └── __tests__/         # auth.test.ts + tools.test.ts
 
 docs/                  # 35+ docs (see docs/ directory)
-scripts/               # bump-version.mjs, package-windows.ps1
+scripts/               # bump-version.mjs, package-windows.ps1, cleanup-default-data.sql
 supabase/migrations/   # Database migrations (shared project)
 ```
 
@@ -93,7 +93,7 @@ Architecture follows the MCP Build Guide: SHA-256 token auth, centralized regist
 
 ## Release History
 
-- **v0.9.15** (current, Jun 26) — Auth loop fix, CSP dev-mode fix, platform-aware AuthGate, navbar labels, dev server port.
+- **v0.9.15** (current, Jun 27) — Product truth overhaul, plant detail route, cover photo upload, dark mode sweep, profile redesign, PWA persistence, data cleanup migration.
 - **v0.9.14** (Jun 25) — Production signing, PWA hardening, reliability fixes, MCP transport, Google OAuth, domain migration to sprout.kovina.org.
 - **v0.9.13** (Jun 23) — Platform RC Packaging & Test Prep.
 - **v0.9.12** (Jun 22) — Public homepage, nav/footer, auth-aware routing.

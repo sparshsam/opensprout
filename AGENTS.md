@@ -2,7 +2,7 @@
 
 ## Current Release
 
-**v0.9.15** — Auth Loop Fix, CSP Dev-Mode Fix, Platform-Aware AuthGate (2026-06-26)
+**v0.9.15** — Product Truth Overhaul, Plant Detail Route, Dark Mode Sweep (2026-06-27)
 
 ## Product Identity
 
@@ -52,11 +52,18 @@ opensprout/
 | `/api/mcp` | MCP Streamable HTTP endpoint |
 | `/today` | Authenticated home dashboard |
 | `/plants` | Plant collection |
+| `/plants/[id]` | Plant detail (photo, health, care history, schedules, quick care) |
 | `/identify` | Plant identification |
 | `/profile` | Profile & settings |
 | `/settings/mcp` | MCP token management |
 
 ## Key Changes in v0.9.15
+
+### Product Truth Overhaul
+- **No fake health:** `cleanHealthStatus()` returns `undefined` instead of `"stable"`. New plants start with no health assessment (shows "Not assessed").
+- **No fake schedules:** `emptyForm` removed `water_every_days: 7` and `fertilize_every_days: 30`. Schedules only created when user explicitly sets cadence.
+- **No fake stats:** Dashboard counts only real plants, real task instances, real care logs. Removed "Active schedules" and "Plant Health" sections.
+- **Data cleanup migration:** `scripts/cleanup-default-data.sql` — review-first SQL to reset old default health_status and delete auto-created schedules for plants with no species_id.
 
 ### Auth Loop Fix (Critical)
 - **Root cause:** `/auth/callback` used `NextResponse.redirect("/today")` without exchanging the PKCE auth code — the redirect stripped `?code=...` from the URL, so `detectSessionInUrl` never fired, causing an infinite sign-in loop.
@@ -71,6 +78,54 @@ opensprout/
 - **Web browser:** Public homepage renders for everyone (signed in or out). Logo links to `/`. "Sign in" button checks session — if already authed, goes to `/today`.
 - **Native app (Capacitor):** Detects `window.Capacitor.isNativePlatform()` — redirects to `/login` or `/today` (if session exists).
 - All three nav components (TopBar, Sidebar, BottomNav) now label the home tab "Dashboard" instead of "Home".
+
+### Plant Detail Route (`/plants/[id]`)
+- New page created at `(authenticated)/plants/[id]/page.tsx`.
+- Shows: photo (or "No photo yet"), name, species (or "Unknown species"), location, health (or "Not assessed"), care schedule (or "No care schedule yet"), care history (or "No care logged yet").
+- "Basic tracker mode" badge when no species_id and no photo.
+- Quick care buttons log real actions with toast confirmation.
+- All plant cards in Dashboard and Plants grid link directly to `/plants/[id]`.
+
+### Cover Photo Upload
+- Optional cover photo upload in the Add Plant form.
+- Uses existing `uploadPlantPhoto` + `setPlantCoverPhoto` pipeline.
+- Photo preview with remove option before save.
+- Plant creation succeeds even without photo.
+
+### Plants Page Cleanup
+- Removed inline detail panel (quick care, schedule, timeline) — plants page is now a grid only.
+- Cards link directly to `/plants/[id]`.
+- Removed unused `selectedId`, `onQuickCare`, `timeline` state.
+
+### Dark Mode Sweep
+- Comprehensive dark mode fix across all components:
+  - `timeline-item.tsx`: careColors (8 types) and healthBar got `dark:bg-*-950 dark:border-*-800 dark:text-*-400` variants.
+  - `bottom-sheet.tsx`, `task-card.tsx`, `journal-form.tsx`: added `dark:bg-muted`.
+  - `button.tsx`: outline variant uses `dark:bg-background dark:hover:bg-muted` (visible hover).
+  - `calendar/page.tsx`, `explore/page.tsx`, `settings/page.tsx`, `journal/page.tsx`: all bg-white → `dark:bg-muted`.
+  - Red-tinted error/retry buttons: `dark:bg-muted dark:text-red-400 dark:hover:bg-red-900/30`.
+
+### Theme Toggle Relocated
+- Moved from floating fixed button (bottom-right) to TopBar header.
+- Visible on all authenticated pages, both mobile and desktop.
+
+### PWA Install Persistence
+- Dismissal saved to `localStorage` (`opensprout-pwa-dismissed`).
+- Once dismissed/installed, prompt never shows again on reloads.
+
+### Profile Page Redesign
+- Card-based layout with `SectionCard` component (icon header + content).
+- Account section: full-width card with avatar, email, plant count, logout.
+- Desktop: 2-column grid for settings cards.
+- About section: 4-column inline grid on large screens.
+- Consistent `rounded-2xl border bg-white dark:bg-muted` styling.
+
+### Nav Labels
+- "Home" → "Dashboard" in TopBar, Sidebar, BottomNav.
+- OpenSprout logo links to `/` (public homepage) everywhere.
+
+### Dev Server Port
+- Dev server changed from port 3000 to 9999.
 
 ## Key Changes in v0.9.14
 
