@@ -23,14 +23,14 @@ const careColors: Record<
   string,
   { bg: string; dot: string; icon: string }
 > = {
-  water: { bg: "bg-sky-50 border-sky-200", dot: "bg-sky-400", icon: "text-sky-600" },
-  fertilize: { bg: "bg-emerald-50 border-emerald-200", dot: "bg-emerald-400", icon: "text-emerald-600" },
-  mist: { bg: "bg-cyan-50 border-cyan-200", dot: "bg-cyan-400", icon: "text-cyan-600" },
-  rotate: { bg: "bg-violet-50 border-violet-200", dot: "bg-violet-400", icon: "text-violet-600" },
-  prune: { bg: "bg-orange-50 border-orange-200", dot: "bg-orange-400", icon: "text-orange-600" },
-  repot: { bg: "bg-rose-50 border-rose-200", dot: "bg-rose-400", icon: "text-rose-600" },
-  inspect: { bg: "bg-amber-50 border-amber-200", dot: "bg-amber-400", icon: "text-amber-600" },
-  custom: { bg: "bg-slate-50 border-slate-200", dot: "bg-slate-400", icon: "text-slate-600" },
+  water: { bg: "bg-sky-50 border-sky-200 dark:bg-sky-950 dark:border-sky-800", dot: "bg-sky-400 dark:bg-sky-500", icon: "text-sky-600 dark:text-sky-400" },
+  fertilize: { bg: "bg-emerald-50 border-emerald-200 dark:bg-emerald-950 dark:border-emerald-800", dot: "bg-emerald-400 dark:bg-emerald-500", icon: "text-emerald-600 dark:text-emerald-400" },
+  mist: { bg: "bg-cyan-50 border-cyan-200 dark:bg-cyan-950 dark:border-cyan-800", dot: "bg-cyan-400 dark:bg-cyan-500", icon: "text-cyan-600 dark:text-cyan-400" },
+  rotate: { bg: "bg-violet-50 border-violet-200 dark:bg-violet-950 dark:border-violet-800", dot: "bg-violet-400 dark:bg-violet-500", icon: "text-violet-600 dark:text-violet-400" },
+  prune: { bg: "bg-orange-50 border-orange-200 dark:bg-orange-950 dark:border-orange-800", dot: "bg-orange-400 dark:bg-orange-500", icon: "text-orange-600 dark:text-orange-400" },
+  repot: { bg: "bg-rose-50 border-rose-200 dark:bg-rose-950 dark:border-rose-800", dot: "bg-rose-400 dark:bg-rose-500", icon: "text-rose-600 dark:text-rose-400" },
+  inspect: { bg: "bg-amber-50 border-amber-200 dark:bg-amber-950 dark:border-amber-800", dot: "bg-amber-400 dark:bg-amber-500", icon: "text-amber-600 dark:text-amber-400" },
+  custom: { bg: "bg-slate-50 border-slate-200 dark:bg-slate-950 dark:border-slate-800", dot: "bg-slate-400 dark:bg-slate-500", icon: "text-slate-600 dark:text-slate-400" },
 };
 
 const careLabels: Record<CareType, string> = {
@@ -45,11 +45,11 @@ const careLabels: Record<CareType, string> = {
 };
 
 function healthBar(score: number) {
-  if (score >= 5) return { label: "Thriving", color: "text-emerald-600 bg-emerald-50 border-emerald-200" };
-  if (score >= 4) return { label: "Good", color: "text-green-600 bg-green-50 border-green-200" };
-  if (score >= 3) return { label: "Stable", color: "text-amber-600 bg-amber-50 border-amber-200" };
-  if (score >= 2) return { label: "Needs attention", color: "text-orange-600 bg-orange-50 border-orange-200" };
-  return { label: "Struggling", color: "text-red-600 bg-red-50 border-red-200" };
+  if (score >= 5) return { label: "Thriving", color: "text-emerald-600 bg-emerald-50 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-950 dark:border-emerald-800" };
+  if (score >= 4) return { label: "Good", color: "text-green-600 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-950 dark:border-green-800" };
+  if (score >= 3) return { label: "Stable", color: "text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950 dark:border-amber-800" };
+  if (score >= 2) return { label: "Needs attention", color: "text-orange-600 bg-orange-50 border-orange-200 dark:text-orange-400 dark:bg-orange-950 dark:border-orange-800" };
+  return { label: "Struggling", color: "text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950 dark:border-red-800" };
 }
 
 function PhotoThumbnail({ objectPath }: { objectPath: string }) {

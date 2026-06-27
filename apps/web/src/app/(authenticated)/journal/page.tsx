@@ -380,7 +380,7 @@ export default function JournalPage() {
               <Button
                 onClick={() => handleDelete(deleteEntry)}
                 disabled={deleting}
-                className="bg-red-600 text-white hover:bg-red-700"
+                className="bg-red-600 text-white hover:bg-red-500 dark:bg-red-800 dark:hover:bg-red-600"
               >
                 {deleting ? (
                   <Loader2 className="animate-spin" size={16} />
