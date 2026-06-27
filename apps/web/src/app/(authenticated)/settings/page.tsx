@@ -267,7 +267,7 @@ export default function SettingsPage() {
                     id="lead-time"
                     value={prefs.leadTimeMinutes}
                     onChange={handleLeadTimeChange}
-                    className="h-10 w-full rounded-md border border-input bg-white px-3 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring"
+                    className="h-10 w-full rounded-md border border-input bg-white px-3 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring dark:bg-muted"
                   >
                     {LEAD_TIME_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>

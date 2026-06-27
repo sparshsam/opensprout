@@ -166,7 +166,7 @@ export default function ExplorePage() {
           placeholder="Search plants by name..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full rounded-lg border border-border bg-white py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring"
+          className="w-full rounded-lg border border-border bg-white py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring dark:bg-muted"
         />
       </div>
 
@@ -210,7 +210,7 @@ export default function ExplorePage() {
               variant="outline"
               size="sm"
               onClick={loadSpecies}
-              className="shrink-0 border-red-300 bg-white text-red-700 hover:bg-red-100"
+              className="shrink-0 border-red-300 bg-white text-red-700 hover:bg-red-100 dark:bg-muted dark:text-red-400 dark:hover:bg-red-900/30"
             >
               <RefreshCw size={14} aria-hidden />
               Retry
@@ -317,7 +317,7 @@ export default function ExplorePage() {
                   className={cn(
                     "flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-2 text-xs font-semibold transition",
                     detailTab === key
-                      ? "bg-white text-foreground shadow-sm"
+                      ? "bg-white text-foreground shadow-sm dark:bg-muted"
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 >

@@ -340,7 +340,7 @@ export default function CalendarPage() {
               variant="outline"
               size="sm"
               onClick={loadMonth}
-              className="shrink-0 border-red-300 bg-white text-red-700 hover:bg-red-100"
+              className="shrink-0 border-red-300 bg-white text-red-700 hover:bg-red-100 dark:bg-muted dark:text-red-400 dark:hover:bg-red-900/30"
             >
               <RefreshCw size={14} aria-hidden />
               Retry
@@ -549,13 +549,13 @@ export default function CalendarPage() {
               </button>
               <button
                 onClick={() => setAction("snooze")}
-                className="flex flex-col items-center gap-2 rounded-xl border border-border bg-white p-4 text-sm font-semibold text-foreground transition active:scale-[0.97] hover:bg-muted"
+                className="flex flex-col items-center gap-2 rounded-xl border border-border bg-white p-4 text-sm font-semibold text-foreground transition active:scale-[0.97] hover:bg-muted dark:bg-muted"
               >
                 <Clock size={18} /> Snooze
               </button>
               <button
                 onClick={() => setAction("reschedule")}
-                className="flex flex-col items-center gap-2 rounded-xl border border-border bg-white p-4 text-sm font-semibold text-foreground transition active:scale-[0.97] hover:bg-muted"
+                className="flex flex-col items-center gap-2 rounded-xl border border-border bg-white p-4 text-sm font-semibold text-foreground transition active:scale-[0.97] hover:bg-muted dark:bg-muted"
               >
                 <Calendar size={18} /> Reschedule
               </button>
@@ -600,7 +600,7 @@ export default function CalendarPage() {
             <label className="block text-sm font-semibold">
               Notes
               <textarea
-                className="mt-1 min-h-20 w-full rounded-md border border-input bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring"
+                className="mt-1 min-h-20 w-full rounded-md border border-input bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring dark:bg-muted"
                 placeholder="Any observations..."
                 value={taskNotes}
                 onChange={(e) => setTaskNotes(e.target.value)}
