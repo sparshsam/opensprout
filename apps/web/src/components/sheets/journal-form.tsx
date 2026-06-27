@@ -103,7 +103,7 @@ export function JournalForm({
       <label className="block">
         <span className="text-sm font-semibold">Notes</span>
         <textarea
-          className="mt-1 min-h-24 w-full rounded-md border border-input bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring"
+          className="mt-1 min-h-24 w-full rounded-md border border-input bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring dark:bg-muted"
           value={values.body}
           onChange={(e) => setValue("body", e.target.value)}
           placeholder="Describe what you observed..."
@@ -124,7 +124,7 @@ export function JournalForm({
         <label className="block">
           <span className="text-sm font-semibold">Health score</span>
           <select
-            className="mt-1 w-full rounded-md border border-input bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring"
+            className="mt-1 w-full rounded-md border border-input bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring dark:bg-muted"
             value={values.health_score ?? ""}
             onChange={(e) =>
               setValue(

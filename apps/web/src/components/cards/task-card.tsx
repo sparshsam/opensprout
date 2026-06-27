@@ -56,7 +56,7 @@ export function TaskCard({
     <button
       onClick={onClick}
       className={cn(
-        "w-full rounded-xl border border-border bg-white p-4 text-left shadow-sm transition active:scale-[0.98] md:hover:border-primary md:hover:shadow-md",
+        "w-full rounded-xl border border-border bg-white p-4 text-left shadow-sm transition active:scale-[0.98] md:hover:border-primary md:hover:shadow-md dark:bg-muted",
         overdue && "border-l-4 border-l-red-400",
         dueToday && !overdue && "border-l-4 border-l-amber-400",
         snoozed && "opacity-70",

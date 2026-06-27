@@ -216,7 +216,7 @@ export default function JournalPage() {
               variant="outline"
               size="sm"
               onClick={loadFeed}
-              className="shrink-0 border-red-300 bg-white text-red-700 hover:bg-red-100"
+              className="shrink-0 border-red-300 bg-white text-red-700 hover:bg-red-100 dark:bg-muted dark:text-red-400 dark:hover:bg-red-900/30"
             >
               <RefreshCw size={14} aria-hidden />
               Retry
@@ -231,7 +231,7 @@ export default function JournalPage() {
           <div className="flex items-center gap-2">
             <Search size={14} className="text-muted-foreground" aria-hidden />
             <select
-              className="rounded-md border border-border bg-white px-3 py-1.5 text-sm outline-none focus:border-primary"
+              className="rounded-md border border-border bg-white px-3 py-1.5 text-sm outline-none focus:border-primary dark:bg-muted"
               value={filterPlant}
               onChange={(e) => setFilterPlant(e.target.value)}
               aria-label="Filter by plant"
@@ -245,7 +245,7 @@ export default function JournalPage() {
             </select>
           </div>
           <select
-            className="rounded-md border border-border bg-white px-3 py-1.5 text-sm outline-none focus:border-primary"
+            className="rounded-md border border-border bg-white px-3 py-1.5 text-sm outline-none focus:border-primary dark:bg-muted"
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
             aria-label="Filter by type"

@@ -133,7 +133,7 @@ export function TimelineItem(props: TimelineItemProps) {
 
   if (type === "photo" && object_path) {
     return (
-      <div className="flex gap-3 rounded-lg border border-border bg-white p-3">
+      <div className="flex gap-3 rounded-lg border border-border bg-white p-3 dark:bg-muted">
         <div className="flex flex-col items-center gap-1">
           <div className="h-3 w-3 rounded-full bg-violet-400" />
           <div className="w-px flex-1 bg-border" />
@@ -164,7 +164,7 @@ export function TimelineItem(props: TimelineItemProps) {
   if (type === "journal_entry") {
     const health = health_score ? healthBar(health_score) : null;
     return (
-      <div className={cn("flex gap-3 rounded-lg border p-3", "bg-white border-border")}>
+      <div className={cn("flex gap-3 rounded-lg border p-3", "bg-white border-border dark:bg-muted")}>
         <div className="flex flex-col items-center gap-1">
           <div className="h-3 w-3 rounded-full bg-amber-400" />
           <div className="w-px flex-1 bg-border" />

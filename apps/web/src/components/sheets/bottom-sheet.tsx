@@ -42,7 +42,7 @@ export function BottomSheet({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="relative z-10 w-full max-w-lg rounded-t-2xl bg-white px-5 pb-8 pt-4 shadow-2xl animate-in slide-in-from-bottom"
+        className="relative z-10 w-full max-w-lg rounded-t-2xl bg-white px-5 pb-8 pt-4 shadow-2xl animate-in slide-in-from-bottom dark:bg-muted"
         style={{
           animation: "slideUp 0.2s ease-out",
         }}
