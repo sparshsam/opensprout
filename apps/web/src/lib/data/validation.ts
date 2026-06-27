@@ -90,7 +90,7 @@ function cleanPositiveInteger(value: unknown, label: string, min: number, max: n
 }
 
 function cleanHealthStatus(value: unknown) {
-  if (value === undefined || value === null || value === "") return "stable";
+  if (value === undefined || value === null || value === "") return undefined;
   if (typeof value !== "string" || !healthStatuses.has(value as HealthStatus)) {
     throw new ValidationError("Health status is invalid.");
   }

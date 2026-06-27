@@ -13,13 +13,14 @@ import type { CareScheduleRow, CareType, HealthStatus, PlantRow, PlantSpeciesRow
 import type { PlantFormValues } from "@/lib/data/plants";
 import type { TimelineEvent } from "@/lib/data/tasks";
 import { identifyPlant } from "@/lib/data/identify";
+import { uploadPlantPhoto, setPlantCoverPhoto } from "@/lib/data/photos";
 import { listPlantTimeline } from "@/lib/data/tasks";
 import { CoverPhoto } from "@/components/cards/cover-photo";
 import { PullToRefresh } from "@/components/pull-to-refresh";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const healthOptions: HealthStatus[] = ["thriving", "stable", "watch", "struggling", "unknown"];
-const emptyForm: PlantFormValues = { name: "", species_id: "", species: "", location: "", notes: "", health_status: "stable", water_every_days: 7, fertilize_every_days: 30 };
+const emptyForm: PlantFormValues = { name: "", species_id: "", species: "", location: "", notes: "", health_status: undefined, water_every_days: undefined, fertilize_every_days: undefined };
 
 export default function PlantsPage() {
   const { supabase, user, data, speciesList, dataLoading, error, notice, setError, handleCreatePlant, handleUpdatePlant, handleDeletePlant, handleMarkCare, refreshDashboard } = useApp();
@@ -31,6 +32,7 @@ export default function PlantsPage() {
   const [editingPlant, setEditingPlant] = useState<PlantRow | null>(null);
   const [form, setForm] = useState<PlantFormValues>(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
   const [tlLoading, setTlLoading] = useState(false);
   const [careLoading, setCareLoading] = useState<string | null>(null);
@@ -48,12 +50,12 @@ export default function PlantsPage() {
     return () => { m = false; };
   }, [selectedPlant?.id, supabase, user]);
 
-  function openCreate() { setEditingPlant(null); setForm(emptyForm); setShowForm(true); }
+  function openCreate() { setEditingPlant(null); setForm(emptyForm); setCoverFile(null); setShowForm(true); }
   function openEdit(p: PlantRow) {
     const s = data.schedules.filter((s) => s.plant_id === p.id);
-    setEditingPlant(p); setForm({ name: p.name, species_id: p.species_id ?? "", species: p.species ?? "", location: p.location ?? "", notes: p.notes ?? "", health_status: p.health_status ?? "stable", water_every_days: cadence(s, "water") ?? 7, fertilize_every_days: cadence(s, "fertilize") ?? 30 }); setShowForm(true);
+    setEditingPlant(p); setForm({ name: p.name, species_id: p.species_id ?? "", species: p.species ?? "", location: p.location ?? "", notes: p.notes ?? "", health_status: p.health_status ?? undefined, water_every_days: cadence(s, "water"), fertilize_every_days: cadence(s, "fertilize") }); setShowForm(true);
   }
-  async function handleSave(e: FormEvent<HTMLFormElement>) { e.preventDefault(); if (!form.name.trim()) return; setSaving(true); setError(null); try { if (editingPlant) { await handleUpdatePlant(editingPlant.id, form); } else { const c = await handleCreatePlant(form); setSelectedId(c.id); } setShowForm(false); setEditingPlant(null); } catch {} finally { setSaving(false); } }
+  async function handleSave(e: FormEvent<HTMLFormElement>) { e.preventDefault(); if (!form.name.trim()) return; setSaving(true); setError(null); try { if (editingPlant) { await handleUpdatePlant(editingPlant.id, form); } else { const c = await handleCreatePlant(form); setSelectedId(c.id); if (coverFile && supabase && user) { try { const { objectPath } = await uploadPlantPhoto(supabase, user.id, c.id, coverFile); await setPlantCoverPhoto(supabase, user.id, c.id, objectPath); } catch { setError("Plant created but photo upload failed."); } } } setShowForm(false); setEditingPlant(null); setCoverFile(null); } catch {} finally { setSaving(false); } }
   async function onDelete(p: PlantRow) { if (!window.confirm(`Delete ${p.name}?`)) return; await handleDeletePlant(p); if (selectedId === p.id) setSelectedId(null); }
   async function onQuickCare(ct: CareType) { if (!selectedPlant) return; setCareLoading(ct); try { await handleMarkCare(selectedPlant.id, ct, selectedPlant.name); if (supabase && user) { const c = supabase; if (c) { const e = await listPlantTimeline(c, user.id, selectedPlant.id); setTimeline(e); } } } finally { setCareLoading(null); } }
 
@@ -75,7 +77,7 @@ export default function PlantsPage() {
         <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search plants" className="h-12 w-full rounded-full pl-10 text-sm bg-muted" />
       </div>
 
-      {showForm && (<section className="mb-14 border-t border-border pt-8"><PlantForm editing={Boolean(editingPlant)} values={form} speciesList={speciesList} saving={saving} onChange={setForm} onCancel={() => { setShowForm(false); setEditingPlant(null); }} onSubmit={handleSave} /></section>)}
+      {showForm && (<section className="mb-14 border-t border-border pt-8"><PlantForm editing={Boolean(editingPlant)} values={form} speciesList={speciesList} saving={saving} coverFile={coverFile} onCoverChange={setCoverFile} onChange={setForm} onCancel={() => { setShowForm(false); setEditingPlant(null); setCoverFile(null); }} onSubmit={handleSave} /></section>)}
 
       <PullToRefresh onRefresh={refreshDashboard}>
         <div className="lg:grid lg:grid-cols-[1fr_380px] lg:gap-12">
@@ -132,11 +134,13 @@ export default function PlantsPage() {
   );
 }
 
-function PlantForm({ editing, values, speciesList, saving, onChange, onCancel, onSubmit }: {
+function PlantForm({ editing, values, speciesList, saving, coverFile, onCoverChange, onChange, onCancel, onSubmit }: {
   editing: boolean;
   values: PlantFormValues;
   speciesList: PlantSpeciesRow[];
   saving: boolean;
+  coverFile: File | null;
+  onCoverChange: (f: File | null) => void;
   onChange: (v: PlantFormValues) => void;
   onCancel: () => void;
   onSubmit: (e: FormEvent<HTMLFormElement>) => void
@@ -205,6 +209,48 @@ function PlantForm({ editing, values, speciesList, saving, onChange, onCancel, o
       <p className="text-display text-foreground">
         {editing ? "Edit plant" : "New plant"}
       </p>
+
+      {/* Cover photo */}
+      {!editing && (
+        <div>
+          <label className="text-label block mb-2 text-muted-foreground">Photo (optional)</label>
+          {coverFile ? (
+            <div className="flex items-center gap-3">
+              <img
+                src={URL.createObjectURL(coverFile)}
+                alt="Preview"
+                className="h-20 w-20 rounded-2xl object-cover"
+              />
+              <button
+                type="button"
+                onClick={() => onCoverChange(null)}
+                className="rounded-full bg-muted px-4 py-2 text-xs font-semibold text-muted-foreground hover:bg-muted/80"
+              >
+                Remove
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => document.getElementById("cover-photo-input")?.click()}
+              className="flex h-20 w-20 items-center justify-center rounded-2xl border-2 border-dashed border-border bg-muted text-muted-foreground hover:bg-muted/80 transition cursor-pointer"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </button>
+          )}
+          <input
+            id="cover-photo-input"
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) onCoverChange(f);
+              e.target.value = "";
+            }}
+          />
+        </div>
+      )}
 
       {/* Name */}
       <div>
@@ -333,7 +379,7 @@ function PlantForm({ editing, values, speciesList, saving, onChange, onCancel, o
   );
 }
 
-function cadence(schedules: CareScheduleRow[], type: CareType): number | null {
-  const s = schedules.find((s) => s.active && s.care_type === type); if (!s) return null;
+function cadence(schedules: CareScheduleRow[], type: CareType): number | undefined {
+  const s = schedules.find((s) => s.active && s.care_type === type); if (!s) return undefined;
   if (s.cadence_unit === "day") return s.cadence_value; if (s.cadence_unit === "week") return s.cadence_value * 7; if (s.cadence_unit === "month") return s.cadence_value * 30; return s.cadence_value;
 }

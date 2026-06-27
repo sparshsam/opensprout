@@ -189,6 +189,21 @@ export default function PlantDetailPage() {
           )}
         </div>
 
+        {/* Basic tracker mode */}
+        {!plant.cover_photo_path && !plant.species && (
+          <section className="mb-12">
+            <p className="text-label mb-4 text-muted-foreground">Tracking mode</p>
+            <div className="border-t border-border pt-6">
+              <span className="inline-block rounded-full bg-muted px-5 py-2 text-xs font-bold tracking-wider uppercase text-muted-foreground">
+                Basic tracker
+              </span>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Add a species or photo to unlock care guidance.
+              </p>
+            </div>
+          </section>
+        )}
+
         {/* Health status */}
         <section className="mb-12">
           <p className="text-label mb-4 text-muted-foreground">Health</p>

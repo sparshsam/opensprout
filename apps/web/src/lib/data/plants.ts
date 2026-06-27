@@ -102,7 +102,7 @@ export async function createPlant(supabase: Client, userId: string, values: Plan
       species: cleanText(validated.species),
       location: cleanText(validated.location),
       notes: cleanText(validated.notes),
-      health_status: validated.health_status ?? "stable",
+      health_status: validated.health_status ?? null,
       client_id: clientId("plant"),
       client_created_at: timestamp,
       client_updated_at: timestamp,
@@ -112,11 +112,12 @@ export async function createPlant(supabase: Client, userId: string, values: Plan
 
   if (error) throw error;
 
+  // Only create care schedules when the user explicitly set cadence values.
   const schedules = [
-    validated.water_every_days
+    validated.water_every_days != null
       ? buildSchedule(userId, plant.id, "water", validated.water_every_days)
       : null,
-    validated.fertilize_every_days
+    validated.fertilize_every_days != null
       ? buildSchedule(userId, plant.id, "fertilize", validated.fertilize_every_days)
       : null,
   ].filter((schedule): schedule is NonNullable<typeof schedule> => Boolean(schedule));
