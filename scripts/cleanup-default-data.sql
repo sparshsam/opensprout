@@ -19,23 +19,26 @@
 
 -- === STEP 1: Review old default health values ===
 -- Shows plants where health_status was never explicitly assessed
--- (was set to 'stable' by the old default)
-SELECT id, name, health_status, created_at
+-- (was set to 'stable' by the old default).
+-- Uses species_id IS NULL (not species) because users can enter
+-- random text as species. Only a non-null species_id indicates
+-- a recognized species was selected.
+SELECT id, name, species, health_status, created_at
 FROM plants
 WHERE health_status = 'stable'
   AND species_id IS NULL
-  AND species IS NULL
   AND cover_photo_path IS NULL
 ORDER BY created_at;
 
 -- === STEP 2: Review old default schedules ===
 -- Shows schedules that were likely created from old defaults
--- (7-day water, 30-day fertilize, no species preset)
-SELECT cs.id, cs.plant_id, p.name as plant_name, cs.care_type, cs.cadence_value, cs.cadence_unit
+-- (7-day water, 30-day fertilize, no species preset).
+-- species_id IS NULL catches both "no species" and random text.
+SELECT cs.id, cs.plant_id, p.name as plant_name, p.species, cs.care_type, cs.cadence_value, cs.cadence_unit
 FROM care_schedules cs
 JOIN plants p ON p.id = cs.plant_id
 WHERE p.species_id IS NULL
-  AND p.species IS NULL
+  AND p.cover_photo_path IS NULL
   AND (
     (cs.care_type = 'water' AND cs.cadence_value = 7 AND cs.cadence_unit = 'day')
     OR (cs.care_type = 'fertilize' AND cs.cadence_value = 30 AND cs.cadence_unit = 'day')
@@ -49,7 +52,6 @@ ORDER BY p.name;
 -- SET health_status = NULL
 -- WHERE health_status = 'stable'
 --   AND species_id IS NULL
---   AND species IS NULL
 --   AND cover_photo_path IS NULL;
 
 -- Delete default schedules that were auto-created
@@ -57,7 +59,7 @@ ORDER BY p.name;
 -- USING plants p
 -- WHERE p.id = cs.plant_id
 --   AND p.species_id IS NULL
---   AND p.species IS NULL
+--   AND p.cover_photo_path IS NULL
 --   AND (
 --     (cs.care_type = 'water' AND cs.cadence_value = 7 AND cs.cadence_unit = 'day')
 --     OR (cs.care_type = 'fertilize' AND cs.cadence_value = 30 AND cs.cadence_unit = 'day')
