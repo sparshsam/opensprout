@@ -4,17 +4,15 @@ import { useState, useMemo, useEffect, useRef, type FormEvent } from "react";
 import { useApp } from "@/lib/context/app-context";
 import { useAtmosphere } from "@/lib/hooks/use-atmosphere";
 import Link from "next/link";
-import { Plus, Search, Pencil, Trash2, Droplets, Loader2, Sprout, Camera } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Loader2, Sprout, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { formatDueDate } from "@/lib/data/care";
 import type { CareScheduleRow, CareType, HealthStatus, PlantRow, PlantSpeciesRow } from "@/lib/data/types";
 import type { PlantFormValues } from "@/lib/data/plants";
-import type { TimelineEvent } from "@/lib/data/tasks";
 import { identifyPlant } from "@/lib/data/identify";
 import { uploadPlantPhoto, setPlantCoverPhoto } from "@/lib/data/photos";
-import { listPlantTimeline } from "@/lib/data/tasks";
 import { CoverPhoto } from "@/components/cards/cover-photo";
 import { PullToRefresh } from "@/components/pull-to-refresh";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,41 +21,25 @@ const healthOptions: HealthStatus[] = ["thriving", "stable", "watch", "strugglin
 const emptyForm: PlantFormValues = { name: "", species_id: "", species: "", location: "", notes: "", health_status: undefined, water_every_days: undefined, fertilize_every_days: undefined };
 
 export default function PlantsPage() {
-  const { supabase, user, data, speciesList, dataLoading, error, notice, setError, handleCreatePlant, handleUpdatePlant, handleDeletePlant, handleMarkCare, refreshDashboard } = useApp();
+  const { supabase, user, data, speciesList, dataLoading, error, notice, setError, handleCreatePlant, handleUpdatePlant, handleDeletePlant, refreshDashboard } = useApp();
   const { greeting } = useAtmosphere();
 
-  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editingPlant, setEditingPlant] = useState<PlantRow | null>(null);
   const [form, setForm] = useState<PlantFormValues>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
-  const [tlLoading, setTlLoading] = useState(false);
-  const [careLoading, setCareLoading] = useState<string | null>(null);
-
-  const selectedPlant = data.plants.find((p) => p.id === selectedId) ?? data.plants[0] ?? null;
-  const selectedSchedules = selectedPlant ? data.schedules.filter((s) => s.plant_id === selectedPlant.id) : [];
 
   const visible = useMemo(() => data.plants.filter((p) => `${p.name} ${p.species ?? ""} ${p.location ?? ""}`.toLowerCase().includes(query.toLowerCase())), [data.plants, query]);
-
-  useEffect(() => {
-    if (!selectedPlant || !supabase || !user) return;
-    let m = true; setTlLoading(true);
-    const c = supabase; if (!c) return;
-    listPlantTimeline(c, user.id, selectedPlant.id).then((e) => { if (m) setTimeline(e); }).catch(() => { if (m) setTimeline([]); }).finally(() => { if (m) setTlLoading(false); });
-    return () => { m = false; };
-  }, [selectedPlant?.id, supabase, user]);
 
   function openCreate() { setEditingPlant(null); setForm(emptyForm); setCoverFile(null); setShowForm(true); }
   function openEdit(p: PlantRow) {
     const s = data.schedules.filter((s) => s.plant_id === p.id);
     setEditingPlant(p); setForm({ name: p.name, species_id: p.species_id ?? "", species: p.species ?? "", location: p.location ?? "", notes: p.notes ?? "", health_status: p.health_status ?? undefined, water_every_days: cadence(s, "water"), fertilize_every_days: cadence(s, "fertilize") }); setShowForm(true);
   }
-  async function handleSave(e: FormEvent<HTMLFormElement>) { e.preventDefault(); if (!form.name.trim()) return; setSaving(true); setError(null); try { if (editingPlant) { await handleUpdatePlant(editingPlant.id, form); } else { const c = await handleCreatePlant(form); setSelectedId(c.id); if (coverFile && supabase && user) { try { const { objectPath } = await uploadPlantPhoto(supabase, user.id, c.id, coverFile); await setPlantCoverPhoto(supabase, user.id, c.id, objectPath); } catch { setError("Plant created but photo upload failed."); } } } setShowForm(false); setEditingPlant(null); setCoverFile(null); } catch {} finally { setSaving(false); } }
-  async function onDelete(p: PlantRow) { if (!window.confirm(`Delete ${p.name}?`)) return; await handleDeletePlant(p); if (selectedId === p.id) setSelectedId(null); }
-  async function onQuickCare(ct: CareType) { if (!selectedPlant) return; setCareLoading(ct); try { await handleMarkCare(selectedPlant.id, ct, selectedPlant.name); if (supabase && user) { const c = supabase; if (c) { const e = await listPlantTimeline(c, user.id, selectedPlant.id); setTimeline(e); } } } finally { setCareLoading(null); } }
+  async function handleSave(e: FormEvent<HTMLFormElement>) { e.preventDefault(); if (!form.name.trim()) return; setSaving(true); setError(null); try { if (editingPlant) { await handleUpdatePlant(editingPlant.id, form); } else { const c = await handleCreatePlant(form); if (coverFile && supabase && user) { try { const { objectPath } = await uploadPlantPhoto(supabase, user.id, c.id, coverFile); await setPlantCoverPhoto(supabase, user.id, c.id, objectPath); } catch { setError("Plant created but photo upload failed."); } } } setShowForm(false); setEditingPlant(null); setCoverFile(null); } catch {} finally { setSaving(false); } }
+  async function onDelete(p: PlantRow) { if (!window.confirm(`Delete ${p.name}?`)) return; await handleDeletePlant(p); }
 
   return (
     <>
@@ -80,55 +62,37 @@ export default function PlantsPage() {
       {showForm && (<section className="mb-14 border-t border-border pt-8"><PlantForm editing={Boolean(editingPlant)} values={form} speciesList={speciesList} saving={saving} coverFile={coverFile} onCoverChange={setCoverFile} onChange={setForm} onCancel={() => { setShowForm(false); setEditingPlant(null); setCoverFile(null); }} onSubmit={handleSave} /></section>)}
 
       <PullToRefresh onRefresh={refreshDashboard}>
-        <div className="lg:grid lg:grid-cols-[1fr_380px] lg:gap-12">
-          <div>
-            {dataLoading && visible.length === 0 ? (
-              <div className="grid gap-6 sm:grid-cols-2">{[...Array(4)].map((_, i) => <Skeleton key={i} className="h-52 rounded-3xl" />)}</div>
-            ) : visible.length === 0 ? (
-              <div className="py-16 text-center">
-                <p className="text-xl font-bold text-foreground">{query ? "No plants match that search." : "No plants yet"}</p>
-                <p className="mt-2 text-sm text-muted-foreground max-w-sm mx-auto">{query ? "Try a different search." : "Add your first plant to start."}</p>
-                {!query && <button onClick={openCreate} className="mt-8 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground hover:brightness-110"><Plus size={16} className="inline" /> Add your first plant</button>}
-              </div>
-            ) : (
-              <div className="grid gap-6 sm:grid-cols-2">
-                {visible.map((plant) => (
-                  <Link key={plant.id} href={`/plants/${plant.id}`} className="group block rounded-3xl border border-border/40 bg-white p-6 transition hover:shadow-sm dark:bg-muted">
-                    <CoverPhoto coverPhotoPath={plant.cover_photo_path} className="aspect-[4/3] w-full rounded-2xl object-cover mb-5" />
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="text-lg font-bold text-foreground">{plant.name}</p>
-                        {plant.species && <p className="text-sm italic text-muted-foreground">{plant.species}</p>}
-                      </div>
-                      <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold", !plant.health_status || plant.health_status === "unknown" ? "bg-muted text-muted-foreground" : plant.health_status === "thriving" || plant.health_status === "stable" ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive")}>
-                        {plant.health_status && plant.health_status !== "unknown" ? plant.health_status.charAt(0).toUpperCase() : "?"}
-                      </div>
-                    </div>
-                    {plant.location && <p className="mt-2 text-xs text-muted-foreground">{plant.location}</p>}
-                    <div className="mt-4 flex gap-2 pt-2 border-t border-border/30" onClick={(e) => e.stopPropagation()}>
-                      <span onClick={(e) => { e.preventDefault(); openEdit(plant); }} className="rounded-full bg-muted px-4 py-1.5 text-xs font-semibold text-muted-foreground cursor-pointer hover:bg-muted/80">Edit</span>
-                      <span onClick={(e) => { e.preventDefault(); onDelete(plant); }} className="rounded-full bg-destructive/5 px-4 py-1.5 text-xs font-semibold text-destructive cursor-pointer hover:bg-destructive/10">Delete</span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
+        {dataLoading && visible.length === 0 ? (
+          <div className="grid gap-6 sm:grid-cols-2">{[...Array(4)].map((_, i) => <Skeleton key={i} className="h-52 rounded-3xl" />)}</div>
+        ) : visible.length === 0 ? (
+          <div className="py-16 text-center">
+            <p className="text-xl font-bold text-foreground">{query ? "No plants match that search." : "No plants yet"}</p>
+            <p className="mt-2 text-sm text-muted-foreground max-w-sm mx-auto">{query ? "Try a different search." : "Add your first plant to start."}</p>
+            {!query && <button onClick={openCreate} className="mt-8 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground hover:brightness-110"><Plus size={16} className="inline" /> Add your first plant</button>}
           </div>
-
-          {selectedPlant ? (
-            <div className="lg:sticky lg:top-20 space-y-10 lg:block">
-              <div className="lg:hidden">
-                <button onClick={() => setSelectedId(null)} className="mb-4 rounded-full bg-muted px-5 py-2 text-xs font-semibold text-foreground hover:bg-muted/80">← Back to grid</button>
-              </div>
-              <CoverPhoto coverPhotoPath={selectedPlant.cover_photo_path} className="aspect-[4/3] w-full rounded-2xl object-cover" />
-              <div><div className="flex items-start justify-between gap-3"><div><p className="text-display text-foreground">{selectedPlant.name}</p>{selectedPlant.species && <p className="mt-1 text-sm italic text-muted-foreground">{selectedPlant.species}</p>}</div><div className="flex gap-2"><button onClick={() => openEdit(selectedPlant)} className="rounded-full bg-muted px-4 py-2 text-xs font-semibold hover:bg-muted/80"><Pencil size={14} className="inline" /> Edit</button><button onClick={() => onDelete(selectedPlant)} className="rounded-full bg-destructive/5 px-4 py-2 text-xs font-semibold text-destructive hover:bg-destructive/10"><Trash2 size={14} className="inline" /> Delete</button></div></div></div>
-              <div><p className="text-label mb-4 text-muted-foreground">Quick care</p><div className="flex flex-wrap gap-2">{["water", "fertilize", "mist", "rotate"].map((ct) => (<button key={ct} onClick={() => onQuickCare(ct as CareType)} disabled={careLoading !== null} className="rounded-full bg-muted px-5 py-2.5 text-xs font-bold tracking-wider uppercase text-foreground hover:bg-muted/80 disabled:opacity-40">{careLoading === ct ? <Loader2 className="animate-spin inline" size={12} /> : null}{ct}</button>))}</div></div>
-              <div className="border-t border-border pt-6"><p className="text-label mb-4 text-muted-foreground">Schedule</p>{selectedSchedules.filter((s) => s.active).length === 0 ? <p className="text-sm text-muted-foreground">No care schedule set.</p> : <div className="space-y-3">{selectedSchedules.filter((s) => s.active).map((s) => (<div key={s.id} className="flex items-center justify-between gap-4"><span className="text-sm font-semibold capitalize text-foreground">{s.care_type}</span><span className="text-xs text-muted-foreground">{s.next_due_at ? `Due ${formatDueDate(s.next_due_at)}` : "No upcoming"}</span></div>))}</div>}</div>
-              {selectedPlant.notes && (<div className="border-t border-border pt-6"><p className="text-label mb-3 text-muted-foreground">Notes</p><p className="text-sm leading-relaxed text-foreground">{selectedPlant.notes}</p></div>)}
-              <div className="border-t border-border pt-6"><p className="text-label mb-4 text-muted-foreground">Timeline</p>{tlLoading ? <div className="space-y-2">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-10 rounded-full" />)}</div> : timeline.length === 0 ? <p className="text-sm text-muted-foreground">No care events yet.</p> : <div className="space-y-2">{timeline.slice(0, 8).map((e) => (<div key={e.id} className="flex items-center gap-3 rounded-full bg-muted/50 px-5 py-2.5"><div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"><Droplets size={12} /></div><div className="min-w-0 flex-1"><p className="text-xs font-semibold text-foreground capitalize">{e.careType ?? e.type}</p></div><span className="shrink-0 text-xs text-muted-foreground">{e.occurredAt.slice(0, 10)}</span></div>))}</div>}</div>
-            </div>
-          ) : dataLoading ? <div className="space-y-4"><Skeleton className="h-64 rounded-2xl" /><Skeleton className="h-32 rounded-2xl" /></div> : <div className="py-16 text-center"><p className="text-sm text-muted-foreground">Select a plant to see details</p></div>}
-        </div>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {visible.map((plant) => (
+              <Link key={plant.id} href={`/plants/${plant.id}`} className="group block rounded-3xl border border-border/40 bg-white p-6 transition hover:shadow-sm dark:bg-muted">
+                <CoverPhoto coverPhotoPath={plant.cover_photo_path} className="aspect-[4/3] w-full rounded-2xl object-cover mb-5" />
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-lg font-bold text-foreground">{plant.name}</p>
+                    {plant.species && <p className="text-sm italic text-muted-foreground">{plant.species}</p>}
+                  </div>
+                  <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold", !plant.health_status || plant.health_status === "unknown" ? "bg-muted text-muted-foreground" : plant.health_status === "thriving" || plant.health_status === "stable" ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive")}>
+                    {plant.health_status && plant.health_status !== "unknown" ? plant.health_status.charAt(0).toUpperCase() : "?"}
+                  </div>
+                </div>
+                {plant.location && <p className="mt-2 text-xs text-muted-foreground">{plant.location}</p>}
+                <div className="mt-4 flex gap-2 pt-2 border-t border-border/30" onClick={(e) => e.stopPropagation()}>
+                  <span onClick={(e) => { e.preventDefault(); openEdit(plant); }} className="rounded-full bg-muted px-4 py-1.5 text-xs font-semibold text-muted-foreground cursor-pointer hover:bg-muted/80">Edit</span>
+                  <span onClick={(e) => { e.preventDefault(); onDelete(plant); }} className="rounded-full bg-destructive/5 px-4 py-1.5 text-xs font-semibold text-destructive cursor-pointer hover:bg-destructive/10">Delete</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </PullToRefresh>
     </>
   );
