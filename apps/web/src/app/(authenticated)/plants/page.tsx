@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo, useEffect, type FormEvent } from "react";
+import { useState, useMemo, useEffect, useRef, type FormEvent } from "react";
 import { useApp } from "@/lib/context/app-context";
 import { useAtmosphere } from "@/lib/hooks/use-atmosphere";
-import { Plus, Search, Pencil, Trash2, Droplets, Loader2, Sprout } from "lucide-react";
+import Link from "next/link";
+import { Plus, Search, Pencil, Trash2, Droplets, Loader2, Sprout, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -11,6 +12,7 @@ import { formatDueDate } from "@/lib/data/care";
 import type { CareScheduleRow, CareType, HealthStatus, PlantRow, PlantSpeciesRow } from "@/lib/data/types";
 import type { PlantFormValues } from "@/lib/data/plants";
 import type { TimelineEvent } from "@/lib/data/tasks";
+import { identifyPlant } from "@/lib/data/identify";
 import { listPlantTimeline } from "@/lib/data/tasks";
 import { CoverPhoto } from "@/components/cards/cover-photo";
 import { PullToRefresh } from "@/components/pull-to-refresh";
@@ -54,7 +56,6 @@ export default function PlantsPage() {
   async function handleSave(e: FormEvent<HTMLFormElement>) { e.preventDefault(); if (!form.name.trim()) return; setSaving(true); setError(null); try { if (editingPlant) { await handleUpdatePlant(editingPlant.id, form); } else { const c = await handleCreatePlant(form); setSelectedId(c.id); } setShowForm(false); setEditingPlant(null); } catch {} finally { setSaving(false); } }
   async function onDelete(p: PlantRow) { if (!window.confirm(`Delete ${p.name}?`)) return; await handleDeletePlant(p); if (selectedId === p.id) setSelectedId(null); }
   async function onQuickCare(ct: CareType) { if (!selectedPlant) return; setCareLoading(ct); try { await handleMarkCare(selectedPlant.id, ct, selectedPlant.name); if (supabase && user) { const c = supabase; if (c) { const e = await listPlantTimeline(c, user.id, selectedPlant.id); setTimeline(e); } } } finally { setCareLoading(null); } }
-  function nextTask(id: string) { const s = data.schedules.find((s) => s.plant_id === id && s.active); if (!s || !s.next_due_at) return null; return { careType: s.care_type, dueAt: s.next_due_at }; }
 
   return (
     <>
@@ -90,55 +91,246 @@ export default function PlantsPage() {
             ) : (
               <div className="grid gap-6 sm:grid-cols-2">
                 {visible.map((plant) => (
-                  <div key={plant.id} onClick={() => setSelectedId(plant.id)} className={cn("group cursor-pointer rounded-3xl border border-border/40 bg-white p-6 transition hover:shadow-sm", selectedPlant?.id === plant.id && "border-primary/30")}>
+                  <Link key={plant.id} href={`/plants/${plant.id}`} className="group block rounded-3xl border border-border/40 bg-white p-6 transition hover:shadow-sm dark:bg-muted">
                     <CoverPhoto coverPhotoPath={plant.cover_photo_path} className="aspect-[4/3] w-full rounded-2xl object-cover mb-5" />
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="text-lg font-bold text-foreground">{plant.name}</p>
                         {plant.species && <p className="text-sm italic text-muted-foreground">{plant.species}</p>}
                       </div>
-                      <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold", plant.health_status === "thriving" || plant.health_status === "stable" ? "bg-primary/10 text-primary" : plant.health_status === "watch" || plant.health_status === "struggling" ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground")}>
-                        {plant.health_status ? plant.health_status.charAt(0).toUpperCase() : "?"}
+                      <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold", !plant.health_status || plant.health_status === "unknown" ? "bg-muted text-muted-foreground" : plant.health_status === "thriving" || plant.health_status === "stable" ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive")}>
+                        {plant.health_status && plant.health_status !== "unknown" ? plant.health_status.charAt(0).toUpperCase() : "?"}
                       </div>
                     </div>
                     {plant.location && <p className="mt-2 text-xs text-muted-foreground">{plant.location}</p>}
-                    {nextTask(plant.id) && <p className="mt-3 rounded-full bg-primary/10 px-3 py-1 inline-block text-xs font-bold tracking-wider uppercase text-primary">{nextTask(plant.id)!.careType}</p>}
-                    <div className="mt-4 flex gap-2 pt-2 border-t border-border/30">
-                      <span onClick={(e) => { e.stopPropagation(); openEdit(plant); }} className="rounded-full bg-muted px-4 py-1.5 text-xs font-semibold text-muted-foreground cursor-pointer hover:bg-muted/80">Edit</span>
-                      <span onClick={(e) => { e.stopPropagation(); onDelete(plant); }} className="rounded-full bg-destructive/5 px-4 py-1.5 text-xs font-semibold text-destructive cursor-pointer hover:bg-destructive/10">Delete</span>
+                    <div className="mt-4 flex gap-2 pt-2 border-t border-border/30" onClick={(e) => e.stopPropagation()}>
+                      <span onClick={(e) => { e.preventDefault(); openEdit(plant); }} className="rounded-full bg-muted px-4 py-1.5 text-xs font-semibold text-muted-foreground cursor-pointer hover:bg-muted/80">Edit</span>
+                      <span onClick={(e) => { e.preventDefault(); onDelete(plant); }} className="rounded-full bg-destructive/5 px-4 py-1.5 text-xs font-semibold text-destructive cursor-pointer hover:bg-destructive/10">Delete</span>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
           </div>
 
-          <aside className="hidden lg:block">
-            {selectedPlant ? (
-              <div className="sticky top-20 space-y-10">
-                <CoverPhoto coverPhotoPath={selectedPlant.cover_photo_path} className="aspect-[4/3] w-full rounded-2xl object-cover" />
-                <div><div className="flex items-start justify-between gap-3"><div><p className="text-display text-foreground">{selectedPlant.name}</p>{selectedPlant.species && <p className="mt-1 text-sm italic text-muted-foreground">{selectedPlant.species}</p>}</div><div className="flex gap-2"><button onClick={() => openEdit(selectedPlant)} className="rounded-full bg-muted px-4 py-2 text-xs font-semibold hover:bg-muted/80"><Pencil size={14} className="inline" /> Edit</button><button onClick={() => onDelete(selectedPlant)} className="rounded-full bg-destructive/5 px-4 py-2 text-xs font-semibold text-destructive hover:bg-destructive/10"><Trash2 size={14} className="inline" /> Delete</button></div></div></div>
-                <div><p className="text-label mb-4 text-muted-foreground">Quick care</p><div className="flex flex-wrap gap-2">{["water", "fertilize", "mist", "rotate"].map((ct) => (<button key={ct} onClick={() => onQuickCare(ct as CareType)} disabled={careLoading !== null} className="rounded-full bg-muted px-5 py-2.5 text-xs font-bold tracking-wider uppercase text-foreground hover:bg-muted/80 disabled:opacity-40">{careLoading === ct ? <Loader2 className="animate-spin inline" size={12} /> : null}{ct}</button>))}</div></div>
-                <div className="border-t border-border pt-6"><p className="text-label mb-4 text-muted-foreground">Schedule</p>{selectedSchedules.filter((s) => s.active).length === 0 ? <p className="text-sm text-muted-foreground">No care schedule set.</p> : <div className="space-y-3">{selectedSchedules.filter((s) => s.active).map((s) => (<div key={s.id} className="flex items-center justify-between gap-4"><span className="text-sm font-semibold capitalize text-foreground">{s.care_type}</span><span className="text-xs text-muted-foreground">{s.next_due_at ? `Due ${formatDueDate(s.next_due_at)}` : "No upcoming"}</span></div>))}</div>}</div>
-                {selectedPlant.notes && (<div className="border-t border-border pt-6"><p className="text-label mb-3 text-muted-foreground">Notes</p><p className="text-sm leading-relaxed text-foreground">{selectedPlant.notes}</p></div>)}
-                <div className="border-t border-border pt-6"><p className="text-label mb-4 text-muted-foreground">Timeline</p>{tlLoading ? <div className="space-y-2">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-10 rounded-full" />)}</div> : timeline.length === 0 ? <p className="text-sm text-muted-foreground">No care events yet.</p> : <div className="space-y-2">{timeline.slice(0, 8).map((e) => (<div key={e.id} className="flex items-center gap-3 rounded-full bg-muted/50 px-5 py-2.5"><div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"><Droplets size={12} /></div><div className="min-w-0 flex-1"><p className="text-xs font-semibold text-foreground capitalize">{e.careType ?? e.type}</p></div><span className="shrink-0 text-xs text-muted-foreground">{e.occurredAt.slice(0, 10)}</span></div>))}</div>}</div>
+          {selectedPlant ? (
+            <div className="lg:sticky lg:top-20 space-y-10 lg:block">
+              <div className="lg:hidden">
+                <button onClick={() => setSelectedId(null)} className="mb-4 rounded-full bg-muted px-5 py-2 text-xs font-semibold text-foreground hover:bg-muted/80">← Back to grid</button>
               </div>
-            ) : dataLoading ? <div className="space-y-4"><Skeleton className="h-64 rounded-2xl" /><Skeleton className="h-32 rounded-2xl" /></div> : <div className="py-16 text-center"><p className="text-sm text-muted-foreground">Select a plant to see details</p></div>}
-          </aside>
+              <CoverPhoto coverPhotoPath={selectedPlant.cover_photo_path} className="aspect-[4/3] w-full rounded-2xl object-cover" />
+              <div><div className="flex items-start justify-between gap-3"><div><p className="text-display text-foreground">{selectedPlant.name}</p>{selectedPlant.species && <p className="mt-1 text-sm italic text-muted-foreground">{selectedPlant.species}</p>}</div><div className="flex gap-2"><button onClick={() => openEdit(selectedPlant)} className="rounded-full bg-muted px-4 py-2 text-xs font-semibold hover:bg-muted/80"><Pencil size={14} className="inline" /> Edit</button><button onClick={() => onDelete(selectedPlant)} className="rounded-full bg-destructive/5 px-4 py-2 text-xs font-semibold text-destructive hover:bg-destructive/10"><Trash2 size={14} className="inline" /> Delete</button></div></div></div>
+              <div><p className="text-label mb-4 text-muted-foreground">Quick care</p><div className="flex flex-wrap gap-2">{["water", "fertilize", "mist", "rotate"].map((ct) => (<button key={ct} onClick={() => onQuickCare(ct as CareType)} disabled={careLoading !== null} className="rounded-full bg-muted px-5 py-2.5 text-xs font-bold tracking-wider uppercase text-foreground hover:bg-muted/80 disabled:opacity-40">{careLoading === ct ? <Loader2 className="animate-spin inline" size={12} /> : null}{ct}</button>))}</div></div>
+              <div className="border-t border-border pt-6"><p className="text-label mb-4 text-muted-foreground">Schedule</p>{selectedSchedules.filter((s) => s.active).length === 0 ? <p className="text-sm text-muted-foreground">No care schedule set.</p> : <div className="space-y-3">{selectedSchedules.filter((s) => s.active).map((s) => (<div key={s.id} className="flex items-center justify-between gap-4"><span className="text-sm font-semibold capitalize text-foreground">{s.care_type}</span><span className="text-xs text-muted-foreground">{s.next_due_at ? `Due ${formatDueDate(s.next_due_at)}` : "No upcoming"}</span></div>))}</div>}</div>
+              {selectedPlant.notes && (<div className="border-t border-border pt-6"><p className="text-label mb-3 text-muted-foreground">Notes</p><p className="text-sm leading-relaxed text-foreground">{selectedPlant.notes}</p></div>)}
+              <div className="border-t border-border pt-6"><p className="text-label mb-4 text-muted-foreground">Timeline</p>{tlLoading ? <div className="space-y-2">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-10 rounded-full" />)}</div> : timeline.length === 0 ? <p className="text-sm text-muted-foreground">No care events yet.</p> : <div className="space-y-2">{timeline.slice(0, 8).map((e) => (<div key={e.id} className="flex items-center gap-3 rounded-full bg-muted/50 px-5 py-2.5"><div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"><Droplets size={12} /></div><div className="min-w-0 flex-1"><p className="text-xs font-semibold text-foreground capitalize">{e.careType ?? e.type}</p></div><span className="shrink-0 text-xs text-muted-foreground">{e.occurredAt.slice(0, 10)}</span></div>))}</div>}</div>
+            </div>
+          ) : dataLoading ? <div className="space-y-4"><Skeleton className="h-64 rounded-2xl" /><Skeleton className="h-32 rounded-2xl" /></div> : <div className="py-16 text-center"><p className="text-sm text-muted-foreground">Select a plant to see details</p></div>}
         </div>
       </PullToRefresh>
     </>
   );
 }
 
-function PlantForm({ editing, values, speciesList, saving, onChange, onCancel, onSubmit }: { editing: boolean; values: PlantFormValues; speciesList: PlantSpeciesRow[]; saving: boolean; onChange: (v: PlantFormValues) => void; onCancel: () => void; onSubmit: (e: FormEvent<HTMLFormElement>) => void }) {
+function PlantForm({ editing, values, speciesList, saving, onChange, onCancel, onSubmit }: {
+  editing: boolean;
+  values: PlantFormValues;
+  speciesList: PlantSpeciesRow[];
+  saving: boolean;
+  onChange: (v: PlantFormValues) => void;
+  onCancel: () => void;
+  onSubmit: (e: FormEvent<HTMLFormElement>) => void
+}) {
   const set = (p: Partial<PlantFormValues>) => onChange({ ...values, ...p });
-  return (<form onSubmit={onSubmit} className="max-w-lg space-y-6"><p className="text-display text-foreground">{editing ? "Edit plant" : "New plant"}</p>
-    <div><label className="text-label block mb-2 text-muted-foreground">Name</label><Input value={values.name} onChange={(e) => set({ name: e.target.value })} placeholder="e.g. Monstera Deliciosa" className="h-12 w-full rounded-full px-5 text-sm bg-muted" required autoFocus /></div>
-    <div><label className="text-label block mb-2 text-muted-foreground">Species</label><Input value={values.species ?? ""} onChange={(e) => set({ species: e.target.value })} placeholder="e.g. Monstera deliciosa" className="h-12 w-full rounded-full px-5 text-sm bg-muted" /></div>
-    <div><label className="text-label block mb-2 text-muted-foreground">Location</label><Input value={values.location ?? ""} onChange={(e) => set({ location: e.target.value })} placeholder="e.g. Living room" className="h-12 w-full rounded-full px-5 text-sm bg-muted" /></div>
-    <div className="flex gap-3"><Button type="submit" disabled={saving || !values.name.trim()}>{saving ? "Saving..." : editing ? "Save changes" : "Create plant"}</Button><Button type="button" variant="secondary" onClick={onCancel}>Cancel</Button></div>
-  </form>);
+  const [speciesQuery, setSpeciesQuery] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [identifying, setIdentifying] = useState(false);
+  const [identifyError, setIdentifyError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const matches = useMemo(() => {
+    const q = speciesQuery.trim().toLowerCase();
+    if (!q) return [];
+    return speciesList
+      .filter((s) =>
+        [s.common_name, s.scientific_name ?? "", ...s.aliases].some((v) =>
+          v.toLowerCase().includes(q),
+        ),
+      )
+      .slice(0, 12);
+  }, [speciesList, speciesQuery]);
+
+  async function handleIdentify(file: File) {
+    setIdentifying(true);
+    setIdentifyError(null);
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        try {
+          const base64 = (reader.result as string).split(",")[1];
+          const result = await identifyPlant(base64);
+          if (result.error) {
+            setIdentifyError(result.error);
+            setIdentifying(false);
+            return;
+          }
+          if (result.bestMatch) {
+            const matched = speciesList.find(
+              (s) =>
+                s.scientific_name?.toLowerCase() ===
+                  result.bestMatch!.scientificName.toLowerCase() ||
+                s.common_name.toLowerCase() ===
+                  result.bestMatch!.scientificName.toLowerCase(),
+            );
+            set({
+              species: result.bestMatch.scientificName,
+              species_id: matched?.id ?? "",
+            });
+            setSpeciesQuery("");
+          }
+        } catch {
+          setIdentifyError("Failed to identify plant.");
+        }
+        setIdentifying(false);
+      };
+      reader.readAsDataURL(file);
+    } catch {
+      setIdentifying(false);
+      setIdentifyError("Failed to read image.");
+    }
+  }
+
+  return (
+    <form onSubmit={onSubmit} className="max-w-lg space-y-6">
+      <p className="text-display text-foreground">
+        {editing ? "Edit plant" : "New plant"}
+      </p>
+
+      {/* Name */}
+      <div>
+        <label className="text-label block mb-2 text-muted-foreground">Name</label>
+        <Input
+          value={values.name}
+          onChange={(e) => set({ name: e.target.value })}
+          placeholder="e.g. Monstera by the window"
+          className="h-12 w-full rounded-full px-5 text-sm bg-muted"
+          required
+          autoFocus
+        />
+      </div>
+
+      {/* Species + photo identify */}
+      <div>
+        <label className="text-label block mb-2 text-muted-foreground">Species</label>
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Input
+              value={values.species ?? ""}
+              onChange={(e) => {
+                set({ species: e.target.value, species_id: "" });
+                setSpeciesQuery(e.target.value);
+                setShowDropdown(true);
+              }}
+              onFocus={() => {
+                if (speciesQuery || values.species) setShowDropdown(true);
+              }}
+              onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+              placeholder="e.g. Monstera deliciosa"
+              className="h-12 w-full rounded-full px-5 text-sm bg-muted"
+            />
+            {showDropdown && matches.length > 0 && (
+              <div className="absolute z-10 mt-1.5 w-full rounded-2xl border border-border bg-background shadow-lg max-h-60 overflow-y-auto dark:bg-muted">
+                {matches.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    className="flex w-full cursor-pointer items-center gap-2 px-5 py-3 text-left text-sm transition hover:bg-muted first:rounded-t-2xl last:rounded-b-2xl"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      onChange({
+                        ...values,
+                        species: s.scientific_name ?? s.common_name,
+                        species_id: s.id,
+                      });
+                      setSpeciesQuery("");
+                      setShowDropdown(false);
+                    }}
+                  >
+                    <Sprout size={14} className="shrink-0 text-primary/60" />
+                    <div className="min-w-0">
+                      <span className="font-medium text-foreground">
+                        {s.common_name}
+                      </span>
+                      {s.scientific_name && (
+                        <span className="ml-2 italic text-muted-foreground">
+                          {s.scientific_name}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          {!editing && (
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={identifying}
+              className="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-full bg-muted text-muted-foreground transition hover:bg-muted/80 hover:text-foreground disabled:opacity-40"
+              title="Identify plant from photo"
+            >
+              {identifying ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <Camera size={18} />
+              )}
+            </button>
+          )}
+        </div>
+        {identifyError && (
+          <p className="mt-2 text-xs text-destructive">{identifyError}</p>
+        )}
+        <p className="mt-1.5 text-xs text-muted-foreground">
+          Start typing to search your species library, or use the{" "}
+          <Camera size={12} className="inline" /> camera to identify from a
+          photo.
+        </p>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) handleIdentify(f);
+            e.target.value = "";
+          }}
+        />
+      </div>
+
+      {/* Location */}
+      <div>
+        <label className="text-label block mb-2 text-muted-foreground">Location</label>
+        <Input
+          value={values.location ?? ""}
+          onChange={(e) => set({ location: e.target.value })}
+          placeholder="e.g. Living room"
+          className="h-12 w-full rounded-full px-5 text-sm bg-muted"
+        />
+      </div>
+
+      {/* Actions */}
+      <div className="flex gap-3">
+        <Button type="submit" disabled={saving || !values.name.trim()}>
+          {saving ? "Saving..." : editing ? "Save changes" : "Create plant"}
+        </Button>
+        <Button type="button" variant="secondary" onClick={onCancel}>
+          Cancel
+        </Button>
+      </div>
+    </form>
+  );
 }
 
 function cadence(schedules: CareScheduleRow[], type: CareType): number | null {
