@@ -71,7 +71,7 @@ export default function IdentifyPage() {
       {error && (<div className="mb-10 rounded-full bg-destructive/10 px-6 py-3 text-sm font-semibold text-destructive"><div className="flex items-center justify-between gap-3"><span>{error}</span>{hasPhoto && <button onClick={identify} disabled={identifying} className="rounded-full bg-destructive/20 px-4 py-1.5 text-xs font-bold tracking-wider uppercase">Retry</button>}</div></div>)}
       {confirmed && (<div className="mb-10 rounded-full bg-primary/10 px-6 py-3 text-sm font-semibold text-primary"><Check size={16} className="inline" /> Saved — redirecting.</div>)}
 
-      <section className="max-w-lg space-y-10">
+      <section className="max-w-lg space-y-10 md:max-w-2xl">
         {/* 1. Capture */}
         <div><p className="text-label mb-4 text-muted-foreground">1. Capture</p><div className="rounded-2xl bg-muted p-6"><PhotoPicker photos={photos} onAdd={addPhoto} onRemove={removePhoto} maxPhotos={1} disabled={identifying || saving} /></div></div>
 
