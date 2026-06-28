@@ -231,6 +231,26 @@ export async function deletePhoto(
   if (deleteError) throw deleteError;
 }
 
+/**
+ * List all non-deleted photos for a plant, ordered by sort_order.
+ */
+export async function listPlantPhotos(
+  supabase: Client,
+  userId: string,
+  plantId: string,
+): Promise<JournalPhotoRow[]> {
+  const { data, error } = await supabase
+    .from("journal_photos")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("plant_id", plantId)
+    .is("deleted_at", null)
+    .order("sort_order", { ascending: true });
+
+  if (error) throw error;
+  return data ?? [];
+}
+
 // ──────────────────────────────────────────────
 // Get a public download URL (NOT recommended for
 // private photos — use signed URLs instead)

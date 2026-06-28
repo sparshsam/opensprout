@@ -23,6 +23,7 @@ export type Database = {
           notes: string | null;
           cover_photo_path: string | null;
           health_status: HealthStatus | null;
+          is_favorite: boolean;
           archived_at: string | null;
           client_id: string | null;
           client_created_at: string | null;
@@ -46,6 +47,7 @@ export type Database = {
           notes?: string | null;
           cover_photo_path?: string | null;
           health_status?: HealthStatus | null;
+          is_favorite?: boolean;
           archived_at?: string | null;
           client_id?: string | null;
           client_created_at?: string | null;

@@ -1,38 +1,29 @@
 {
   "name": "OpenSprout",
   "short_name": "OpenSprout",
-  "description": "Free and open-source plant care tracking — schedules, logs, photos & journal.",
+  "description": "Free and open-source plant care tracking. Private, local-first, no subscriptions.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
-  "orientation": "portrait-primary",
-  "lang": "en-US",
   "background_color": "#f8fbf9",
   "theme_color": "#16784f",
-  "categories": ["lifestyle", "productivity"],
-  "edge_side_panel": {
-    "preferred_width": 400
-  },
-  "launch_handler": {
-    "client_mode": "focus-existing"
-  },
+  "orientation": "portrait-primary",
   "icons": [
-    {
-      "src": "/icons/icon.png",
-      "sizes": "1024x1024",
-      "type": "image/png",
-      "purpose": "any"
-    },
     {
       "src": "/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "/icons/icon-512.png",
       "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-1024.png",
+      "sizes": "1024x1024",
       "type": "image/png",
       "purpose": "any maskable"
     }
@@ -51,6 +42,24 @@
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Plant Collection"
+    }
+  ],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "categories": ["lifestyle", "productivity"],
+  "lang": "en-US",
+  "dir": "ltr",
+  "handle_links": "auto",
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "display_override": ["standalone", "minimal-ui"],
+  "prefer_related_applications": false,
+  "related_applications": [
+    {
+      "platform": "play",
+      "id": "com.sparshsam.opensprout"
     }
   ]
 }

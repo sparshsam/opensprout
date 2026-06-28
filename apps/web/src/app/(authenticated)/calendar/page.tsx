@@ -383,10 +383,14 @@ export default function CalendarPage() {
       {/* ── Month Grid ── */}
       <section className="mt-4">
         {loading ? (
-          <div className="grid min-h-[260px] place-items-center text-muted-foreground">
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <Loader2 className="animate-spin" size={18} aria-hidden />
-              Loading calendar
+          <div className="space-y-2">
+            <div className="grid grid-cols-7 gap-1">
+              {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d) => (
+                <div key={d} className="py-2 text-center text-xs font-bold uppercase text-muted-foreground/50">{d}</div>
+              ))}
+              {[...Array(35)].map((_, i) => (
+                <div key={i} className="aspect-square rounded-xl bg-muted animate-pulse" />
+              ))}
             </div>
           </div>
         ) : (

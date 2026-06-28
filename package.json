@@ -1,6 +1,6 @@
 {
   "name": "opensprout",
-  "version": "0.9.14",
+  "version": "0.9.24",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "workspaces": [

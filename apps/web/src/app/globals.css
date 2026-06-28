@@ -102,6 +102,13 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ── Global focus-visible ring ── */
+*:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring));
+  border-radius: var(--radius-xs);
+}
+
 /* ── Type scale — Sora variable font ── */
 
 /* Hero: 48-72px, font-black, tight leading */
@@ -140,4 +147,14 @@
 @utility full-bleed {
   width: 100vw;
   margin-left: calc(-50vw + 50%);
+}
+
+/* ── Fade-in animation for page transitions ── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@utility animate-page-in {
+  animation: fadeIn 0.35s ease-out both;
 }

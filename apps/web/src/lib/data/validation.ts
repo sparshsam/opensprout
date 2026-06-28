@@ -9,8 +9,6 @@ export type ValidatedPlantValues = {
   location?: string;
   notes?: string;
   health_status?: HealthStatus;
-  water_every_days?: number;
-  fertilize_every_days?: number;
 };
 
 export class ValidationError extends Error {
@@ -33,8 +31,6 @@ export function validatePlantValues(input: unknown): ValidatedPlantValues {
   const species = cleanString(source.species, "Species", 1, 120);
   const location = cleanString(source.location, "Location", 1, 80);
   const notes = cleanString(source.notes, "Notes", 1, 1000);
-  const waterEveryDays = cleanPositiveInteger(source.water_every_days, "Watering interval", 1, 365);
-  const fertilizeEveryDays = cleanPositiveInteger(source.fertilize_every_days, "Fertilizing interval", 1, 365);
   const healthStatus = cleanHealthStatus(source.health_status);
 
   return {
@@ -44,8 +40,6 @@ export function validatePlantValues(input: unknown): ValidatedPlantValues {
     location,
     notes,
     health_status: healthStatus,
-    water_every_days: waterEveryDays,
-    fertilize_every_days: fertilizeEveryDays,
   };
 }
 

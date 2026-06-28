@@ -1,4 +1,4 @@
-import type { CareType } from "@/lib/data/types";
+import type { CareType, TaskInstanceRow } from "@/lib/data/types";
 
 // ──────────────────────────────────────────────
 // Reminder Preferences (stored in localStorage
@@ -9,9 +9,9 @@ const STORAGE_KEY = "opensprout_reminder_prefs";
 
 export type ReminderPreferences = {
   enabled: boolean;
-  leadTimeMinutes: number;       // How many minutes before due to fire
-  quietHoursStart: string | null; // "22:00" format, null = no quiet hours
-  quietHoursEnd: string | null;   // "07:00" format
+  leadTimeMinutes: number;
+  quietHoursStart: string | null;
+  quietHoursEnd: string | null;
   timezone: string;
 };
 
@@ -37,11 +37,14 @@ export function loadReminderPrefs(): ReminderPreferences {
 export function saveReminderPrefs(prefs: ReminderPreferences): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+  // If enabled changed, setup or teardown background polling
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("opensprout-prefs-changed", { detail: prefs }));
+  }
 }
 
 // ──────────────────────────────────────────────
-// Notification ID helpers
-// Consistent IDs so we can cancel/replace them
+// Helpers
 // ──────────────────────────────────────────────
 
 const NOTIF_PREFIX = "opensprout-task";
@@ -50,10 +53,6 @@ const CHANNEL_ID = "opensprout-care-reminders";
 export function taskNotifId(taskId: string): string {
   return `${NOTIF_PREFIX}-${taskId}`;
 }
-
-// ──────────────────────────────────────────────
-// Check if we are running in Capacitor native
-// ──────────────────────────────────────────────
 
 function isCapacitorNative(): boolean {
   try {
@@ -64,9 +63,139 @@ function isCapacitorNative(): boolean {
 }
 
 // ──────────────────────────────────────────────
+// Web Notification API helpers (PWA + desktop)
+// Requires user interaction to grant permission.
+// Works on all platforms where the PWA is installed.
+// ──────────────────────────────────────────────
+
+/** Request Notification API permission (web path). */
+export async function requestWebNotificationPermission(): Promise<boolean> {
+  if (!("Notification" in window)) return false;
+  if (Notification.permission === "granted") return true;
+  if (Notification.permission === "denied") return false;
+  const result = await Notification.requestPermission();
+  return result === "granted";
+}
+
+/** Show a web notification immediately. */
+function showWebNotification(title: string, body: string, tag: string, data?: Record<string, string>) {
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  try {
+    new Notification(title, {
+      body,
+      tag,
+      icon: "/icon-192.png",
+      badge: "/icon-192.png",
+      data: data ?? {},
+      silent: false,
+    });
+  } catch {
+    // Silently fail
+  }
+}
+
+// ──────────────────────────────────────────────
+// Track shown notifications across page loads
+// using a Set in sessionStorage
+// ──────────────────────────────────────────────
+
+function getShownSet(): Set<string> {
+  try {
+    const raw = sessionStorage.getItem("opensprout-shown-notifs");
+    return new Set(raw ? JSON.parse(raw) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function markShown(tag: string) {
+  try {
+    const set = getShownSet();
+    set.add(tag);
+    sessionStorage.setItem("opensprout-shown-notifs", JSON.stringify([...set]));
+  } catch {
+    // noop
+  }
+}
+
+function isShown(tag: string): boolean {
+  return getShownSet().has(tag);
+}
+
+// ──────────────────────────────────────────────
+// Show a "missed reminders" summary on app load
+// ──────────────────────────────────────────────
+
+export function showMissedReminders(
+  tasks: { overdue: TaskInstanceRow[]; today: TaskInstanceRow[] },
+  plantMap: Map<string, string>,
+): void {
+  if (!("Notification" in window)) return;
+  if (Notification.permission !== "granted") return;
+
+  const tag = "opensprout-missed-care";
+  if (isShown(tag)) return;
+
+  const totalOverdue = tasks.overdue.length;
+  const totalToday = tasks.today.length;
+
+  if (totalOverdue > 0 || totalToday > 0) {
+    const parts: string[] = [];
+    if (totalOverdue > 0) parts.push(`${totalOverdue} overdue`);
+    if (totalToday > 0) parts.push(`${totalToday} due today`);
+    const plantNames = [...tasks.overdue, ...tasks.today]
+      .map((t) => plantMap.get(t.plant_id))
+      .filter(Boolean) as string[];
+    const uniquePlants = [...new Set(plantNames)];
+
+    showWebNotification(
+      "Care needed 🌱",
+      `${parts.join(" + ")} — ${uniquePlants.slice(0, 3).join(", ")}${uniquePlants.length > 3 ? "…" : ""}`,
+      tag,
+    );
+    markShown(tag);
+  }
+}
+
+// ──────────────────────────────────────────────
+// Web: due-soon notification — fire when a task
+// becomes due within the current browsing session
+// ──────────────────────────────────────────────
+
+const dueSoonTags = new Set<string>();
+
+export function showDueSoonNotification(
+  taskId: string,
+  plantName: string,
+  careType: string,
+  dueAt: string,
+): void {
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  if (dueSoonTags.has(taskId)) return;
+
+  const tag = `opensprout-due-${taskId}`;
+  if (isShown(tag)) return;
+
+  showWebNotification(
+    `${plantName} — ${careType}`,
+    `Due ${new Date(dueAt).toLocaleString(undefined, {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    })}`,
+    tag,
+    { taskId },
+  );
+  dueSoonTags.add(taskId);
+  markShown(tag);
+}
+
+// ──────────────────────────────────────────────
 // Schedule a single task reminder
 // Uses Capacitor Local Notifications on Android,
-// falls back to no-op on web (PWA push in future)
+// Web Notification API on PWA/desktop
 // ──────────────────────────────────────────────
 
 export type TaskReminderInput = {
@@ -83,63 +212,22 @@ export async function scheduleTaskReminder(
   prefs: ReminderPreferences = loadReminderPrefs(),
 ): Promise<void> {
   if (!prefs.enabled) return;
-  if (!isCapacitorNative()) {
-    // Web: no local notification API — future PWA push
-    // Store in a "pending reminders" list for web badge
-    return;
-  }
 
   const due = new Date(input.dueAt).getTime();
   const leadMs = prefs.leadTimeMinutes * 60 * 1000;
   let fireAt = due - leadMs;
   const now = Date.now();
 
-  // Don't schedule in the past
+  // Don't schedule in the past unless it's already due
   if (fireAt <= now) {
-    // Schedule for "now" if it's already overdue
     fireAt = now + 1000;
   }
 
   // Apply quiet hours
   if (prefs.quietHoursStart && prefs.quietHoursEnd) {
-    const fireDate = new Date(fireAt);
-    const fireMinutes = fireDate.getHours() * 60 + fireDate.getMinutes();
-    const [startH, startM] = prefs.quietHoursStart.split(":").map(Number);
-    const [endH, endM] = prefs.quietHoursEnd.split(":").map(Number);
-    const quietStart = startH * 60 + startM;
-    const quietEnd = endH * 60 + endM;
-
-    let adjusted = false;
-    if (quietStart < quietEnd) {
-      // Same-day range e.g. 22:00-07:00 spans midnight
-      if (fireMinutes >= quietStart || fireMinutes < quietEnd) {
-        // Schedule for after quiet hours end
-        const afterQuiet = new Date(fireDate);
-        afterQuiet.setHours(endH, endM, 0, 0);
-        fireAt = afterQuiet.getTime();
-        adjusted = true;
-      }
-    } else {
-      // Wraps midnight — 22:00-07:00
-      if (fireMinutes >= quietStart || fireMinutes < quietEnd) {
-        if (fireMinutes >= quietStart) {
-          const nextDay = new Date(fireDate);
-          nextDay.setDate(nextDay.getDate() + 1);
-          nextDay.setHours(endH, endM, 0, 0);
-          fireAt = nextDay.getTime();
-        } else {
-          const today = new Date(fireDate);
-          today.setHours(endH, endM, 0, 0);
-          fireAt = today.getTime();
-        }
-        adjusted = true;
-      }
-    }
-
-    if (adjusted && fireAt <= now) {
-      // If adjusted time is past, skip notification entirely
-      return;
-    }
+    const adjusted = applyQuietHours(fireAt, prefs.quietHoursStart, prefs.quietHoursEnd);
+    if (adjusted === null) return; // Skip if adjusted time is in the past
+    fireAt = adjusted;
   }
 
   const title = input.label
@@ -153,14 +241,65 @@ export async function scheduleTaskReminder(
     minute: "2-digit",
   })}`;
 
-  try {
-    const { LocalNotifications } = await import(
-      "@capacitor/local-notifications"
-    );
+  if (isCapacitorNative()) {
+    await scheduleCapacitor(input.taskId, title, body, fireAt, input.plantId);
+  } else {
+    // Web: schedule via setTimeout (only lasts for the session)
+    scheduleWebNotification(input.taskId, title, body, fireAt - Date.now(), input);
+  }
+}
 
-    // Cancel any existing notification for this task first
+function applyQuietHours(fireAt: number, quietStart: string, quietEnd: string): number | null {
+  const fireDate = new Date(fireAt);
+  const fireMinutes = fireDate.getHours() * 60 + fireDate.getMinutes();
+  const [startH, startM] = quietStart.split(":").map(Number);
+  const [endH, endM] = quietEnd.split(":").map(Number);
+  const quietStartMin = startH * 60 + startM;
+  const quietEndMin = endH * 60 + endM;
+
+  let adjusted = false;
+  if (quietStartMin < quietEndMin) {
+    // Same-day range like 08:00-17:00
+    if (fireMinutes >= quietStartMin && fireMinutes < quietEndMin) {
+      // Quiet hours are currently active — schedule for after
+      const afterQuiet = new Date(fireDate);
+      afterQuiet.setHours(endH, endM, 0, 0);
+      fireAt = afterQuiet.getTime();
+      adjusted = true;
+    }
+  } else {
+    // Wraps midnight — 22:00-07:00
+    if (fireMinutes >= quietStartMin || fireMinutes < quietEndMin) {
+      if (fireMinutes >= quietStartMin) {
+        const nextDay = new Date(fireDate);
+        nextDay.setDate(nextDay.getDate() + 1);
+        nextDay.setHours(endH, endM, 0, 0);
+        fireAt = nextDay.getTime();
+      } else {
+        const today = new Date(fireDate);
+        today.setHours(endH, endM, 0, 0);
+        fireAt = today.getTime();
+      }
+      adjusted = true;
+    }
+  }
+
+  if (adjusted && fireAt <= Date.now()) return null;
+  return fireAt;
+}
+
+async function scheduleCapacitor(
+  taskId: string,
+  title: string,
+  body: string,
+  fireAt: number,
+  plantId: string,
+) {
+  try {
+    const { LocalNotifications } = await import("@capacitor/local-notifications");
+
     await LocalNotifications.cancel({
-      notifications: [{ id: notifIdFromTask(input.taskId) }],
+      notifications: [{ id: notifIdFromTask(taskId) }],
     });
 
     await LocalNotifications.schedule({
@@ -168,13 +307,9 @@ export async function scheduleTaskReminder(
         {
           title,
           body,
-          id: notifIdFromTask(input.taskId),
+          id: notifIdFromTask(taskId),
           schedule: { at: new Date(fireAt), allowWhileIdle: true },
-          extra: {
-            taskId: input.taskId,
-            plantId: input.plantId,
-            screen: "plants",
-          },
+          extra: { taskId, plantId, screen: "plants" },
           channelId: CHANNEL_ID,
           smallIcon: "ic_stat_sprout",
           iconColor: "#16784f",
@@ -187,21 +322,58 @@ export async function scheduleTaskReminder(
   }
 }
 
+/** Web notification timers — keyed by taskId so we can cancel. */
+const webTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
+function scheduleWebNotification(
+  taskId: string,
+  title: string,
+  body: string,
+  delayMs: number,
+  input: TaskReminderInput,
+) {
+  // Cancel existing timer
+  const existing = webTimers.get(taskId);
+  if (existing) clearTimeout(existing);
+
+  if (delayMs < 0) delayMs = 0;
+  // Cap at ~24 days (max setTimeout)
+  if (delayMs > 2_147_483_647) return;
+
+  const timer = setTimeout(() => {
+    if (!("Notification" in window) || Notification.permission !== "granted") return;
+    showWebNotification(title, body, `opensprout-task-${taskId}`, {
+      taskId: taskId,
+      plantId: input.plantId,
+    });
+    webTimers.delete(taskId);
+  }, delayMs);
+
+  webTimers.set(taskId, timer);
+}
+
 // ──────────────────────────────────────────────
 // Cancel a task reminder
 // ──────────────────────────────────────────────
 
 export async function cancelTaskReminder(taskId: string): Promise<void> {
+  // Cancel web timer
+  const timer = webTimers.get(taskId);
+  if (timer) {
+    clearTimeout(timer);
+    webTimers.delete(taskId);
+  }
+  dueSoonTags.delete(taskId);
+
+  // Cancel capacitor notification
   if (!isCapacitorNative()) return;
   try {
-    const { LocalNotifications } = await import(
-      "@capacitor/local-notifications"
-    );
+    const { LocalNotifications } = await import("@capacitor/local-notifications");
     await LocalNotifications.cancel({
       notifications: [{ id: notifIdFromTask(taskId) }],
     });
   } catch {
-    // Silently fail if plugin not available
+    // Silently fail
   }
 }
 
@@ -210,8 +382,6 @@ export async function cancelTaskReminder(taskId: string): Promise<void> {
 // Called after refreshDashboard
 // ──────────────────────────────────────────────
 
-import type { TaskInstanceRow } from "@/lib/data/types";
-
 export async function rescheduleAllReminders(
   tasks: { overdue: TaskInstanceRow[]; today: TaskInstanceRow[]; upcoming: TaskInstanceRow[] },
   plantMap: Map<string, string>,
@@ -219,7 +389,6 @@ export async function rescheduleAllReminders(
   const prefs = loadReminderPrefs();
   if (!prefs.enabled) return;
 
-  // Cancel all existing, then reschedule
   const allTasks = [...tasks.overdue, ...tasks.today, ...tasks.upcoming];
 
   for (const task of allTasks) {
@@ -239,23 +408,30 @@ export async function rescheduleAllReminders(
       prefs,
     );
   }
+
+  // Show missed reminders banner (web)
+  showMissedReminders(
+    { overdue: tasks.overdue, today: tasks.today },
+    plantMap,
+  );
 }
 
 // ──────────────────────────────────────────────
-// Request notification permissions (Android)
+// Request notification permissions (unified)
+// Works for both Capacitor native and Web
 // ──────────────────────────────────────────────
 
 export async function requestNotificationPermission(): Promise<boolean> {
-  if (!isCapacitorNative()) return true; // No permissions needed on web
-  try {
-    const { LocalNotifications } = await import(
-      "@capacitor/local-notifications"
-    );
-    const perm = await LocalNotifications.requestPermissions();
-    return perm.display === "granted";
-  } catch {
-    return false;
+  if (isCapacitorNative()) {
+    try {
+      const { LocalNotifications } = await import("@capacitor/local-notifications");
+      const perm = await LocalNotifications.requestPermissions();
+      return perm.display === "granted";
+    } catch {
+      return false;
+    }
   }
+  return requestWebNotificationPermission();
 }
 
 // ──────────────────────────────────────────────
@@ -263,12 +439,11 @@ export async function requestNotificationPermission(): Promise<boolean> {
 // ──────────────────────────────────────────────
 
 function notifIdFromTask(taskId: string): number {
-  // Hash the UUID to a positive 32-bit int
   let hash = 0;
   for (let i = 0; i < taskId.length; i++) {
     const char = taskId.charCodeAt(i);
     hash = (hash << 5) - hash + char;
-    hash |= 0; // Convert to 32-bit int
+    hash |= 0;
   }
   return Math.abs(hash);
 }

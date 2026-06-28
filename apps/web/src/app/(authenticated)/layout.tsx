@@ -5,6 +5,7 @@ import { BottomNav } from "@/components/shell/bottom-nav";
 import { TopBar } from "@/components/shell/top-bar";
 import { PwaInstall } from "@/components/shell/pwa-install";
 import { AppUpdate } from "@/components/shell/app-update";
+import { WelcomeWizard } from "@/components/onboarding/welcome-wizard";
 import { Sprout } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -36,16 +37,35 @@ function AuthenticatedLayoutInner({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {/* Skip-to-content link for keyboard/assistive tech users */}
+      <a
+        href="#main-content"
+        className="skip-to-content"
+      >
+        Skip to main content
+      </a>
+
+      {/* Live region for dynamic announcements (loading, errors, etc.) */}
+      <div
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+        id="a11y-announcements"
+      />
+
       <TopBar />
       <main
         id="main-content"
-        className="mx-auto w-full max-w-7xl px-6 pb-32 pt-28 sm:pt-36 md:pb-16 lg:px-10"
+        className="mx-auto w-full max-w-7xl px-6 pb-32 pt-28 sm:pt-36 md:pb-16 lg:px-10 animate-page-in"
       >
         {children}
       </main>
       <BottomNav />
       <PwaInstall />
       <AppUpdate />
+
+      {/* First-run onboarding wizard */}
+      <WelcomeWizard />
     </div>
   );
 }

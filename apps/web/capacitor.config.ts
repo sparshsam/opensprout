@@ -8,7 +8,8 @@ const config: CapacitorConfig = {
     // Development: set CAPACITOR_DEV_URL=http://localhost:3000 for live reload
     url: process.env.CAPACITOR_DEV_URL || undefined,
     androidScheme: "https",
-    cleartext: true,
+    // cleartext: disabled for production — set CAPACITOR_CLEARTEXT=true for local dev
+    cleartext: process.env.CAPACITOR_CLEARTEXT === "true",
     allowNavigation: ["opensprout://*"],
   },
   plugins: {

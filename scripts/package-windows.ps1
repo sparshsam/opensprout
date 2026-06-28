@@ -17,8 +17,8 @@
 #>
 
 param(
-    [string]$PwaUrl = "https://opensprout.vercel.app",
-    [string]$Version = "0.9.14.0",
+    [string]$PwaUrl = "https://sprout.kovina.org",
+    [string]$Version = "0.9.24.0",
     [string]$Publisher = "CN=Sparsh Sam",
     [string]$OutputDir = ".\dist"
 )

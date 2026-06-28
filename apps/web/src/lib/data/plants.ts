@@ -9,8 +9,6 @@ export type PlantFormValues = {
   location?: string;
   notes?: string;
   health_status?: HealthStatus;
-  water_every_days?: number;
-  fertilize_every_days?: number;
 };
 
 export type DashboardData = {
@@ -21,16 +19,60 @@ export type DashboardData = {
 
 type Client = SupabaseClient<Database>;
 
-const careIntervals: Record<CareType, number> = {
-  water: 7,
-  fertilize: 30,
-  mist: 3,
-  rotate: 14,
-  prune: 60,
-  repot: 180,
-  inspect: 7,
-  custom: 7,
+// Schedule management helpers
+
+export type ScheduleUpdateInput = {
+  cadence_value?: number;
+  cadence_unit?: "day" | "week" | "month";
+  active?: boolean;
+  notes?: string | null;
 };
+
+export async function createPlantSchedules(
+  supabase: Client,
+  userId: string,
+  plantId: string,
+  presets: { careType: CareType; cadenceDays: number }[],
+): Promise<void> {
+  if (presets.length === 0) return;
+  const timestamp = nowIso();
+  const schedules = presets.map((p) => buildSchedule(userId, plantId, p.careType, p.cadenceDays, timestamp));
+
+  const { error } = await supabase.from("care_schedules").insert(schedules);
+  if (error) throw error;
+}
+
+export async function updateCareSchedule(
+  supabase: Client,
+  userId: string,
+  scheduleId: string,
+  input: ScheduleUpdateInput,
+): Promise<void> {
+  const { error } = await supabase
+    .from("care_schedules")
+    .update({
+      ...input,
+      client_updated_at: nowIso(),
+    })
+    .eq("id", scheduleId)
+    .eq("user_id", userId);
+
+  if (error) throw error;
+}
+
+export async function deleteCareSchedule(
+  supabase: Client,
+  userId: string,
+  scheduleId: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from("care_schedules")
+    .update({ deleted_at: new Date().toISOString(), active: false, client_updated_at: nowIso() })
+    .eq("id", scheduleId)
+    .eq("user_id", userId);
+
+  if (error) throw error;
+}
 
 function nowIso() {
   return new Date().toISOString();
@@ -111,22 +153,6 @@ export async function createPlant(supabase: Client, userId: string, values: Plan
     .single();
 
   if (error) throw error;
-
-  // Only create care schedules when the user explicitly set cadence values.
-  const schedules = [
-    validated.water_every_days != null
-      ? buildSchedule(userId, plant.id, "water", validated.water_every_days)
-      : null,
-    validated.fertilize_every_days != null
-      ? buildSchedule(userId, plant.id, "fertilize", validated.fertilize_every_days)
-      : null,
-  ].filter((schedule): schedule is NonNullable<typeof schedule> => Boolean(schedule));
-
-  if (schedules.length > 0) {
-    const { error: scheduleError } = await supabase.from("care_schedules").insert(schedules);
-    if (scheduleError) throw scheduleError;
-  }
-
   return plant;
 }
 
@@ -161,6 +187,167 @@ export async function deletePlant(supabase: Client, userId: string, plantId: str
   if (error) throw error;
 }
 
+// ── Organization features ──
+
+export async function archivePlant(supabase: Client, userId: string, plantId: string) {
+  const { error } = await supabase
+    .from("plants")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("id", plantId)
+    .eq("user_id", userId)
+    .is("deleted_at", null);
+  if (error) throw error;
+}
+
+export async function restorePlant(supabase: Client, userId: string, plantId: string) {
+  const { error } = await supabase
+    .from("plants")
+    .update({ archived_at: null })
+    .eq("id", plantId)
+    .eq("user_id", userId);
+  if (error) throw error;
+}
+
+export async function toggleFavorite(supabase: Client, userId: string, plantId: string, isFavorite: boolean) {
+  const { error } = await supabase
+    .from("plants")
+    .update({ is_favorite: isFavorite })
+    .eq("id", plantId)
+    .eq("user_id", userId);
+  if (error) throw error;
+}
+
+export type PlantSortField = "name" | "created_at" | "updated_at" | "health_status" | "species";
+export type SortDirection = "asc" | "desc";
+
+export type PlantFilterOptions = {
+  query?: string;
+  healthFilter?: string | null;
+  locationFilter?: string | null;
+  showArchived?: boolean;
+  favoritesOnly?: boolean;
+  sortField?: PlantSortField;
+  sortDirection?: SortDirection;
+};
+
+/**
+ * Get unique locations across a user's plants.
+ */
+export async function listPlantLocations(
+  supabase: Client,
+  userId: string,
+): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("plants")
+    .select("location")
+    .eq("user_id", userId)
+    .is("deleted_at", null)
+    .not("location", "is", null);
+
+  if (error) throw error;
+  const locations = [...new Set(data.map((r) => r.location).filter(Boolean) as string[])];
+  return locations.sort();
+}
+
+/**
+ * Count plants by health status.
+ */
+export async function getPlantHealthCounts(
+  supabase: Client,
+  userId: string,
+): Promise<Record<string, number>> {
+  const { data, error } = await supabase
+    .from("plants")
+    .select("health_status")
+    .eq("user_id", userId)
+    .is("deleted_at", null);
+
+  if (error) throw error;
+  const counts: Record<string, number> = {};
+  for (const row of data) {
+    const status = row.health_status ?? "unknown";
+    counts[status] = (counts[status] ?? 0) + 1;
+  }
+  return counts;
+}
+
+export function sortAndFilterPlants(
+  plants: PlantRow[],
+  options: PlantFilterOptions,
+): PlantRow[] {
+  let filtered = [...plants];
+
+  // Filter by archive status
+  if (!options.showArchived) {
+    filtered = filtered.filter((p) => !p.archived_at);
+  }
+
+  // Filter favorites only
+  if (options.favoritesOnly) {
+    filtered = filtered.filter((p) => p.is_favorite);
+  }
+
+  // Search query
+  if (options.query) {
+    const q = options.query.toLowerCase();
+    filtered = filtered.filter((p) =>
+      `${p.name} ${p.species ?? ""} ${p.location ?? ""} ${p.health_status ?? ""} ${p.cultivar ?? ""} ${p.nickname ?? ""}`
+        .toLowerCase().includes(q),
+    );
+  }
+
+  // Health filter
+  if (options.healthFilter) {
+    filtered = filtered.filter((p) =>
+      options.healthFilter === "unknown"
+        ? !p.health_status || p.health_status === "unknown"
+        : p.health_status === options.healthFilter,
+    );
+  }
+
+  // Location filter
+  if (options.locationFilter) {
+    filtered = filtered.filter((p) => p.location === options.locationFilter);
+  }
+
+  // Sort
+  const field = options.sortField ?? "updated_at";
+  const dir = options.sortDirection ?? "desc";
+
+  filtered.sort((a, b) => {
+    let cmp = 0;
+    switch (field) {
+      case "name":
+        cmp = (a.name ?? "").localeCompare(b.name ?? "");
+        break;
+      case "species":
+        cmp = (a.species ?? "").localeCompare(b.species ?? "");
+        break;
+      case "health_status":
+        cmp = (a.health_status ?? "").localeCompare(b.health_status ?? "");
+        break;
+      case "created_at":
+        cmp = (a.created_at ?? "").localeCompare(b.created_at ?? "");
+        break;
+      case "updated_at":
+        cmp = (a.updated_at ?? "").localeCompare(b.updated_at ?? "");
+        break;
+    }
+    return dir === "desc" ? -cmp : cmp;
+  });
+
+  // Favorites first (when not already filtered by favorites only)
+  if (!options.favoritesOnly) {
+    filtered.sort((a, b) => {
+      if (a.is_favorite && !b.is_favorite) return -1;
+      if (!a.is_favorite && b.is_favorite) return 1;
+      return 0;
+    });
+  }
+
+  return filtered;
+}
+
 export async function markCareDone(supabase: Client, userId: string, plantId: string, careType: CareType) {
   const { data: schedule } = await supabase
     .from("care_schedules")
@@ -175,6 +362,16 @@ export async function markCareDone(supabase: Client, userId: string, plantId: st
     .maybeSingle();
 
   const timestamp = nowIso();
+  const labels: Record<string, string> = {
+    water: "Marked watered",
+    fertilize: "Marked fertilized",
+    mist: "Marked misted",
+    rotate: "Marked rotated",
+    prune: "Marked pruned",
+    repot: "Marked repotted",
+    inspect: "Marked inspected",
+    custom: "Marked cared for",
+  };
   const { data: log, error: logError } = await supabase
     .from("care_logs")
     .insert({
@@ -183,7 +380,7 @@ export async function markCareDone(supabase: Client, userId: string, plantId: st
       schedule_id: schedule?.id ?? null,
       care_type: careType,
       occurred_at: timestamp,
-      notes: careType === "water" ? "Marked watered from dashboard." : "Marked fertilized from dashboard.",
+      notes: labels[careType] ?? "Marked cared for",
       client_id: clientId("care-log"),
       client_created_at: timestamp,
       client_updated_at: timestamp,
@@ -216,9 +413,8 @@ export async function markCareDone(supabase: Client, userId: string, plantId: st
   return log;
 }
 
-function buildSchedule(userId: string, plantId: string, careType: CareType, cadenceDays: number) {
-  const timestamp = nowIso();
-  const days = Number.isFinite(cadenceDays) && cadenceDays > 0 ? cadenceDays : careIntervals[careType];
+function buildSchedule(userId: string, plantId: string, careType: CareType, cadenceDays: number, timestamp: string) {
+  const days = Number.isFinite(cadenceDays) && cadenceDays > 0 ? cadenceDays : 7;
 
   return {
     user_id: userId,

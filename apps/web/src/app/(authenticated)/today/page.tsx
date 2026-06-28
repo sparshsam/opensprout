@@ -5,12 +5,14 @@ import { useApp } from "@/lib/context/app-context";
 import { useAtmosphere } from "@/lib/hooks/use-atmosphere";
 import {
   Check, X, Clock, Calendar, Sprout, ArrowRight, Droplets,
-  Leaf, Plus, Scan, BookOpen,
+  Leaf, Plus, Scan, BookOpen, AlertTriangle, ChevronRight,
+  Sun, FlaskConical, Scissors, RotateCw, Search,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { CompleteTaskInput } from "@/lib/data/tasks";
-import type { TaskWithPlant } from "@/lib/data/tasks";
+import type { CompleteTaskInput, TaskWithPlant } from "@/lib/data/tasks";
+import type { CareType } from "@/lib/data/types";
 import { BottomSheet } from "@/components/sheets/bottom-sheet";
+import { InsightCards } from "@/components/insights/insight-cards";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PullToRefresh } from "@/components/pull-to-refresh";
@@ -19,10 +21,22 @@ import Link from "next/link";
 
 // ── Helpers ──
 
+const CARE_ICONS: Record<string, React.ElementType> = {
+  water: Droplets,
+  fertilize: FlaskConical,
+  mist: Sun,
+  rotate: RotateCw,
+  prune: Scissors,
+  repot: Sprout,
+  inspect: Search,
+  custom: Leaf,
+};
+
 function formatRelTime(d: string): string {
   const dt = new Date(d);
   const now = new Date();
-  const h = Math.round((dt.getTime() - now.getTime()) / (1000 * 60 * 60));
+  const diff = dt.getTime() - now.getTime();
+  const h = Math.round(diff / (1000 * 60 * 60));
   if (h < 0) return "Overdue";
   if (h < 1) return "Soon";
   if (h < 24) return `In ${h}h`;
@@ -44,6 +58,19 @@ function daysSinceEpoch(d: string): number {
   return Math.floor(new Date(d).getTime() / 86_400_000);
 }
 
+// ── Types for plant care summary ──
+
+type PlantCareSummary = {
+  id: string;
+  name: string;
+  species: string | null;
+  coverPhotoPath: string | null;
+  healthStatus: string | null;
+  nextCareType: CareType | null;
+  nextDueAt: string | null;
+  taskCount: number;
+};
+
 // ── Page ──
 
 export default function HomePage() {
@@ -59,18 +86,16 @@ export default function HomePage() {
   const [taskNotes, setTaskNotes] = useState("");
   const [pickDate, setPickDate] = useState("");
 
-  // ── Computed snapshots ──
+  // ── Computed ──
 
   const totalDue = tasks.overdue.length + tasks.today.length;
   const allUpcoming = [...tasks.overdue, ...tasks.today, ...tasks.upcoming];
-  const nextTask = allUpcoming[0] ?? null;
 
   const recentLogs = useMemo(
     () => [...data.logs].sort((a, b) => new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime()),
     [data.logs],
   );
 
-  /** Logs recorded this week. */
   const weeklyLogCount = useMemo(
     () => data.logs.filter((l) => daysSinceEpoch(l.occurred_at) >= daysSinceEpoch(new Date().toISOString()) - 7).length,
     [data.logs],
@@ -78,6 +103,52 @@ export default function HomePage() {
 
   const isLoading = dataLoading && tasks.overdue.length === 0 && tasks.today.length === 0;
   const hasPlants = data.plants.length > 0;
+  const hasTasks = totalDue > 0 || tasks.upcoming.length > 0;
+
+  // Build per-plant care summaries from schedules + tasks
+  const plantSummaries = useMemo((): PlantCareSummary[] => {
+    return data.plants
+      .map((plant) => {
+        // Find the next upcoming task for this plant
+        const plantTasks = allUpcoming.filter((t) => t.plant_id === plant.id);
+        const nextTask = plantTasks[0] ?? null;
+        return {
+          id: plant.id,
+          name: plant.name,
+          species: plant.species,
+          coverPhotoPath: plant.cover_photo_path,
+          healthStatus: plant.health_status,
+          nextCareType: nextTask?.care_type ?? null,
+          nextDueAt: nextTask?.due_at ?? null,
+          taskCount: plantTasks.length,
+        };
+      })
+      .filter((p) => p.taskCount > 0 || !hasTasks) // show all plants when no tasks
+      .slice(0, 8);
+  }, [data.plants, allUpcoming, hasTasks]);
+
+  // Contextual next action text
+  const contextualAction = useMemo((): { text: string; plantId?: string } | null => {
+    if (tasks.overdue.length > 0) {
+      const t = tasks.overdue[0];
+      return { text: `${t.plantName} needs ${t.care_type} — it's overdue`, plantId: t.plant_id };
+    }
+    if (tasks.today.length > 0) {
+      const t = tasks.today[0];
+      return { text: `Time to ${t.care_type} ${t.plantName}`, plantId: t.plant_id };
+    }
+    if (tasks.upcoming.length > 0) {
+      const t = tasks.upcoming[0];
+      return { text: `Next up: ${t.care_type} ${t.plantName} ${t.due_at ? formatRelTime(t.due_at) : ""}`, plantId: t.plant_id };
+    }
+    if (hasPlants && weeklyLogCount > 0) {
+      return { text: "All caught up! Great work keeping up with care." };
+    }
+    if (hasPlants) {
+      return { text: "No care due today — your plants are happy." };
+    }
+    return null;
+  }, [tasks, hasPlants, weeklyLogCount]);
 
   function openSheet(task: TaskWithPlant) { setActiveTask(task); setAction("pick"); setAmountMl(""); setFertName(""); setFertStrength(""); setTaskNotes(""); setPickDate(""); setBusy(false); }
   function closeSheet() { setActiveTask(null); setAction("pick"); }
@@ -108,14 +179,16 @@ export default function HomePage() {
             {/* ═══════════════════════════════════════ */}
             {/* Hero — atmospheric brand moment         */}
             {/* ═══════════════════════════════════════ */}
-            <section className="mb-28 sm:mb-36">
+            <section className="mb-16 sm:mb-20">
               <p className="text-label mb-5 text-primary">{greeting}</p>
               <h1 className="text-hero mb-6 max-w-3xl text-foreground leading-[1.05]">
                 {headline}
               </h1>
-              <p className="mb-10 max-w-lg text-base leading-relaxed text-muted-foreground sm:text-lg">
+              <p className="mb-8 max-w-lg text-base leading-relaxed text-muted-foreground sm:text-lg">
                 {tagline}
               </p>
+
+              {/* Contextual CTA */}
               <div className="flex flex-wrap gap-3">
                 {totalDue > 0 ? (
                   <button onClick={() => document.getElementById("care-section")?.scrollIntoView({ behavior: "smooth" })} className="rounded-full bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground hover:brightness-110">
@@ -132,11 +205,166 @@ export default function HomePage() {
             {hasPlants ? (
               <>
                 {/* ═══════════════════════════════════════ */}
-                {/* Snapshot — stats row                    */}
+                {/* Contextual next action — smart prompt   */}
                 {/* ═══════════════════════════════════════ */}
-                <section className="mb-28 sm:mb-36">
-                  <p className="text-label mb-8 text-muted-foreground">At a glance</p>
-                  <div className="border-t border-border pt-10">
+                {contextualAction && (
+                  <section className="mb-12">
+                    <div className="rounded-2xl border border-primary/20 bg-primary/[0.03] px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                          <Sprout size={18} />
+                        </div>
+                        <p className="text-sm font-semibold text-foreground flex-1">
+                          {contextualAction.text}
+                        </p>
+                      </div>
+                    </div>
+                  </section>
+                )}
+
+                {/* ═══════════════════════════════════════ */}
+                {/* Overdue tasks                            */}
+                {/* ═══════════════════════════════════════ */}
+                {tasks.overdue.length > 0 && (
+                  <section id="care-section" className="mb-10">
+                    <div className="flex items-center gap-2 mb-5">
+                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-destructive/10">
+                        <AlertTriangle size={12} className="text-destructive" />
+                      </div>
+                      <p className="text-label text-destructive">
+                        Overdue
+                      </p>
+                      <span className="rounded-full bg-destructive/10 px-2.5 py-0.5 text-xs font-bold text-destructive">
+                        {tasks.overdue.length}
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {tasks.overdue.map((t) => (
+                        <button
+                          key={t.id}
+                          onClick={() => openSheet(t)}
+                          className="flex w-full items-center gap-4 rounded-2xl border border-destructive/20 bg-destructive/[0.02] px-5 py-4 text-left transition hover:bg-destructive/[0.05] active:scale-[0.99]"
+                        >
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+                            <Droplets size={16} />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-foreground">{t.plantName}</p>
+                            <p className="mt-0.5 text-xs text-muted-foreground capitalize">{t.care_type}</p>
+                          </div>
+                          <div className="shrink-0 text-right">
+                            <span className="block text-xs font-bold text-destructive">Overdue</span>
+                            {t.due_at && (
+                              <span className="text-[11px] text-destructive/70">
+                                {new Date(t.due_at).toLocaleDateString()}
+                              </span>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* ═══════════════════════════════════════ */}
+                {/* Today's tasks                            */}
+                {/* ═══════════════════════════════════════ */}
+                {tasks.today.length > 0 ? (
+                  <section className="mb-10">
+                    <p className="text-label mb-5 text-muted-foreground">
+                      Due today
+                      {tasks.today.length > 1 && (
+                        <span className="ml-2 text-xs text-muted-foreground">({tasks.today.length})</span>
+                      )}
+                    </p>
+                    <div className="space-y-2">
+                      {tasks.today.map((t) => (
+                        <button
+                          key={t.id}
+                          onClick={() => openSheet(t)}
+                          className="flex w-full items-center gap-4 rounded-2xl border border-border/50 bg-white px-5 py-4 text-left transition hover:bg-muted/30 active:scale-[0.99] dark:bg-muted"
+                        >
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                            <Droplets size={16} />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-foreground">{t.plantName}</p>
+                            <p className="mt-0.5 text-xs text-muted-foreground capitalize">{t.care_type}</p>
+                          </div>
+                          <div className="shrink-0">
+                            <button
+                              onClick={(e) => { e.stopPropagation(); openSheet(t); }}
+                              className="rounded-full bg-primary px-5 py-2 text-xs font-semibold text-primary-foreground hover:brightness-110"
+                            >
+                              Mark done
+                            </button>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </section>
+                ) : tasks.overdue.length === 0 && (
+                  /* ── Nothing due today ── */
+                  <section className="mb-10">
+                    <div className="rounded-3xl border border-border/50 bg-muted/20 px-8 py-12 text-center">
+                      <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-primary/8">
+                        <Check size={28} className="text-primary" />
+                      </div>
+                      <p className="text-display mb-2 text-foreground">Nothing due today</p>
+                      <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                        All care tasks for today are complete. Check back tomorrow or browse your plants to see upcoming needs.
+                      </p>
+                      <div className="mt-6 flex flex-wrap justify-center gap-3">
+                        <Link href="/plants" className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:brightness-110">
+                          Browse plants
+                        </Link>
+                        <Link href="/journal" className="rounded-full bg-muted px-6 py-3 text-sm font-semibold text-foreground hover:bg-muted/80">
+                          Journal entry
+                        </Link>
+                      </div>
+                    </div>
+                  </section>
+                )}
+
+                {/* ═══════════════════════════════════════ */}
+                {/* Upcoming tasks                           */}
+                {/* ═══════════════════════════════════════ */}
+                {tasks.upcoming.length > 0 && (
+                  <section className="mb-10">
+                    <p className="text-label mb-5 text-muted-foreground">Upcoming</p>
+                    <div className="space-y-2">
+                      {tasks.upcoming.slice(0, 5).map((t) => (
+                        <button
+                          key={t.id}
+                          onClick={() => openSheet(t)}
+                          className="flex w-full items-center gap-4 rounded-2xl border border-border/30 bg-white/50 px-5 py-3.5 text-left transition hover:bg-muted/30 active:scale-[0.99] dark:bg-muted/30"
+                        >
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                            <Droplets size={14} />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-muted-foreground">{t.plantName}</p>
+                            <p className="mt-0.5 text-xs text-muted-foreground/70 capitalize">{t.care_type}</p>
+                          </div>
+                          <div className="shrink-0 text-right">
+                            <span className="text-xs text-muted-foreground">{t.due_at ? formatRelTime(t.due_at) : ""}</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                    {tasks.upcoming.length > 5 && (
+                      <Link href="/calendar" className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+                        View all in calendar <ArrowRight size={14} />
+                      </Link>
+                    )}
+                  </section>
+                )}
+
+                {/* ═══════════════════════════════════════ */}
+                {/* Stats row — compact, moved below tasks   */}
+                {/* ═══════════════════════════════════════ */}
+                <section className="mb-10">
+                  <div className="border-t border-border pt-8">
                     <div className="flex flex-wrap gap-x-16 gap-y-6">
                       <StatFigure value={data.plants.length} label="Plants" icon={Leaf} />
                       <StatFigure value={totalDue} label={totalDue === 1 ? "Task due" : "Tasks due"} icon={Droplets} />
@@ -146,10 +374,10 @@ export default function HomePage() {
                 </section>
 
                 {/* ═══════════════════════════════════════ */}
-                {/* Quick actions                           */}
+                {/* Quick actions — improved                 */}
                 {/* ═══════════════════════════════════════ */}
-                <section className="mb-28 sm:mb-36">
-                  <p className="text-label mb-8 text-muted-foreground">Quick actions</p>
+                <section className="mb-10">
+                  <p className="text-label mb-5 text-muted-foreground">Quick actions</p>
                   <div className="flex flex-wrap gap-3">
                     <Link href="/plants" className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground transition hover:brightness-110">
                       <Plus size={16} /> New plant
@@ -160,90 +388,83 @@ export default function HomePage() {
                     <Link href="/journal" className="inline-flex items-center gap-2 rounded-full bg-muted px-7 py-3.5 text-sm font-semibold text-foreground transition hover:bg-muted/80">
                       <BookOpen size={16} /> Journal
                     </Link>
+                    <Link href="/calendar" className="inline-flex items-center gap-2 rounded-full bg-muted px-7 py-3.5 text-sm font-semibold text-foreground transition hover:bg-muted/80">
+                      <Calendar size={16} /> Calendar
+                    </Link>
                   </div>
                 </section>
 
                 {/* ═══════════════════════════════════════ */}
-                {/* Next care — based on real task instances */}
-                {/* ═══════════════════════════════════════ %}
+                {/* Insight cards — smart care insights      */}
+                {/* ═══════════════════════════════════════ */}
+                <InsightCards />
 
                 {/* ═══════════════════════════════════════ */}
-                {/* Today's care — next urgent task         */}
+                {/* Plant care summaries                     */}
                 {/* ═══════════════════════════════════════ */}
-                {nextTask && (
-                  <section id="care-section" className="mb-28 sm:mb-36">
-                    <p className="text-label mb-8 text-muted-foreground">Next care</p>
-                    <div className="border-t border-border pt-10">
-                      <div className="flex items-start justify-between gap-8">
-                        <div className="min-w-0 max-w-xl">
-                          <p className="text-display mb-3 text-foreground">{nextTask.plantName}</p>
-                          <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                            <span className="rounded-full bg-primary/10 px-4 py-1.5 text-xs font-bold tracking-wider uppercase text-primary">{nextTask.care_type}</span>
-                            <span>{nextTask.due_at ? formatRelTime(nextTask.due_at) : ""}</span>
+                {plantSummaries.length > 0 && (
+                  <section className="mb-10">
+                    <div className="flex items-center justify-between mb-5">
+                      <p className="text-label text-muted-foreground">Your plants</p>
+                      <Link href="/plants" className="rounded-full bg-muted px-4 py-1.5 text-xs font-semibold text-foreground hover:bg-muted/80">View all</Link>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      {plantSummaries.map((summary) => (
+                        <Link
+                          key={summary.id}
+                          href={`/plants/${summary.id}`}
+                          className="group flex items-center gap-4 rounded-2xl border border-border/40 bg-white p-4 transition hover:shadow-sm active:scale-[0.99] dark:bg-muted"
+                        >
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary">
+                            <Sprout size={22} />
                           </div>
-                          <button onClick={() => openSheet(nextTask)} className="mt-8 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground hover:brightness-110">
-                            Mark as done
-                          </button>
-                        </div>
-                        <div className="hidden shrink-0 sm:block">
-                          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/8 text-primary">
-                            <Sprout size={36} aria-hidden />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-foreground truncate">
+                              {summary.name}
+                            </p>
+                            {summary.nextCareType ? (
+                              <p className="mt-0.5 text-xs text-muted-foreground capitalize">
+                                {summary.nextCareType}
+                                {summary.nextDueAt && (
+                                  <span className="ml-1">
+                                    · {formatRelTime(summary.nextDueAt)}
+                                  </span>
+                                )}
+                              </p>
+                            ) : (
+                              <p className="mt-0.5 text-xs text-muted-foreground">All caught up</p>
+                            )}
                           </div>
-                        </div>
-                      </div>
+                          <ChevronRight size={14} className="shrink-0 text-muted-foreground/40 group-hover:text-muted-foreground transition" />
+                        </Link>
+                      ))}
                     </div>
                   </section>
                 )}
-
-                {/* ═══════════════════════════════════════ */}
-                {/* Upcoming tasks                          */}
-                {/* ═══════════════════════════════════════ */}
-                {(tasks.upcoming.length > 0 || totalDue > 0) && (
-                  <section className="mb-28 sm:mb-36">
-                    <p className="text-label mb-8 text-muted-foreground">All upcoming</p>
-                    <div className="space-y-3">
-                      {tasks.overdue.slice(0, 3).map((t) => <ReminderRow key={t.id} task={t} overdue onClick={() => openSheet(t)} />)}
-                      {tasks.today.slice(0, 4).map((t) => <ReminderRow key={t.id} task={t} onClick={() => openSheet(t)} />)}
-                      {tasks.upcoming.slice(0, 3).map((t) => <ReminderRow key={t.id} task={t} subdued onClick={() => openSheet(t)} />)}
-                      {(tasks.overdue.length > 3 || tasks.today.length > 4 || tasks.upcoming.length > 3) && (
-                        <a href="/calendar" className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">View all in calendar <ArrowRight size={14} /></a>
-                      )}
-                    </div>
-                  </section>
-                )}
-
-                {/* ═══════════════════════════════════════ */}
-                {/* Collection — plant cards                */}
-                {/* ═══════════════════════════════════════ */}
-                <section className="mb-28 sm:mb-36">
-                  <div className="flex items-center justify-between mb-8">
-                    <p className="text-label text-muted-foreground">{data.plants.length} plant{data.plants.length !== 1 ? "s" : ""}</p>
-                    <Link href="/plants" className="rounded-full bg-muted px-5 py-2 text-xs font-semibold text-foreground hover:bg-muted/80">View all</Link>
-                  </div>
-                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {data.plants.slice(0, 6).map((plant) => (
-                      <PlantCard key={plant.id} id={plant.id} name={plant.name} species={plant.species} location={plant.location} />
-                    ))}
-                  </div>
-                  {data.plants.length > 6 && (
-                    <Link href="/plants" className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">View all {data.plants.length} plants <ArrowRight size={14} /></Link>
-                  )}
-                </section>
 
                 {/* ═══════════════════════════════════════ */}
                 {/* Recent care — activity log              */}
                 {/* ═══════════════════════════════════════ */}
                 {recentLogs.length > 0 && (
                   <section className="mb-12">
-                    <p className="text-label mb-8 text-muted-foreground">Recent care</p>
-                    <div className="space-y-3">
+                    <p className="text-label mb-5 text-muted-foreground">Recent care</p>
+                    <div className="space-y-2">
                       {recentLogs.slice(0, 5).map((log) => {
                         const plant = data.plants.find((p) => p.id === log.plant_id);
+                        const Icon = CARE_ICONS[log.care_type] ?? Droplets;
                         return (
                           <div key={log.id} className="flex items-center gap-4 rounded-full bg-muted/50 px-6 py-4">
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"><Droplets size={14} aria-hidden /></div>
-                            <div className="min-w-0 flex-1"><p className="text-sm font-semibold text-foreground"><span className="capitalize">{log.care_type}</span> — {plant?.name ?? "Unknown plant"}</p></div>
-                            <time className="shrink-0 text-xs font-semibold text-muted-foreground">{formatTimeAgo(log.occurred_at)}</time>
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                              <Icon size={14} aria-hidden />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-semibold text-foreground">
+                                <span className="capitalize">{log.care_type}</span> — {plant?.name ?? "Unknown plant"}
+                              </p>
+                            </div>
+                            <time className="shrink-0 text-xs font-semibold text-muted-foreground">
+                              {formatTimeAgo(log.occurred_at)}
+                            </time>
                           </div>
                         );
                       })}
@@ -253,14 +474,20 @@ export default function HomePage() {
               </>
             ) : (
               /* ── Empty state ── */
-              <section className="pt-28 sm:pt-36">
+              <section className="pt-20">
                 <div className="mx-auto max-w-lg text-center">
                   <p className="text-label mb-4 text-primary">{greeting}</p>
                   <h2 className="text-hero mb-6 text-foreground">Welcome to OpenSprout</h2>
-                  <p className="mb-8 max-w-md mx-auto text-base leading-relaxed text-muted-foreground">Track watering, log care, and keep your plants thriving. Add your first plant to start.</p>
+                  <p className="mb-8 max-w-md mx-auto text-base leading-relaxed text-muted-foreground">
+                    Track watering, log care, and keep your plants thriving. Add your first plant to start.
+                  </p>
                   <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-                    <Link href="/plants" className="rounded-full bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground hover:brightness-110">Add your first plant</Link>
-                    <Link href="/identify" className="rounded-full bg-muted px-7 py-3.5 text-sm font-semibold text-foreground hover:bg-muted/80">Identify a plant</Link>
+                    <Link href="/plants" className="rounded-full bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground hover:brightness-110">
+                      Add your first plant
+                    </Link>
+                    <Link href="/identify" className="rounded-full bg-muted px-7 py-3.5 text-sm font-semibold text-foreground hover:bg-muted/80">
+                      Identify a plant
+                    </Link>
                   </div>
                 </div>
               </section>
@@ -322,31 +549,6 @@ function StatFigure({ value, label, icon: Icon }: { value: string | number; labe
         <p className="text-sm text-muted-foreground">{label}</p>
       </div>
     </div>
-  );
-}
-
-// ── Reminder row ──
-function ReminderRow({ task, overdue, subdued, onClick }: { task: TaskWithPlant; overdue?: boolean; subdued?: boolean; onClick: () => void }) {
-  return (
-    <button onClick={onClick} className={cn("flex w-full items-center gap-4 rounded-full px-6 py-4 text-left transition hover:bg-muted/70 active:scale-[0.99]", overdue && "bg-destructive/5", !overdue && !subdued && "bg-muted/30")}>
-      <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-full", overdue ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary")}><Droplets size={16} aria-hidden /></div>
-      <div className="min-w-0 flex-1"><p className={cn("text-sm font-semibold", overdue && "text-destructive", subdued && "text-muted-foreground/70")}>{task.plantName}</p><p className="mt-0.5 text-xs text-muted-foreground capitalize">{task.care_type}</p></div>
-      <div className="shrink-0 text-right"><span className={cn("block text-sm font-semibold", overdue && "text-destructive", subdued && "text-muted-foreground/50")}>{task.due_at ? formatRelTime(task.due_at) : ""}</span>{overdue && <span className="text-xs font-bold text-destructive">Overdue</span>}</div>
-    </button>
-  );
-}
-
-// ── Plant card ──
-function PlantCard({ id, name, species, location }: { id: string; name: string; species: string | null; location: string | null }) {
-  return (
-    <Link href="/plants" className="group block rounded-3xl border border-border/50 bg-white p-6 transition hover:shadow-sm active:scale-[0.99] dark:bg-muted">
-      <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/8 text-primary mb-5">
-        <Sprout size={32} aria-hidden />
-      </div>
-      <p className="text-lg font-bold text-foreground">{name}</p>
-      {species && <p className="mt-0.5 text-sm italic text-muted-foreground">{species}</p>}
-      {location && <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground"><span className="inline-block h-1.5 w-1.5 rounded-full bg-primary/40" />{location}</p>}
-    </Link>
   );
 }
 

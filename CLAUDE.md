@@ -1,4 +1,4 @@
-# OpenSprout v0.9.15
+# OpenSprout v0.9.24
 
 **Stack:** Next.js 15 (App Router) · Supabase · Capacitor v8 Android · Tailwind CSS v4 · Sora font  
 **Deploy:** https://sprout.kovina.org  

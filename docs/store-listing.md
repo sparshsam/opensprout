@@ -1,8 +1,8 @@
 # OpenSprout Store Listing
 
-**Prepared:** June 25, 2026  
-**Version:** 0.9.14  
-**Platform:** Google Play, Microsoft Store (future)
+**Prepared:** June 27, 2026  
+**Version:** 0.9.24  
+**Platform:** Google Play, Microsoft Store
 
 ---
 
@@ -24,11 +24,16 @@ Track watering, fertilizing, and care schedules for all your plants in one place
 - **Plant Journal** — Write journal entries about each plant with health scores, tags, and optional photos
 - **Photo Timeline** — Visual timeline combining care logs, journal entries, and photos chronologically
 - **Plant Identification** — Take or upload a photo to identify your plant via AI (powered by PlantNet)
-- **Care Templates** — 30 built-in plant species with suggested care guidelines (Monstera, Snake Plant, Pothos, and more)
+- **Plant Organization** — Group by room/location, mark favorites, filter by health, sort by name/date/species
+- **Plant Doctor** — Diagnose plant issues by selecting symptoms from a curated species library
+- **Smart Insights** — Missed care detection, care streaks, seasonal tips, and health reminders
+- **Photo Gallery** — Multiple photos per plant with gallery navigation and in-line upload
+- **Care Templates** — 30+ built-in plant species with suggested care guidelines
 - **Calendar View** — See upcoming and past care tasks on a calendar
+- **Notifications** — Scheduled care reminders with quiet hours (Android native + web PWA)
 - **Dark Mode** — System-aware dark/light theme with manual toggle
-- **Data Export** — Export all your data as JSON anytime
-- **MCP Integration** — Connect AI agents (Claude Code, Hermes, Cursor) to your plant data via secure API tokens
+- **Data Export/Import** — Full JSON export/import
+- **MCP Integration** — Connect AI agents to your plant data via secure API tokens
 - **Android App** — Standalone Android app via Capacitor, installable from Play Store
 - **Open Source** — Licensed under AGPLv3. Full source on GitHub
 
@@ -60,7 +65,7 @@ OpenSprout believes you should own your data. Every feature is designed with dat
 ### Permissions
 
 - **Camera** — Used only when you explicitly take a plant photo
-- **Notifications** — Optional, opt-in care reminders
+- **Notifications** — Optional, opt-in care reminders (Android)
 - **Storage** — For attaching photos from your gallery
 
 ### Open Source
@@ -69,9 +74,9 @@ OpenSprout is free and open-source software under the AGPLv3 license. You can in
 
 [github.com/sparshsam/opensprout](https://github.com/sparshsam/opensprout)
 
-## Keywords / Tags
+## Keywords
 
-plant care, plant tracker, watering reminder, plant journal, garden tracker, houseplant care, plant identification, plant schedule, gardening app, plant log, plant watering, plant diary, houseplant, succulent care, open source plant app, free plant tracker
+plant care, plant tracker, watering reminder, plant journal, garden tracker, houseplant care, plant identification, plant schedule, gardening app, plant log, open source, free, privacy-first
 
 ## Feature Bullets
 
@@ -79,11 +84,14 @@ plant care, plant tracker, watering reminder, plant journal, garden tracker, hou
 - Log care activities with amounts, notes, and photo attachments
 - Maintain a plant health journal with health scores and tags
 - Identify plants via AI photo recognition (powered by PlantNet)
-- 30 built-in care templates for common houseplant species
+- Diagnose plant issues with the Plant Doctor symptom selector
+- Organize plants by room/location, favorites, health status, and species
+- Smart care insights — streaks, missed-care alerts, seasonal tips
+- 30+ built-in care templates for common houseplant species
 - Calendar view of upcoming and past care tasks
+- Scheduled notifications with quiet hours support
 - Dark mode with system-aware theme switching
 - Export all data as JSON — no vendor lock-in
-- MCP API for AI agent integration (Claude Code, Hermes, Cursor)
 - Fully open source under AGPLv3 — inspect, modify, self-host
 
 ## Promotional Text (170 chars max)
@@ -97,47 +105,34 @@ Track plants, schedules, and care logs in a privacy-first, open-source app. No a
 
 ## Content Rating
 
-- Google Play: Everyone (with guidance for user-generated content)
-- Apple App Store: 4+ (with no restricted content)
+- Google Play: Everyone
 - Microsoft Store: Everyone
 
-See `docs/age-rating.md` for full questionnaire responses.
+## Store Assets
 
-## Screenshots Required
+| Asset | Size | Source |
+|-------|------|--------|
+| App icon | 512×512 | `apps/web/public/icons/icon-512.png` |
+| Feature graphic (Play) | 1024×500 | Generate via `scripts/generate-store-screenshots.mjs` |
+| Feature graphic (Microsoft) | 1350×540 | Generate via `scripts/generate-store-screenshots.mjs` |
+| Phone screenshots (×6) | 1240×2480 | Generate via `scripts/generate-store-screenshots.mjs` |
+| Tablet screenshots (×2) | 2048×2732 | Generate via `scripts/generate-store-screenshots.mjs` |
 
-| Type | Size | Status | Source |
-|------|------|--------|--------|
-| Phone screenshot (dashboard) | 390×844 portrait | ⬜ Need higher-res | Run app, screenshot in device emulator |
-| Phone screenshot (plant list) | 390×844 portrait | ⬜ Need higher-res | Run app, screenshot in device emulator |
-| Phone screenshot (plant detail) | 390×844 portrait | ⬜ Need higher-res | Run app, screenshot in device emulator |
-| Phone screenshot (care schedule) | 390×844 portrait | ⬜ Need higher-res | Run app, screenshot in device emulator |
-| Phone screenshot (calendar) | 390×844 portrait | ⬜ Need higher-res | Run app, screenshot in device emulator |
-| Phone screenshot (identify) | 390×844 portrait | ⬜ Need higher-res | Run app, screenshot in device emulator |
-| 7" tablet screenshot | 2048×1536 landscape | ⬜ Not yet | Android emulator with tablet skin |
-| 10" tablet screenshot | 2560×1600 landscape | ⬜ Not yet | Android emulator with tablet skin |
-
-See `docs/assets/store-screenshots/` for current (low-res) screenshots — regenerate from running app.
-
-## Store Assets Checklist
-
-- [ ] **High-res icon (512×512)** — `public/icon-512.png` ✅
-- [ ] **Feature graphic (1024×500)** — Needs design tool (Canva/Figma)
-- [ ] **Phone screenshots (2 minimum)** — Need high-res captures from emulator
-- [ ] **Tablet screenshots (7" + 10")** — Need emulator captures
-- [ ] **Feature graphic** — Branded banner, sprout icon + tagline
-- [ ] **Privacy policy URL** — Host at `/privacy` on production domain ✅
-- [ ] **Data safety answers** — Documented in `docs/data-safety.md` ✅
-- [ ] **Content rating** — Documented in `docs/age-rating.md` ✅
-- [ ] **Release notes** — Draft from CHANGELOG.md ✅
-
-## Release Notes (What's New)
+## Release Notes — v0.9.24
 
 ```
-OpenSprout v0.9.14
-
-• Production release signing configured
-• Android App Bundle (AAB) and APK signed with release key
-• Release version automation via scripts/bump-version.mjs
-• Data safety documentation for Play Store
-• Performance and packaging improvements
+• Plant organization — group by room, mark favorites, filter by health, sort options
+• Plant Doctor — symptom-based diagnosis from the species care library
+• Smart insights — missed care detection, care streaks, seasonal tips, health reminders
+• Photo gallery — multiple photos per plant with gallery navigation
+• Care plan setup wizard — guided schedule creation with species presets
+• Dashboard rebuild — today's care first, overdue section, nothing-due state
+• Notifications — Android native + web PWA, quiet hours, background refresh
+• Onboarding tour — first-run welcome wizard for new users
+• Desktop polish — two-column layout, improved settings, better loading states
+• Accessibility — skip-to-content, focus-visible rings, aria-live regions
 ```
+
+## Data Safety
+
+See `docs/data-safety.md` for full Play Console data safety answers.

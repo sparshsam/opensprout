@@ -222,11 +222,14 @@ export default function ExplorePage() {
       {/* ── Results section ── */}
       <section className="mt-6">
         {loading ? (
-          <div className="grid min-h-40 place-items-center text-muted-foreground">
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <Leaf size={18} className="animate-pulse" aria-hidden />
-              Loading plants
-            </div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="rounded-3xl border border-border/40 bg-white p-5 dark:bg-muted">
+                <div className="aspect-[4/3] w-full rounded-2xl bg-muted animate-pulse mb-4" />
+                <div className="h-5 w-3/4 rounded-full bg-muted animate-pulse mb-2" />
+                <div className="h-4 w-1/2 rounded-full bg-muted animate-pulse" />
+              </div>
+            ))}
           </div>
         ) : filteredSpecies.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border bg-card p-8 text-center shadow-panel">

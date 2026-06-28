@@ -70,8 +70,6 @@ const emptyForm: PlantFormValues = {
   location: "",
   notes: "",
   health_status: "stable",
-  water_every_days: 7,
-  fertilize_every_days: 30,
 };
 
 export function AppShell() {
@@ -187,8 +185,6 @@ export function AppShell() {
       location: plant.location ?? "",
       notes: plant.notes ?? "",
       health_status: plant.health_status ?? "stable",
-      water_every_days: scheduleCadence(selectedSchedules, "water") ?? 7,
-      fertilize_every_days: scheduleCadence(selectedSchedules, "fertilize") ?? 30,
     });
     setShowForm(true);
   }
@@ -637,8 +633,6 @@ function PlantForm({
       name: values.name || species.common_name,
       species_id: species.id,
       species: species.scientific_name ?? species.common_name,
-      water_every_days: suggestedWaterDays(species) ?? values.water_every_days,
-      fertilize_every_days: species.fertilizing_frequency_days ?? values.fertilize_every_days,
     });
   }
 
@@ -737,26 +731,6 @@ function PlantForm({
         </label>
         {!editing && (
           <>
-            <label className="text-sm font-semibold">
-              Water every days
-              <Input
-                className="mt-2"
-                type="number"
-                min={1}
-                value={values.water_every_days ?? ""}
-                onChange={(event) => onChange({ ...values, water_every_days: Number(event.target.value) || undefined })}
-              />
-            </label>
-            <label className="text-sm font-semibold">
-              Fertilize every days
-              <Input
-                className="mt-2"
-                type="number"
-                min={1}
-                value={values.fertilize_every_days ?? ""}
-                onChange={(event) => onChange({ ...values, fertilize_every_days: Number(event.target.value) || undefined })}
-              />
-            </label>
           </>
         )}
       </div>

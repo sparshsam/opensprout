@@ -4,13 +4,20 @@ import type { Session, User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/browser";
 import { buildCareTasks, formatDueDate } from "@/lib/data/care";
 import {
+  archivePlant,
   createPlant,
+  createPlantSchedules,
   deletePlant,
+  deleteCareSchedule,
   listDashboardData,
   markCareDone,
+  restorePlant,
+  toggleFavorite,
+  updateCareSchedule,
   updatePlant,
   type DashboardData,
   type PlantFormValues,
+  type ScheduleUpdateInput,
 } from "@/lib/data/plants";
 import { listPlantSpecies } from "@/lib/data/species";
 import type {
@@ -31,6 +38,13 @@ import {
   type TaskWithPlant,
 } from "@/lib/data/tasks";
 import { syncAll, isOnline, buildSyncStats, type SyncStats } from "@/lib/data/sync";
+import {
+  rescheduleAllReminders,
+  requestNotificationPermission,
+  loadReminderPrefs,
+  saveReminderPrefs,
+  showMissedReminders,
+} from "@/lib/data/reminders";
 import {
   clearCache,
   getCacheStats,
@@ -73,6 +87,9 @@ export interface AppState {
     values: PlantFormValues,
   ) => Promise<void>;
   handleDeletePlant: (plant: PlantRow) => Promise<void>;
+  handleArchivePlant: (plantId: string) => Promise<void>;
+  handleRestorePlant: (plantId: string) => Promise<void>;
+  handleToggleFavorite: (plantId: string, isFavorite: boolean) => Promise<void>;
   handleMarkCare: (
     plantId: string,
     careType: CareType,
@@ -244,6 +261,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setData(nextData);
       const taskResult = await listTasks(client, user.id);
       setTasks(taskResult);
+
+      // Reschedule notifications for all tasks
+      const plantMap = new Map(
+        nextData.plants.map((p) => [p.id, p.name]),
+      );
+      void rescheduleAllReminders(taskResult, plantMap);
     } catch (refreshError) {
       setError(errorMessage(refreshError));
     } finally {
@@ -276,6 +299,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       mounted = false;
     };
   }, [supabase, user]);
+  // ── Background refresh (every 15 min) ──
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(() => {
+      void refreshDashboard();
+    }, 15 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [user, refreshDashboard]);
+
+  // ── Request notification permission on login ──
+  useEffect(() => {
+    if (!user) return;
+    const prefs = loadReminderPrefs();
+    if (prefs.enabled) {
+      void requestNotificationPermission();
+    }
+  }, [user]);
+
 
   // ── Sync / cache handlers ──────────────────────────────────────────
 
@@ -368,15 +409,58 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [supabase, user, refreshDashboard, isOnlineState],
   );
 
+  const handleArchivePlant = useCallback(
+    async (plantId: string) => {
+      const client = supabase;
+      if (!user || !client) return;
+      setError(null);
+      await archivePlant(client, user.id, plantId);
+      setNotice("Plant archived.");
+      await refreshDashboard();
+    },
+    [supabase, user, refreshDashboard],
+  );
+
+  const handleRestorePlant = useCallback(
+    async (plantId: string) => {
+      const client = supabase;
+      if (!user || !client) return;
+      setError(null);
+      await restorePlant(client, user.id, plantId);
+      setNotice("Plant restored.");
+      await refreshDashboard();
+    },
+    [supabase, user, refreshDashboard],
+  );
+
+  const handleToggleFavorite = useCallback(
+    async (plantId: string, isFavorite: boolean) => {
+      const client = supabase;
+      if (!user || !client) return;
+      setError(null);
+      await toggleFavorite(client, user.id, plantId, isFavorite);
+      await refreshDashboard();
+    },
+    [supabase, user, refreshDashboard],
+  );
+
   const handleMarkCare = useCallback(
     async (plantId: string, careType: CareType, plantName: string) => {
       const client = supabase;
       if (!user || !client) return;
       setError(null);
       await markCareDone(client, user.id, plantId, careType);
-      setNotice(
-        `${plantName} marked ${careType === "water" ? "watered" : "fertilized"}.`,
-      );
+      const labels: Record<string, string> = {
+        water: "watered",
+        fertilize: "fertilized",
+        mist: "misted",
+        rotate: "rotated",
+        prune: "pruned",
+        repot: "repotted",
+        inspect: "inspected",
+        custom: "cared for",
+      };
+      setNotice(`${plantName} marked ${labels[careType] ?? "cared for"}.`);
       await refreshDashboard();
     },
     [supabase, user, refreshDashboard],
@@ -473,6 +557,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       handleCreatePlant,
       handleUpdatePlant,
       handleDeletePlant,
+      handleArchivePlant,
+      handleRestorePlant,
+      handleToggleFavorite,
       handleMarkCare,
       handleCompleteTask,
       handleSkipTask,
@@ -499,6 +586,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       handleCreatePlant,
       handleUpdatePlant,
       handleDeletePlant,
+      handleArchivePlant,
+      handleRestorePlant,
+      handleToggleFavorite,
       handleMarkCare,
       handleCompleteTask,
       handleSkipTask,
