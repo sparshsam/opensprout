@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, Fragment, type ReactNode } from "react";
+import { resolveApiUrl } from "@/lib/data/platform";
 
 const LOG_PREFIX = "[OpenSprout]";
 
@@ -25,7 +26,8 @@ function captureError(error: Error) {
   if (event.stack) console.error(event.stack);
 
   if (process.env.NODE_ENV === "production") {
-    fetch("/api/log", {
+    const url = resolveApiUrl("/api/log");
+    fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ level: "error", ...event }),

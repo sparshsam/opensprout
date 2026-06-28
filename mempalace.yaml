@@ -155,7 +155,7 @@ rooms:
   - mobile-nav
   - public-nav
 - name: changelog
-  description: Version history — v0.9.25 current (RC stabilization), v0.9.24 (platform completion), v0.9.15-v0.9.23 (care engine through UX polish)
+  description: Version history — v0.9.26 current (native auth), v0.9.25 (RC stabilization), v0.9.24 (platform completion), v0.9.15-v0.9.23 (care engine through UX polish)
   keywords:
   - changelog
   - version
@@ -172,7 +172,7 @@ rooms:
   - v0.9.16
   - v0.9.15
 - name: identity
-  description: OpenSprout v0.9.25 — privacy-first plant care companion, open-source AGPLv3, editorial premium design, user-owned data, no subscriptions, mcp-ready
+  description: OpenSprout v0.9.26 — privacy-first plant care companion, open-source AGPLv3, editorial premium design, user-owned data, no subscriptions, mcp-ready
   keywords:
   - opensprout
   - plant-care

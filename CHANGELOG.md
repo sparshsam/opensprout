@@ -2,6 +2,24 @@
 
 All notable changes to OpenSprout will be documented here. The format follows [Keep a Changelog](https://keepachangelog.com/). OpenSprout uses [Semantic Versioning](https://semver.org/).
 
+## 0.9.26 — 2026-06-28
+
+### Added
+- **Native Google Sign-In for Android** — in-app Chrome Custom Tab via @capacitor/browser with skipBrowserRedirect and opensprout://auth/callback custom scheme.
+- **Browser-launch login for Windows/PWA** — system browser popup via window.open(), /auth/complete page shows "return to app" message, postMessage to opener.
+- **Platform-aware sign-in dispatch** in login page — detects web / Capacitor native / PWA.
+- **OAuth deep-link handler** — global Capacitor appUrlOpen listener for OAuth callback.
+- **API routing utility** (lib/data/platform.ts) — resolveApiUrl() prepends production origin in Capacitor WebView.
+- **Debug diagnostics** at /debug — origin, Capacitor, session status, API URLs.
+
+### Fixed
+- **Android adaptive icons** — ic_launcher_background changed from #FFFFFF to #16784f (brand green).
+- **White screen flash** — added android:windowBackground to AppTheme.NoActionBar.
+
+### Changed
+- @capacitor/browser@8.0.3 installed and synced.
+- Version bumped to 0.9.26 (versionCode 6).
+
 ## 0.9.25 — 2026-06-28
 
 ### Added

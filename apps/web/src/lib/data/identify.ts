@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, DiagnosisEntryRow } from "@/lib/data/types";
 import { getDiagnosisEntries } from "@/lib/data/knowledge";
+import { resolveApiUrl } from "@/lib/data/platform";
 
 type Client = SupabaseClient<Database>;
 
@@ -28,13 +29,15 @@ export type DiagnosisResult = {
 };
 
 /**
- * Sends a base64-encoded image to the PlantNet API proxy (/api/identify).
+ * Sends a base64-encoded image to the PlantNet API proxy (Next.js API route
+ * on web, Supabase Edge Function on Capacitor native).
  * Parses the PlantNet response into IdentifyResult.
  * Returns matches sorted by score descending.
  */
 export async function identifyPlant(imageBase64: string): Promise<IdentifyResult> {
   try {
-    const response = await fetch("/api/identify", {
+    const url = resolveApiUrl("/api/identify");
+    const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ imageBase64 }),
