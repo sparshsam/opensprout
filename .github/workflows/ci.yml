@@ -100,11 +100,7 @@ jobs:
           [ -f .next/server/app/index.html ] && cp .next/server/app/index.html out/
           # Fallback index
           if [ ! -f out/index.html ]; then
-            cat > out/index.html <<'EOF'
-<!DOCTYPE html><html><head>
-<script>location.href="/today";</script>
-</head><body>Loading OpenSprout...</body></html>
-EOF
+            echo '<!DOCTYPE html><html><head><script>location.href="/today";</script></head><body>Loading OpenSprout...</body></html>' > out/index.html
           fi
         working-directory: apps/web
 
