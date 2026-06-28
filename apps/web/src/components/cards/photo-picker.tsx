@@ -5,10 +5,12 @@ import { Camera, ImagePlus, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
- * PhotoPicker — works on both web and Capacitor Android.
+ * PhotoPicker — works on web and Capacitor Android.
  *
- * On web: opens the native file picker for images.
- * On Capacitor Android: also supports camera capture via @capacitor/camera.
+ * - Gallery button: opens native file picker for images (accept="image/*")
+ * - Camera button: uses capture="environment" on web (triggers device camera
+ *   directly on iOS Safari, Chrome Android, etc.) or Capacitor Camera plugin
+ *   when running natively.
  *
  * Props are designed so the parent controls the file list. The picker
  * just produces Blob objects; the parent decides when/where to upload.
@@ -23,17 +25,11 @@ export type PickedPhoto = {
 };
 
 export type PhotoPickerProps = {
-  /** Current set of picked photos (from parent state) */
   photos: PickedPhoto[];
-  /** Called when new photos are added */
   onAdd: (photos: PickedPhoto[]) => void;
-  /** Called when a photo is removed */
   onRemove: (id: string) => void;
-  /** Max number of photos allowed (default 10) */
   maxPhotos?: number;
-  /** Whether the picker is disabled (e.g. during upload) */
   disabled?: boolean;
-  /** Additional className */
   className?: string;
 };
 
@@ -41,13 +37,18 @@ function generateId() {
   return `photo-${crypto.randomUUID().slice(0, 8)}`;
 }
 
-// Detect if we're running in a Capacitor native context
 function isCapacitorNative(): boolean {
   try {
     return typeof window !== "undefined" && "Capacitor" in window;
   } catch {
     return false;
   }
+}
+
+/** Check if we're on a mobile device likely to have a camera. */
+function isMobileDevice(): boolean {
+  if (typeof window === "undefined") return false;
+  return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
 
 export function PhotoPicker({
@@ -58,11 +59,12 @@ export function PhotoPicker({
   disabled = false,
   className,
 }: PhotoPickerProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const canAdd = photos.length < maxPhotos && !disabled;
 
-  function handleFiles(files: FileList | null) {
+  function processFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
     if (!canAdd) return;
 
@@ -82,60 +84,71 @@ export function PhotoPicker({
     setLoading(false);
   }
 
-  function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
-    handleFiles(e.target.files);
-    // Reset so the same file can be selected again
-    if (fileInputRef.current) fileInputRef.current.value = "";
+  function handleGalleryChange(e: ChangeEvent<HTMLInputElement>) {
+    processFiles(e.target.files);
+    if (galleryInputRef.current) galleryInputRef.current.value = "";
+  }
+
+  function handleCameraChange(e: ChangeEvent<HTMLInputElement>) {
+    processFiles(e.target.files);
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
   }
 
   async function handleCameraCapture() {
     if (!canAdd) return;
 
-    // Check Capacitor native context
-    if (!isCapacitorNative()) {
-      // On web, open the file picker directly
-      fileInputRef.current?.click();
+    if (isCapacitorNative()) {
+      // Capacitor native — use Camera plugin
+      setLoading(true);
+      try {
+        const { Camera, CameraResultType } = await import(
+          "@capacitor/camera"
+        );
+        const image = await Camera.getPhoto({
+          resultType: CameraResultType.Uri,
+          quality: 80,
+          width: 1920,
+          height: 1920,
+          saveToGallery: false,
+        });
+
+        if (!image.webPath) {
+          setLoading(false);
+          return;
+        }
+
+        const response = await fetch(image.webPath);
+        const blob = await response.blob();
+        const fileName =
+          image.path?.split("/").pop() ?? `camera-${Date.now()}.jpg`;
+
+        const newPhoto: PickedPhoto = {
+          id: generateId(),
+          blob,
+          previewUrl: image.webPath,
+          name: fileName,
+          file: null,
+        };
+
+        onAdd([newPhoto]);
+      } catch {
+        // Fallback to file picker
+        galleryInputRef.current?.click();
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 
-    // Capacitor native — use Camera plugin
-    setLoading(true);
-    try {
-      const { Camera, CameraResultType } = await import(
-        "@capacitor/camera"
-      );
-      const image = await Camera.getPhoto({
-        resultType: CameraResultType.Uri,
-        quality: 80,
-        width: 1920,
-        height: 1920,
-        saveToGallery: false,
-      });
-
-      if (!image.webPath) {
-        setLoading(false);
-        return;
-      }
-
-      const response = await fetch(image.webPath);
-      const blob = await response.blob();
-      const fileName = image.path?.split("/").pop() ?? `camera-${Date.now()}.jpg`;
-
-      const newPhoto: PickedPhoto = {
-        id: generateId(),
-        blob,
-        previewUrl: image.webPath,
-        name: fileName,
-        file: null,
-      };
-
-      onAdd([newPhoto]);
-    } catch {
-      // Fall back to file picker on error
-      fileInputRef.current?.click();
-    } finally {
-      setLoading(false);
-    }
+    // Web / PWA — use capture="environment" to open the native camera
+    // This works on:
+    //   - iOS Safari  (opens Camera app)
+    //   - Chrome iOS  (opens Camera app)
+    //   - Chrome Android (opens Camera app)
+    //   - Samsung Internet
+    //   - All modern mobile browsers
+    // On desktop, it falls back to the file picker.
+    cameraInputRef.current?.click();
   }
 
   return (
@@ -166,9 +179,10 @@ export function PhotoPicker({
 
       {/* Add buttons */}
       <div className="flex gap-2">
+        {/* Gallery — opens the standard file picker for images */}
         <button
           type="button"
-          onClick={() => fileInputRef.current?.click()}
+          onClick={() => galleryInputRef.current?.click()}
           disabled={!canAdd}
           className={cn(
             "flex items-center gap-2 rounded-md border border-dashed border-border px-4 py-2 text-sm font-semibold text-muted-foreground transition",
@@ -185,6 +199,7 @@ export function PhotoPicker({
           {loading ? "Loading..." : "Gallery"}
         </button>
 
+        {/* Camera — uses capture attribute on web, Capacitor plugin natively */}
         <button
           type="button"
           onClick={handleCameraCapture}
@@ -197,15 +212,32 @@ export function PhotoPicker({
           )}
         >
           <Camera size={16} />
-          {isCapacitorNative() ? "Camera" : "File picker"}
+          {isCapacitorNative()
+            ? "Camera"
+            : isMobileDevice()
+              ? "Camera"
+              : "Take photo"}
         </button>
 
+        {/* Hidden file input for gallery (standard image picker) */}
         <input
-          ref={fileInputRef}
+          ref={galleryInputRef}
           type="file"
           accept="image/*"
           multiple
-          onChange={handleFileChange}
+          onChange={handleGalleryChange}
+          className="hidden"
+          aria-hidden
+        />
+
+        {/* Hidden file input for camera (capture="environment" triggers native camera on mobile) */}
+        <input
+          ref={cameraInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          multiple={false}
+          onChange={handleCameraChange}
           className="hidden"
           aria-hidden
         />
