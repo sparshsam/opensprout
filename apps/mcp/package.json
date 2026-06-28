@@ -12,8 +12,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.13.0",
-    "@supabase/supabase-js": "^2.107.0"
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "@supabase/supabase-js": "^2.108.2"
   },
   "devDependencies": {
     "tsx": "^4.0.0",
