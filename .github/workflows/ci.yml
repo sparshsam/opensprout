@@ -113,7 +113,7 @@ EOF
         working-directory: apps/web
 
       - name: Build Android (debug)
-        run: cd android && ./gradlew assembleDebug
+        run: cd android && chmod +x gradlew && ./gradlew assembleDebug
         working-directory: apps/web
 
       - name: Upload APK
