@@ -45,7 +45,7 @@ export async function listMcpTokens(
   userId: string,
 ): Promise<McpToken[]> {
   const { data, error } = await supabase
-    .from("mcp_tokens")
+    .from("opensprout_mcp_tokens")
     .select("id, user_id, name, token_prefix, last_used_at, created_at, revoked_at")
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
@@ -64,7 +64,7 @@ export async function createMcpToken(
   const prefix = getTokenPrefix(rawToken);
 
   const { data, error } = await (supabase as any) // eslint-disable-line @typescript-eslint/no-explicit-any
-    .from("mcp_tokens")
+    .from("opensprout_mcp_tokens")
     .insert({
       user_id: userId,
       name,
@@ -85,7 +85,7 @@ export async function revokeMcpToken(
   userId: string,
 ): Promise<void> {
   const { error } = await (supabase as any) // eslint-disable-line @typescript-eslint/no-explicit-any
-    .from("mcp_tokens")
+    .from("opensprout_mcp_tokens")
     .update({ revoked_at: new Date().toISOString() })
     .eq("id", tokenId)
     .eq("user_id", userId);

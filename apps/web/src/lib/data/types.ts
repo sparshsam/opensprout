@@ -9,7 +9,7 @@ export type TaskStatus = "pending" | "done" | "skipped" | "snoozed" | "cancelled
 export type Database = {
   public: {
     Tables: {
-      plants: {
+      opensprout_plants: {
         Row: {
           id: string;
           user_id: string;
@@ -58,10 +58,10 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["plants"]["Insert"]>;
+        Update: Partial<Database["public"]["Tables"]["opensprout_plants"]["Insert"]>;
         Relationships: [];
       };
-      plant_species: {
+      opensprout_plant_species: {
         Row: {
           id: string;
           common_name: string;
@@ -122,10 +122,10 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["plant_species"]["Insert"]>;
+        Update: Partial<Database["public"]["Tables"]["opensprout_plant_species"]["Insert"]>;
         Relationships: [];
       };
-      care_schedules: {
+      opensprout_care_schedules: {
         Row: {
           id: string;
           user_id: string;
@@ -174,10 +174,10 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["care_schedules"]["Insert"]>;
+        Update: Partial<Database["public"]["Tables"]["opensprout_care_schedules"]["Insert"]>;
         Relationships: [];
       };
-      care_logs: {
+      opensprout_care_logs: {
         Row: {
           id: string;
           user_id: string;
@@ -220,10 +220,10 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["care_logs"]["Insert"]>;
+        Update: Partial<Database["public"]["Tables"]["opensprout_care_logs"]["Insert"]>;
         Relationships: [];
       };
-      profiles: {
+      opensprout_profiles: {
         Row: {
           id: string;
           display_name: string | null;
@@ -240,10 +240,10 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
+        Update: Partial<Database["public"]["Tables"]["opensprout_profiles"]["Insert"]>;
         Relationships: [];
       };
-      task_instances: {
+      opensprout_task_instances: {
         Row: {
           id: string;
           user_id: string;
@@ -290,10 +290,10 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["task_instances"]["Insert"]>;
+        Update: Partial<Database["public"]["Tables"]["opensprout_task_instances"]["Insert"]>;
         Relationships: [];
       };
-      journal_entries: {
+      opensprout_journal_entries: {
         Row: {
           id: string;
           user_id: string;
@@ -330,10 +330,10 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["journal_entries"]["Insert"]>;
+        Update: Partial<Database["public"]["Tables"]["opensprout_journal_entries"]["Insert"]>;
         Relationships: [];
       };
-      journal_photos: {
+      opensprout_journal_photos: {
         Row: {
           id: string;
           user_id: string;
@@ -382,10 +382,10 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["journal_photos"]["Insert"]>;
+        Update: Partial<Database["public"]["Tables"]["opensprout_journal_photos"]["Insert"]>;
         Relationships: [];
       };
-      data_transfers: {
+      opensprout_data_transfers: {
         Row: {
           id: string;
           user_id: string;
@@ -424,10 +424,10 @@ export type Database = {
           finished_at?: string | null;
           created_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["data_transfers"]["Insert"]>;
+        Update: Partial<Database["public"]["Tables"]["opensprout_data_transfers"]["Insert"]>;
         Relationships: [];
       };
-      sync_devices: {
+      opensprout_sync_devices: {
         Row: {
           id: string;
           user_id: string;
@@ -452,10 +452,10 @@ export type Database = {
           last_pushed_at?: string | null;
           created_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["sync_devices"]["Insert"]>;
+        Update: Partial<Database["public"]["Tables"]["opensprout_sync_devices"]["Insert"]>;
         Relationships: [];
       };
-      knowledge_articles: {
+      opensprout_knowledge_articles: {
         Row: {
           id: string;
           species_id: string;
@@ -482,10 +482,10 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["knowledge_articles"]["Insert"]>;
+        Update: Partial<Database["public"]["Tables"]["opensprout_knowledge_articles"]["Insert"]>;
         Relationships: [];
       };
-      diagnosis_entries: {
+      opensprout_diagnosis_entries: {
         Row: {
           id: string;
           species_id: string;
@@ -508,10 +508,10 @@ export type Database = {
           sort_order?: number;
           created_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["diagnosis_entries"]["Insert"]>;
+        Update: Partial<Database["public"]["Tables"]["opensprout_diagnosis_entries"]["Insert"]>;
         Relationships: [];
       };
-      identifications: {
+      opensprout_identifications: {
         Row: {
           id: string;
           user_id: string;
@@ -536,7 +536,7 @@ export type Database = {
           source?: string;
           created_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["identifications"]["Insert"]>;
+        Update: Partial<Database["public"]["Tables"]["opensprout_identifications"]["Insert"]>;
         Relationships: [];
       };
     };
@@ -550,26 +550,26 @@ export type Database = {
   };
 };
 
-export type PlantRow = Database["public"]["Tables"]["plants"]["Row"];
-export type PlantInsert = Database["public"]["Tables"]["plants"]["Insert"];
-export type PlantUpdate = Database["public"]["Tables"]["plants"]["Update"];
-export type PlantSpeciesRow = Database["public"]["Tables"]["plant_species"]["Row"];
-export type CareScheduleRow = Database["public"]["Tables"]["care_schedules"]["Row"];
-export type CareLogRow = Database["public"]["Tables"]["care_logs"]["Row"];
-export type TaskInstanceRow = Database["public"]["Tables"]["task_instances"]["Row"];
-export type JournalEntryRow = Database["public"]["Tables"]["journal_entries"]["Row"];
-export type JournalEntryInsert = Database["public"]["Tables"]["journal_entries"]["Insert"];
-export type JournalEntryUpdate = Database["public"]["Tables"]["journal_entries"]["Update"];
-export type JournalPhotoRow = Database["public"]["Tables"]["journal_photos"]["Row"];
-export type JournalPhotoInsert = Database["public"]["Tables"]["journal_photos"]["Insert"];
-export type KnowledgeArticleRow = Database["public"]["Tables"]["knowledge_articles"]["Row"];
-export type KnowledgeArticleInsert = Database["public"]["Tables"]["knowledge_articles"]["Insert"];
-export type KnowledgeArticleUpdate = Database["public"]["Tables"]["knowledge_articles"]["Update"];
-export type DiagnosisEntryRow = Database["public"]["Tables"]["diagnosis_entries"]["Row"];
-export type DiagnosisEntryInsert = Database["public"]["Tables"]["diagnosis_entries"]["Insert"];
-export type DiagnosisEntryUpdate = Database["public"]["Tables"]["diagnosis_entries"]["Update"];
-export type IdentificationRow = Database["public"]["Tables"]["identifications"]["Row"];
-export type IdentificationInsert = Database["public"]["Tables"]["identifications"]["Insert"];
-export type IdentificationUpdate = Database["public"]["Tables"]["identifications"]["Update"];
+export type PlantRow = Database["public"]["Tables"]["opensprout_plants"]["Row"];
+export type PlantInsert = Database["public"]["Tables"]["opensprout_plants"]["Insert"];
+export type PlantUpdate = Database["public"]["Tables"]["opensprout_plants"]["Update"];
+export type PlantSpeciesRow = Database["public"]["Tables"]["opensprout_plant_species"]["Row"];
+export type CareScheduleRow = Database["public"]["Tables"]["opensprout_care_schedules"]["Row"];
+export type CareLogRow = Database["public"]["Tables"]["opensprout_care_logs"]["Row"];
+export type TaskInstanceRow = Database["public"]["Tables"]["opensprout_task_instances"]["Row"];
+export type JournalEntryRow = Database["public"]["Tables"]["opensprout_journal_entries"]["Row"];
+export type JournalEntryInsert = Database["public"]["Tables"]["opensprout_journal_entries"]["Insert"];
+export type JournalEntryUpdate = Database["public"]["Tables"]["opensprout_journal_entries"]["Update"];
+export type JournalPhotoRow = Database["public"]["Tables"]["opensprout_journal_photos"]["Row"];
+export type JournalPhotoInsert = Database["public"]["Tables"]["opensprout_journal_photos"]["Insert"];
+export type KnowledgeArticleRow = Database["public"]["Tables"]["opensprout_knowledge_articles"]["Row"];
+export type KnowledgeArticleInsert = Database["public"]["Tables"]["opensprout_knowledge_articles"]["Insert"];
+export type KnowledgeArticleUpdate = Database["public"]["Tables"]["opensprout_knowledge_articles"]["Update"];
+export type DiagnosisEntryRow = Database["public"]["Tables"]["opensprout_diagnosis_entries"]["Row"];
+export type DiagnosisEntryInsert = Database["public"]["Tables"]["opensprout_diagnosis_entries"]["Insert"];
+export type DiagnosisEntryUpdate = Database["public"]["Tables"]["opensprout_diagnosis_entries"]["Update"];
+export type IdentificationRow = Database["public"]["Tables"]["opensprout_identifications"]["Row"];
+export type IdentificationInsert = Database["public"]["Tables"]["opensprout_identifications"]["Insert"];
+export type IdentificationUpdate = Database["public"]["Tables"]["opensprout_identifications"]["Update"];
 
 export type Client = SupabaseClient<Database>;

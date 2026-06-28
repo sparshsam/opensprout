@@ -30,7 +30,7 @@ export async function DELETE(
   // Verify the token belongs to the current user
   const admin = createAdminClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: existing, error: lookupError } = await (admin.from("mcp_tokens") as any)
+  const { data: existing, error: lookupError } = await (admin.from("opensprout_mcp_tokens") as any)
     .select("id, user_id, revoked_at")
     .eq("id", id)
     .single();
@@ -58,7 +58,7 @@ export async function DELETE(
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (admin.from("mcp_tokens") as any)
+  await (admin.from("opensprout_mcp_tokens") as any)
     .update({ revoked_at: new Date().toISOString() })
     .eq("id", id);
 

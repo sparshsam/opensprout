@@ -65,7 +65,7 @@ export async function uploadPlantPhoto(
 
   // Save metadata to journal_photos
   const { data: photoRow, error: insertError } = await supabase
-    .from("journal_photos")
+    .from("opensprout_journal_photos")
     .insert({
       user_id: userId,
       plant_id: plantId,
@@ -169,7 +169,7 @@ export async function setPlantCoverPhoto(
   coverObjectPath: string | null,
 ): Promise<void> {
   const { error } = await supabase
-    .from("plants")
+    .from("opensprout_plants")
     .update({ cover_photo_path: coverObjectPath })
     .eq("id", plantId)
     .eq("user_id", userId);
@@ -205,7 +205,7 @@ export async function deletePhoto(
 ): Promise<void> {
   // Fetch photo to get object path
   const { data: photo, error: fetchError } = await supabase
-    .from("journal_photos")
+    .from("opensprout_journal_photos")
     .select("object_path")
     .eq("id", photoId)
     .eq("user_id", userId)
@@ -223,7 +223,7 @@ export async function deletePhoto(
 
   // Soft delete metadata
   const { error: deleteError } = await supabase
-    .from("journal_photos")
+    .from("opensprout_journal_photos")
     .update({ deleted_at: nowIso() })
     .eq("id", photoId)
     .eq("user_id", userId);
@@ -240,7 +240,7 @@ export async function listPlantPhotos(
   plantId: string,
 ): Promise<JournalPhotoRow[]> {
   const { data, error } = await supabase
-    .from("journal_photos")
+    .from("opensprout_journal_photos")
     .select("*")
     .eq("user_id", userId)
     .eq("plant_id", plantId)

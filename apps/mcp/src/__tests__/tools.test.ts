@@ -228,7 +228,7 @@ describe("Plant tools", () => {
     it("list_plants output has correct shape", async () => {
       const { mockClient } = createMockDb();
       const { data } = await (mockClient as any)
-        .from("plants")
+        .from("opensprout_plants")
         .select("*")
         .eq("user_id", userId)
         .is("deleted_at", null)
@@ -288,7 +288,7 @@ describe("Plant tools", () => {
     it("list_plants queries with .eq('user_id', userId)", async () => {
       const { mockClient, mockQuery } = createMockDb();
       await (mockClient as any)
-        .from("plants")
+        .from("opensprout_plants")
         .select("*")
         .eq("user_id", userId)
         .is("deleted_at", null)
@@ -300,7 +300,7 @@ describe("Plant tools", () => {
     it("get_plant queries with .eq('user_id', userId)", async () => {
       const { mockClient, mockQuery } = createMockDb();
       await (mockClient as any)
-        .from("plants")
+        .from("opensprout_plants")
         .select("*")
         .eq("id", "plant-1")
         .eq("user_id", userId)
@@ -332,7 +332,7 @@ describe("Plant tools", () => {
 
       // Simulate the handler logic
       const { data: plant, error: plantError } = await (mockClient as any)
-        .from("plants")
+        .from("opensprout_plants")
         .select("id")
         .eq("id", "plant-1")
         .eq("user_id", userId)
@@ -363,7 +363,7 @@ describe("Plant tools", () => {
       (mockClient as any).from.mockReturnValue(ownershipChain);
 
       const { data: plant, error: checkError } = await (mockClient as any)
-        .from("plants")
+        .from("opensprout_plants")
         .select("id")
         .eq("id", "plant-1")
         .eq("user_id", userId)
@@ -568,7 +568,7 @@ describe("Care tools", () => {
     it("list_care_schedules queries with .eq('user_id', userId)", async () => {
       const { mockClient, mockQuery } = createMockDb();
       let query = (mockClient as any)
-        .from("care_schedules")
+        .from("opensprout_care_schedules")
         .select("*")
         .eq("user_id", userId)
         .eq("active", true)
@@ -583,7 +583,7 @@ describe("Care tools", () => {
     it("list_care_logs queries with .eq('user_id', userId)", async () => {
       const { mockClient, mockQuery } = createMockDb();
       await (mockClient as any)
-        .from("care_logs")
+        .from("opensprout_care_logs")
         .select("*")
         .eq("user_id", userId)
         .eq("plant_id", "plant-1")
@@ -597,7 +597,7 @@ describe("Care tools", () => {
     it("list_task_instances queries with .eq('user_id', userId)", async () => {
       const { mockClient, mockQuery } = createMockDb();
       await (mockClient as any)
-        .from("task_instances")
+        .from("opensprout_task_instances")
         .select("*")
         .eq("user_id", userId)
         .is("deleted_at", null)
@@ -625,7 +625,7 @@ describe("Care tools", () => {
       (mockClient as any).from.mockReturnValue(ownershipChain);
 
       const { data: plant, error: plantError } = await (mockClient as any)
-        .from("plants")
+        .from("opensprout_plants")
         .select("id")
         .eq("id", "plant-1")
         .eq("user_id", userId)
@@ -655,7 +655,7 @@ describe("Care tools", () => {
       (mockClient as any).from.mockReturnValue(ownershipChain);
 
       const { data: plant, error: plantError } = await (mockClient as any)
-        .from("plants")
+        .from("opensprout_plants")
         .select("id")
         .eq("id", "plant-1")
         .eq("user_id", userId)
@@ -685,7 +685,7 @@ describe("Care tools", () => {
       (mockClient as any).from.mockReturnValue(ownershipChain);
 
       const { data: task, error: taskError } = await (mockClient as any)
-        .from("task_instances")
+        .from("opensprout_task_instances")
         .select("id")
         .eq("id", "task-1")
         .eq("user_id", userId)
@@ -715,7 +715,7 @@ describe("Care tools", () => {
       (mockClient as any).from.mockReturnValue(ownershipChain);
 
       const { data: task, error: taskError } = await (mockClient as any)
-        .from("task_instances")
+        .from("opensprout_task_instances")
         .select("id")
         .eq("id", "task-1")
         .eq("user_id", userId)
@@ -843,7 +843,7 @@ describe("Journal tools", () => {
     it("list_journal_entries queries with .eq('user_id', userId)", async () => {
       const { mockClient, mockQuery } = createMockDb();
       await (mockClient as any)
-        .from("journal_entries")
+        .from("opensprout_journal_entries")
         .select("*")
         .eq("user_id", userId)
         .eq("plant_id", "plant-1")
@@ -857,7 +857,7 @@ describe("Journal tools", () => {
     it("get_journal_entry queries with .eq('user_id', userId)", async () => {
       const { mockClient, mockQuery } = createMockDb();
       await (mockClient as any)
-        .from("journal_entries")
+        .from("opensprout_journal_entries")
         .select("*")
         .eq("id", "entry-1")
         .eq("user_id", userId)
@@ -886,7 +886,7 @@ describe("Journal tools", () => {
       (mockClient as any).from.mockReturnValue(ownershipChain);
 
       const { data: plant, error: plantError } = await (mockClient as any)
-        .from("plants")
+        .from("opensprout_plants")
         .select("id")
         .eq("id", "plant-1")
         .eq("user_id", userId)
@@ -916,7 +916,7 @@ describe("Journal tools", () => {
       (mockClient as any).from.mockReturnValue(ownershipChain);
 
       const { data: entry, error: checkError } = await (mockClient as any)
-        .from("journal_entries")
+        .from("opensprout_journal_entries")
         .select("id")
         .eq("id", "entry-1")
         .eq("user_id", userId)
@@ -946,7 +946,7 @@ describe("Journal tools", () => {
       (mockClient as any).from.mockReturnValue(ownershipChain);
 
       const { data: entry, error: checkError } = await (mockClient as any)
-        .from("journal_entries")
+        .from("opensprout_journal_entries")
         .select("id")
         .eq("id", "entry-1")
         .eq("user_id", userId)

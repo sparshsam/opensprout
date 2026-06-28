@@ -42,24 +42,24 @@ export type SyncStats = {
  * Maps Supabase table names to local IndexedDB cache store names.
  */
 const TABLE_TO_CACHE: Record<string, string> = {
-  plants: "plants",
-  care_schedules: "schedules",
-  care_logs: "logs",
-  task_instances: "tasks",
-  journal_entries: "journalEntries",
-  journal_photos: "journalPhotos",
+  plants: "opensprout_plants",
+  care_schedules: "opensprout_care_schedules",
+  care_logs: "opensprout_care_logs",
+  task_instances: "opensprout_task_instances",
+  journal_entries: "opensprout_journal_entries",
+  journal_photos: "opensprout_journal_photos",
 };
 
 /**
  * The tables that are pulled during a fresh sync.
  */
 const PULL_TABLES = [
-  "plants",
-  "care_schedules",
-  "care_logs",
-  "task_instances",
-  "journal_entries",
-  "journal_photos",
+  "opensprout_plants",
+  "opensprout_care_schedules",
+  "opensprout_care_logs",
+  "opensprout_task_instances",
+  "opensprout_journal_entries",
+  "opensprout_journal_photos",
 ] as const;
 
 const SUPABASE_URL =

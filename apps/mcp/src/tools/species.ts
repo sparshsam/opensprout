@@ -14,7 +14,7 @@ export function registerSpeciesTools(
     },
     async ({ query }) => {
       const { data, error } = await getClient()
-        .from("plant_species")
+        .from("opensprout_plant_species")
         .select("*")
         .or(`common_name.ilike.%${query}%,scientific_name.ilike.%${query}%`)
         .limit(20);
@@ -37,7 +37,7 @@ export function registerSpeciesTools(
     async ({ speciesId }) => {
       const client = getClient();
       const { data: species, error: speciesError } = await client
-        .from("plant_species")
+        .from("opensprout_plant_species")
         .select("*")
         .eq("id", speciesId)
         .single();
@@ -50,7 +50,7 @@ export function registerSpeciesTools(
       }
 
       const { data: articles } = await client
-        .from("knowledge_articles")
+        .from("opensprout_knowledge_articles")
         .select("*")
         .eq("species_id", speciesId)
         .order("sort_order");

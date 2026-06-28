@@ -115,7 +115,7 @@ export async function diagnoseFromPhotoAndSymptoms(
   let speciesId: string | undefined;
   if (identifyResult.bestMatch) {
     const { data: speciesRows } = await supabase
-      .from("plant_species")
+      .from("opensprout_plant_species")
       .select("id")
       .or(
         `scientific_name.eq.${identifyResult.bestMatch.scientificName},common_name.eq.${identifyResult.bestMatch.scientificName}`,

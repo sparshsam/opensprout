@@ -5,7 +5,7 @@ type Client = SupabaseClient<Database>;
 
 export async function listPlantSpecies(supabase: Client): Promise<PlantSpeciesRow[]> {
   const { data, error } = await supabase
-    .from("plant_species")
+    .from("opensprout_plant_species")
     .select("*")
     .order("common_name", { ascending: true });
 
@@ -31,7 +31,7 @@ export async function searchPlantSpecies(supabase: Client, query: string): Promi
 
 export async function getPlantSpeciesById(supabase: Client, id: string): Promise<PlantSpeciesRow | null> {
   const { data, error } = await supabase
-    .from("plant_species")
+    .from("opensprout_plant_species")
     .select("*")
     .eq("id", id)
     .maybeSingle();

@@ -96,7 +96,7 @@ async function fetchMonthTasks(
   const endStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}T23:59:59`;
 
   const { data: plants } = await client
-    .from("plants")
+    .from("opensprout_plants")
     .select("id, name, location")
     .eq("user_id", userId)
     .is("deleted_at", null);
@@ -106,7 +106,7 @@ async function fetchMonthTasks(
   );
 
   const { data: tasks, error } = await client
-    .from("task_instances")
+    .from("opensprout_task_instances")
     .select("*")
     .eq("user_id", userId)
     .in("status", ["pending", "snoozed"])
