@@ -31,33 +31,3 @@ COMMENT ON TABLE public.opensprout_knowledge_articles IS 'OpenSprout: care/diagn
 COMMENT ON TABLE public.opensprout_diagnosis_entries IS 'OpenSprout: symptom→cause→solution';
 COMMENT ON TABLE public.opensprout_identifications IS 'OpenSprout: AI identification results';
 COMMENT ON TABLE public.opensprout_mcp_tokens IS 'OpenSprout: MCP server auth tokens';
-
--- Update the delete_account() function to use new table names
--- Table RENAME does not update hardcoded table names in function bodies
-CREATE OR REPLACE FUNCTION public.delete_account()
-RETURNS void
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  v_user_id uuid;
-BEGIN
-  v_user_id := auth.uid();
-  IF v_user_id IS NULL THEN
-    RAISE EXCEPTION 'Not authenticated';
-  END IF;
-
-  DELETE FROM public.opensprout_journal_photos WHERE user_id = v_user_id;
-  DELETE FROM public.opensprout_journal_entries WHERE user_id = v_user_id;
-  DELETE FROM public.opensprout_care_logs WHERE user_id = v_user_id;
-  DELETE FROM public.opensprout_task_instances WHERE user_id = v_user_id;
-  DELETE FROM public.opensprout_care_schedules WHERE user_id = v_user_id;
-  DELETE FROM public.opensprout_identifications WHERE user_id = v_user_id;
-  DELETE FROM public.opensprout_mcp_tokens WHERE user_id = v_user_id;
-  DELETE FROM public.opensprout_sync_devices WHERE user_id = v_user_id;
-  DELETE FROM public.opensprout_data_transfers WHERE user_id = v_user_id;
-  DELETE FROM public.opensprout_plants WHERE user_id = v_user_id;
-  DELETE FROM public.opensprout_profiles WHERE id = v_user_id;
-END;
-$$;

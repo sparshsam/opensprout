@@ -2,7 +2,7 @@
 
 ## Current Release
 
-**v0.9.26** — Native Google Sign-In + Android Platform Fixes (2026-06-28)
+**v0.9.26** — CI Stabilization + Database Namespacing (2026-06-28)
 
 ## Product Identity
 
@@ -18,7 +18,8 @@ OpenSprout is a privacy-first, open-source plant care companion. Track watering,
 - **AI:** MCP server at `apps/mcp/` — 28 tools, 112 tests
 - **Auth:** Google OAuth (email/password disabled via Supabase)
 - **Design:** Sora variable font, warm paper light mode, deep botanical dark mode
-- **Hosting:** Vercel (web at sprout.kovina.org), Supabase (backend, shared project)
+- **Hosting:** Vercel (web at sprout.kovina.org), Supabase (backend, shared project with OpenSend)
+- **CI:** GitHub Actions — Java 21 for Android, Node 24 for web, caching via `setup-node`
 
 ## Repo Structure
 
@@ -280,6 +281,49 @@ opensprout/
 ### Dependencies
 - `@capacitor/browser@8.0.3` installed and synced to Android project.
 
+## Key Changes in v0.9.26b — CI Stabilization + Route Cleanup
+
+### CI Fixes (7 PRs)
+- **Java 21** — Android Gradle Plugin 8.13 requires JDK 21. CI `actions/setup-java` upgraded from 17 to 21.
+- **Android build** — Changed from `CAPACITOR_BUILD=true` (which triggers `output: export` and checks all routes for static export compatibility) to normal `npx next build`. Server-only API routes (`/api/mcp`, `auth/callback`) with `force-dynamic` no longer cause build failures.
+- **Static output population** — After normal `next build`, copies generated pages and static assets from `.next/` to `out/` so `npx cap sync` can find the required `index.html`.
+- **`chmod +x gradlew`** — Git doesn't preserve the executable bit on `gradlew` in CI runners.
+- **Global `working-directory` removed** — The `defaults: run: working-directory: apps/web` caused `npm ci` to run from `apps/web` instead of the project root, breaking MCP devDependency installation.
+
+### Route Cleanup
+- Removed all `force-static`, `generateStaticParams`, and `dynamicParams` hacks that were added during the CI debugging process.
+- **Critical revert:** `auth/callback` and `api/mcp/tokens` with `force-static` on GET handlers would cache build-time 401/redirect responses on Vercel, breaking Google OAuth and MCP token management in production.
+- All 5 API route files now have zero export overrides (except `api/mcp` which keeps `force-dynamic` for its JSON-RPC handler).
+
+## Key Changes in v0.9.26c — Database Table Prefix Migration
+
+### Shared Project Namespacing
+The Supabase project `rbdyrymtgfqqkdemicdo` is shared between OpenSprout (plant care) and OpenSend (file sharing). All OpenSprout tables were renamed with an `opensprout_` prefix to match the existing `opensend_` convention.
+
+### Renamed Tables (14)
+| Old name | New name |
+|----------|----------|
+| `profiles` | `opensprout_profiles` |
+| `plants` | `opensprout_plants` |
+| `care_schedules` | `opensprout_care_schedules` |
+| `task_instances` | `opensprout_task_instances` |
+| `care_logs` | `opensprout_care_logs` |
+| `journal_entries` | `opensprout_journal_entries` |
+| `journal_photos` | `opensprout_journal_photos` |
+| `data_transfers` | `opensprout_data_transfers` |
+| `sync_devices` | `opensprout_sync_devices` |
+| `plant_species` | `opensprout_plant_species` |
+| `knowledge_articles` | `opensprout_knowledge_articles` |
+| `diagnosis_entries` | `opensprout_diagnosis_entries` |
+| `identifications` | `opensprout_identifications` |
+| `mcp_tokens` | `opensprout_mcp_tokens` |
+
+### Code Changes (26 files)
+- All `supabase.from()` calls updated to use `opensprout_` prefixed names.
+- All `Database` type definitions in `types.ts` and `mcp/src/types.ts` use `opensprout_` as table keys.
+- All MCP tool files, test mocks, sync cache mappings, and `db.ts` store names updated.
+- `delete_account()` RPC function replaced (table `RENAME` doesn't update hardcoded names in function bodies).
+
 ## Key Changes in v0.9.24 — Platform Completion
 
 ### Android
@@ -306,10 +350,10 @@ opensprout/
 
 - No tests exist in the web app (only MCP tests)
 - No crash reporting / analytics (intentional privacy choice)
-- App version in `package.json` now synced with git tags at v0.9.26
 - Vercel Hobby plan rate-limited for deployments (24h cooldown)
-- Supabase project shared with other apps (send.kovina.org)
+- Supabase project shared with OpenSend (send.kovina.org) — all tables use `opensprout_` prefix
 - Android OAuth requires `opensprout://auth/callback` and `https://sprout.kovina.org/auth/complete` added to Supabase Redirect URLs
+- Android APK built in CI has placeholder web assets (no static export) — functional for development only
 
 ## Build Commands
 
@@ -349,6 +393,7 @@ Located at `apps/mcp/`. Exposes 28 tools for AI agents. Test suite: 112 tests.
 5. **RLS + app-level isolation.** Supabase RLS enabled on all tables; MCP server adds explicit `user_id` filters since it uses the service role.
 6. **Soft deletes.** Deleted records set `deleted_at` — always filter with `.is("deleted_at", null)`.
 7. **Explain recommendations.** Every insight/recommendation includes a `reason` and `dataSource`. Never invent without supporting data.
+8. **Name-spaced table names.** All OpenSprout Supabase tables use the `opensprout_` prefix (e.g., `opensprout_plants`). Always use the full prefixed name in `.from()` calls, type definitions, and SQL queries.
 
 ## Ecosystem Standards
 
