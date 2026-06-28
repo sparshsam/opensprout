@@ -50,11 +50,7 @@ jobs:
 
   android:
     # Android build runs on all events so branch protection always sees this check.
-    # The Android SDK and JDK are cached by the runner so subsequent runs are fast.
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/web
 
     steps:
       - name: Checkout
@@ -83,15 +79,18 @@ jobs:
 
       - name: Build web (static export)
         run: CAPACITOR_BUILD=true npx next build
+        working-directory: apps/web
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
 
       - name: Sync Capacitor
         run: npx cap sync android
+        working-directory: apps/web
 
       - name: Build Android (debug)
         run: cd android && ./gradlew assembleDebug
+        working-directory: apps/web
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
