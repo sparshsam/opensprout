@@ -1,11 +1,11 @@
 /**
- * OpenSprout Service Worker — v0.9.21
+ * OpenSprout Service Worker — v0.9.26
  *
  * Strategy: Network-first with cache fallback.
  * Cache is versioned by CACHE_NAME — change on deploy to invalidate.
  */
 
-const CACHE_NAME = "opensprout-v0.9.24";
+const CACHE_NAME = "opensprout-v0.9.26";
 const APP_SHELL = [
   "/",
   "/manifest.webmanifest",

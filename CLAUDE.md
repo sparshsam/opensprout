@@ -1,4 +1,4 @@
-# OpenSprout v0.9.24
+# OpenSprout v0.9.26
 
 **Stack:** Next.js 15 (App Router) · Supabase · Capacitor v8 Android · Tailwind CSS v4 · Sora font  
 **Deploy:** https://sprout.kovina.org  
@@ -23,9 +23,11 @@ npm run android:release # Signed AAB + APK
 apps/web/              # Next.js + Capacitor Android
   ├── src/app/
   │   ├── page.tsx           # Public homepage
-  │   ├── login/             # Google OAuth sign-in (no email/password)
-  │   ├── auth/callback/     # OAuth PKCE callback handler
+  │   ├── login/             # Google OAuth sign-in (platform-aware: web/PWA/Android)
+  │   ├── auth/callback/     # OAuth PKCE callback route handler (server-side)
+  │   ├── auth/complete/     # PWA popup landing page ("return to app" message)
   │   ├── api/mcp/           # MCP HTTP endpoint + token CRUD
+  │   ├── debug/             # Diagnostics page (Capacitor/platform debugging)
   │   ├── (authenticated)/   # App pages
   │   │   ├── today/         # Dashboard — Today's Care, insights, tasks
   │   │   ├── plants/        # Plant collection with filters/sort/groups
@@ -43,7 +45,7 @@ apps/web/              # Next.js + Capacitor Android
   │   └── globals.css        # Design tokens, animations, a11y
   ├── android/               # Capacitor Android project
   ├── public/
-  │   ├── sw.js              # Service worker (v0.9.24)
+  │   ├── sw.js              # Service worker (v0.9.26)
   │   ├── manifest.webmanifest  # PWA manifest
   │   └── pwabuilder.json    # PWABuilder manifest
   └── src/
@@ -56,10 +58,11 @@ apps/web/              # Next.js + Capacitor Android
       │   ├── cards/         # PhotoPicker, CoverPhoto
       │   ├── sheets/        # BottomSheet
       │   ├── shell/         # TopBar, BottomNav, sidebar
-      │   └── ui/            # Button, Input, Skeleton
+      │   ├── ui/            # Button, Input, Skeleton
+      │   └── oauth-deeplink-handler.tsx  # Capacitor appUrlOpen listener (global)
       ├── lib/
       │   ├── context/       # AppProvider, ThemeProvider
-      │   └── data/          # Data layer (plants, care, tasks, reminders, insights, etc.)
+      │   └── data/          # Data layer (plants, care, tasks, reminders, insights, platform, etc.)
 
 apps/mcp/              # MCP server (28 tools, 112 tests)
   ├── src/
@@ -121,6 +124,8 @@ Architecture follows the MCP Build Guide: SHA-256 token auth, centralized regist
 
 ## Release History
 
+- **v0.9.26** (Jun 28) — Native Google Sign-In + Android Fixes. In-app Chrome Custom Tab for Android, browser-popup login for Windows/PWA, platform-aware sign-in dispatch, API routing for Capacitor static export, adaptive icon fix, white flash fix, debug diagnostics page.
+- **v0.9.25** (Jun 28) — Release Candidate Stabilization. Lint/typecheck/test/build clean, schema verification, build validation, changelog backfill.
 - **v0.9.24** (Jun 28) — Platform completion. Android versionCode 4, cleartext disabled in production, PWABuilder manifest, store screenshots generator, release automation script, CI with Android build job.
 - **v0.9.23** (Jun 28) — UX polish. Welcome wizard onboarding, skeleton loading for calendar/explore, page fade-in animation, skip-to-content + focus-visible rings + aria-live accessibility, restructured settings with Danger Zone.
 - **v0.9.22** (Jun 28) — Plant organization. Favorites (`is_favorite` column), archive/restore UI, group by room/location, health/location/favorites filter panel, sort by name/date/health/species, grid/list view toggle, collection stats.
@@ -144,6 +149,8 @@ Architecture follows the MCP Build Guide: SHA-256 token auth, centralized regist
 - **InsightCards** — Data-driven insight display with expandable reasoning
 - **WelcomeWizard** — First-run onboarding tour (4-step, localStorage-gated)
 - **PhotoPicker** — Camera + gallery capture with `capture="environment"` for mobile
+- **OAuthDeepLinkHandler** — Global Capacitor deep-link listener for OAuth callback, mounted in root layout
+- **DebugInfo** — Diagnostics widget for APK debugging (origin, session, platform detection)
 
 ## App Identity
 
