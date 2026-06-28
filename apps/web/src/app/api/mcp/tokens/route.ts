@@ -8,9 +8,12 @@
  * Only the SHA-256 hash and a display prefix are stored.
  */
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/browser";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sha256Hex, generateToken } from "@/lib/mcp-auth";
+
+export const dynamic = "force-static";
 
 /**
  * Generate a display prefix for the token (first 12 chars + "...").
