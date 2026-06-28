@@ -1,16 +1,28 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { Sprout, Loader2, ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/browser";
 import { PublicNav } from "@/components/public-nav";
 import { PublicFooter } from "@/components/public-footer";
 import Link from "next/link";
 
-function errorMessage(error: unknown) {
-  if (error instanceof Error) return error.message;
-  console.error(error);
-  return "Something went wrong. Please try again.";
+type SignInPlatform = "web" | "native" | "pwa";
+
+/** Detect the current runtime platform to choose the right sign-in flow. */
+function detectPlatform(): SignInPlatform {
+  if (typeof window === "undefined") return "web";
+  const win = window as typeof window & {
+    Capacitor?: { isNativePlatform?: () => boolean };
+  };
+  if (win.Capacitor?.isNativePlatform?.()) return "native";
+  if (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    (window.navigator as { standalone?: boolean }).standalone === true
+  ) {
+    return "pwa";
+  }
+  return "web";
 }
 
 export default function LoginPage() {
@@ -25,6 +37,27 @@ export default function LoginPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Refs for PWA postMessage listener cleanup
+  const pwaTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pwaMessageHandlerRef = useRef<((event: MessageEvent) => void) | null>(
+    null,
+  );
+
+  // Cleanup PWA listener + timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (pwaMessageHandlerRef.current) {
+        window.removeEventListener(
+          "message",
+          pwaMessageHandlerRef.current,
+        );
+      }
+      if (pwaTimeoutRef.current) {
+        clearTimeout(pwaTimeoutRef.current);
+      }
+    };
+  }, []);
+
   /** Returns the app origin for OAuth redirect. */
   function redirectOrigin(): string {
     if (typeof window !== "undefined") return window.location.origin;
@@ -38,19 +71,100 @@ export default function LoginPage() {
     }
     setBusy(true);
     setError(null);
+
     try {
-      const { error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${redirectOrigin()}/auth/callback`,
-        },
-      });
-      if (oauthError) throw oauthError;
+      const platform = detectPlatform();
+
+      if (platform === "web") {
+        // ── Web: direct browser redirect (existing flow) ────────────────
+        const { error: oauthError } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo: `${redirectOrigin()}/auth/callback`,
+          },
+        });
+        if (oauthError) throw oauthError;
+        // Page navigates away — no need to reset busy state
+      } else if (platform === "native") {
+        // ── Capacitor native: in-app Chrome Custom Tab ──────────────────
+        const { data, error: oauthError } =
+          await supabase.auth.signInWithOAuth({
+            provider: "google",
+            options: {
+              redirectTo: "opensprout://auth/callback",
+              skipBrowserRedirect: true,
+            },
+          });
+        if (oauthError) throw oauthError;
+        if (!data?.url) throw new Error("Failed to get sign-in URL.");
+
+        // Open in in-app browser (Chrome Custom Tab on Android)
+        const { Browser } = await import("@capacitor/browser");
+        await Browser.open({ url: data.url });
+
+        // Don't reset busy — user will return via deep link
+      } else {
+        // ── PWA: open system browser popup ──────────────────────────────
+        const { data, error: oauthError } =
+          await supabase.auth.signInWithOAuth({
+            provider: "google",
+            options: {
+              redirectTo: `${redirectOrigin()}/auth/complete`,
+              skipBrowserRedirect: true,
+            },
+          });
+        if (oauthError) throw oauthError;
+        if (!data?.url) throw new Error("Failed to get sign-in URL.");
+
+        const popup = window.open(
+          data.url,
+          "opensprout-google-signin",
+          "width=600,height=700,menubar=no,toolbar=no,location=yes",
+        );
+
+        if (!popup) {
+          // Popup was blocked — show an error
+          setError(
+            "Popup was blocked. Please allow popups for this site and try again.",
+          );
+          setBusy(false);
+          return;
+        }
+
+        // Listen for success message from the popup
+        const onMessage = (event: MessageEvent) => {
+          if (event.origin !== window.location.origin) return;
+          if (event.data?.type === "opensprout-oauth-done") {
+            window.removeEventListener("message", onMessage);
+            if (pwaTimeoutRef.current) clearTimeout(pwaTimeoutRef.current);
+            window.location.href = "/today";
+          }
+        };
+        window.addEventListener("message", onMessage);
+        pwaMessageHandlerRef.current = onMessage;
+
+        // Fallback timeout — 2 minutes
+        pwaTimeoutRef.current = setTimeout(() => {
+          window.removeEventListener("message", onMessage);
+          setBusy(false);
+          setError("Sign-in timed out. Please try again.");
+        }, 120_000);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to sign in with Google.");
+      setError(
+        err instanceof Error ? err.message : "Failed to sign in with Google.",
+      );
       setBusy(false);
     }
   }, [supabase]);
+
+  /** Platform label shown beneath the button. */
+  const platformHint = useMemo(() => {
+    const p = detectPlatform();
+    if (p === "native") return "You'll be taken to Google to sign in securely.";
+    if (p === "pwa") return "A browser window will open to sign you in.";
+    return null;
+  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -116,11 +230,28 @@ export default function LoginPage() {
               {busy ? "Signing in..." : "Continue with Google"}
             </button>
 
+            {platformHint && (
+              <p className="mt-4 text-center text-xs text-muted-foreground/60">
+                {platformHint}
+              </p>
+            )}
+
             <p className="mt-6 text-center text-xs text-muted-foreground">
               By signing in, you agree to our{" "}
-              <Link href="/terms" className="text-primary hover:underline">Terms</Link>
+              <Link
+                href="/terms"
+                className="text-primary hover:underline"
+              >
+                Terms
+              </Link>
               {" "}and{" "}
-              <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.
+              <Link
+                href="/privacy"
+                className="text-primary hover:underline"
+              >
+                Privacy Policy
+              </Link>
+              .
             </p>
           </div>
         </section>

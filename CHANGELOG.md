@@ -2,6 +2,167 @@
 
 All notable changes to OpenSprout will be documented here. The format follows [Keep a Changelog](https://keepachangelog.com/). OpenSprout uses [Semantic Versioning](https://semver.org/).
 
+## 0.9.26 — 2026-06-28
+
+### Added
+- **Native Google Sign-In for Android** — in-app Chrome Custom Tab via @capacitor/browser with skipBrowserRedirect and opensprout://auth/callback custom scheme.
+- **Browser-launch login for Windows/PWA** — system browser popup via window.open(), /auth/complete page shows "return to app" message, postMessage to opener.
+- **Platform-aware sign-in dispatch** in login page — detects web / Capacitor native / PWA.
+- **OAuth deep-link handler** — global Capacitor appUrlOpen listener for OAuth callback.
+- **API routing utility** (lib/data/platform.ts) — resolveApiUrl() prepends production origin in Capacitor WebView.
+- **Debug diagnostics** at /debug — origin, Capacitor, session status, API URLs.
+
+### Fixed
+- **Android adaptive icons** — ic_launcher_background changed from #FFFFFF to #16784f (brand green).
+- **White screen flash** — added android:windowBackground to AppTheme.NoActionBar.
+
+### Changed
+- @capacitor/browser@8.0.3 installed and synced.
+- Version bumped to 0.9.26 (versionCode 6).
+
+## 0.9.25 — 2026-06-28
+
+### Added
+- **Release Candidate Stabilization** — full quality pass for v0.9.25 RC.
+
+### Changed
+- Fixed 4 ESLint `react/no-unescaped-entities` errors in care sheets and plant doctor.
+- Cleaned up 30+ unused import/variable declarations across the web app.
+- Version bumped to 0.9.25 (versionCode 5).
+
+### Technical
+- All quality checks pass: lint (0 errors), TypeScript (clean), Next.js build (clean), MCP tests (112/112), release script check-only mode.
+- Supabase migration ordering verified (9 migrations, ordered by timestamp).
+- `is_favorite` column verified in migration `20260627000000_add_favorites.sql`.
+- `journal_photos` table verified with full schema (object_path, content_type, sort_order, client_id, sync fields).
+- `diagnosis_entries` table verified with RLS (readable by anon + authenticated).
+- `identifications` table verified with RLS (user-scoped).
+- `knowledge_articles` table verified with RLS (readable by anon + authenticated).
+- RLS policies verified on all tables — every user-scoped table has `auth.uid() = user_id`.
+- MCP server builds and passes all 112 tests after app changes.
+- Release script validated in `--check-only` mode — no destructive side effects.
+- PWA manifest verified (icons, screenshots, edge_side_panel, launch_handler, categories).
+- Service worker verified (CACHE_NAME v0.9.24, network-first strategy).
+
+## 0.9.24 — 2026-06-28
+
+### Added
+- **Android versionCode 4**, versionName 0.9.24. Cleartext disabled in production (enabled via `CAPACITOR_CLEARTEXT=true`).
+- **PWABuilder manifest** (`public/pwabuilder.json`) — full metadata, screenshots, edge_side_panel, categories.
+- **Store screenshots generator** — `scripts/generate-store-screenshots.mjs` using Puppeteer for Play + Microsoft.
+- **Release automation** — `scripts/release.sh` version bump → lint → typecheck → MCP → web → Android. Supports `--check-only`, `--android-only`, explicit version args.
+- **CI Android build** — static export → Capacitor sync → `assembleDebug` → artifact upload. Runs on `main` pushes and `v*` tags.
+
+### Changed
+- `manifest.webmanifest` updated with categories, launch_handler, screenshots.
+
+## 0.9.23 — 2026-06-28
+
+### Added
+- **Onboarding** — WelcomeWizard 4-step tour (Welcome → Add → Plan → Track), localStorage-gated.
+- **Loading states** — skeleton squares for Calendar, skeleton cards for Explore.
+- **Page fade-in animation** — `@keyframes fadeIn` + `@utility animate-page-in` in globals.css.
+- **Skip-to-content link** in layout for keyboard users.
+- **`aria-live="polite"`** region for dynamic announcements.
+- **Global focus-visible ring** — 2px + 4px theme ring on all interactive elements.
+
+### Changed
+- Settings restructured: Profile, Notifications, Integrations, Data, Danger Zone, About. Danger Zone visually separated with red tint.
+- Consistent `rounded-2xl border-border/50` cards across settings.
+
+## 0.9.22 — 2026-06-28
+
+### Added
+- **Favorites** — `is_favorite` column, star button on cards, Favorites filter toggle, favorites sorted first.
+- **Archive/Restore UI** — archive button on cards, Archived filter toggle, restore button, visual de-emphasis.
+- **Search & Filters** — search by name/species/location/health/cultivar, filter panel with health/location chips, favorites/archived toggles.
+- **View modes** — grid/list toggle with pill UI, compact list rows with inline actions.
+- **Collection stats** — total + favorites + archived counts, health distribution dots.
+
+### Changed
+- `sortAndFilterPlants()` — pure function, no DB calls. Sort by Name/Date/Updated/Health/Species.
+
+## 0.9.21 — 2026-06-28
+
+### Added
+- **End-to-end notifications** — `rescheduleAllReminders()` called from dashboard refresh.
+- **Web Notification API fallback** — `scheduleWebNotification()` for PWA/desktop via setTimeout.
+- **Missed reminder summary** — `showMissedReminders()` on app load, deduplicated via sessionStorage.
+- **Background refresh** — 15-minute `setInterval` re-checking tasks + rescheduling.
+- **Quiet hours** — handles same-day and midnight-spanning ranges, shifted/ skipped if during quiet hours.
+- **Android reliability** — Capacitor local notifications with `allowWhileIdle: true`, proper channel ID, small icon.
+
+### Changed
+- Lead time options expanded (5 min → 1 day). Platform behavior notes in settings info box.
+
+## 0.9.20 — 2026-06-28
+
+### Added
+- **Smart insights data layer** (`lib/data/insights.ts`) — `detectMissedCare()`, `computeCareStreaks()`, `getLastWatered()`, `getSeasonalTips()`, `buildDashboardInsights()`.
+- **Dashboard InsightCards** — missed care alerts, streak celebrations, health reminders, seasonal tips.
+- **Expandable "Why?" detail** on every insight showing exact data source.
+
+### Changed
+- Insights never invent recommendations without supporting data — every card has `reason` + `dataSource`.
+
+## 0.9.19 — 2026-06-28
+
+### Added
+- **PlantDoctorSheet** — 3-step diagnosis flow: Welcome → Select symptoms → Result.
+- **Symptom-based diagnosis** from species care library (`diagnosis_entries` table).
+- **Severity indicators** (severe/moderate/minor), full cause + solution display.
+- Entry point button on plant detail (species required).
+
+### Fixed
+- Diagnosis is purely informational — never overwrites user health status.
+
+## 0.9.18 — 2026-06-28
+
+### Added
+- **PhotoGallery** component — multiple photos per plant, nav arrows + thumbnail strip.
+- **Inline photo upload/delete** with confirmation dialog.
+- **Two-column desktop layout** — `lg:grid-cols-5` split for photos + info.
+- **Species Info panel** — collapsible with knowledge articles as `<details>`.
+- **Timeline** — care/health tab switcher with proper icons, amounts, timestamps.
+- **Inline notes editing** — tap to edit with Save/Cancel, dashed "Add notes" empty state.
+
+## 0.9.17 — 2026-06-28
+
+### Changed
+- **Dashboard rebuilt** around "Today's Care" — overdue/today/upcoming sections.
+- "Nothing due today" celebratory state with Browse Plants / Journal links.
+- Contextual next action based on current state.
+- Stats demoted below tasks. Plant care summaries per plant.
+- `handleMarkCare()` handles all 8 care types with correct verb labels.
+
+## 0.9.16 — 2026-06-28
+
+### Added
+- **Species care presets** — `resolveSpeciesPresets()` merges species knowledge with defaults.
+- **ApplyCarePlanSheet** — post-creation BottomSheet with 8 care types and toggles.
+- **CadencePicker** — 12 preset cadences (Daily → Yearly) + custom input.
+- **ScheduleCard/ScheduleEditSheet** — schedule management (edit cadence, pause, delete).
+
+### Changed
+- `createPlant()` no longer auto-creates water/fertilize schedules.
+- Raw numeric interval inputs removed from plant form.
+- Pause sets `active: false` (stops task generation without deleting).
+
+## 0.9.15 — 2026-06-27
+
+### Added
+- **Product truth overhaul** — honest defaults, cover photo upload, basic tracker mode.
+- **Plant detail route** — full detail with photos, schedules, timeline.
+- **Cover photo upload** — `CoverPhoto` component.
+- **Dark mode sweep** — journal, calendar, explore, settings, buttons, health bar.
+- **Profile redesign** — redesigned layout with auth info.
+- **PWA persistence** — dismiss button persisted.
+
+### Fixed
+- Auth loop fix, CSP dev-mode fix, platform-aware AuthGate.
+- Google sign-in dark mode, CORS HEAD check, CSP vercel.live.
+- Supabase connectivity check CORS.
+
 ## 0.9.14 — 2026-06-25
 
 ### Added

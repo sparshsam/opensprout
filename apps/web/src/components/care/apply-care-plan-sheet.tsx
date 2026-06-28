@@ -226,7 +226,7 @@ export function ApplyCarePlanSheet({
           onClick={onClose}
           className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition"
         >
-          Not now — I'll set it up later
+          Not now — I&apos;ll set it up later
         </button>
       </div>
     </BottomSheet>

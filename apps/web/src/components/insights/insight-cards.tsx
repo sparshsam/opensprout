@@ -5,12 +5,11 @@ import { useApp } from "@/lib/context/app-context";
 import {
   buildDashboardInsights,
   getSeasonalTips,
-  type CareInsight,
 } from "@/lib/data/insights";
 import { cn } from "@/lib/utils";
 import {
   AlertTriangle, TrendingUp, Droplets, Sun,
-  Heart, Calendar, Sparkles, Info,
+  Heart, Calendar, Info,
 } from "lucide-react";
 import Link from "next/link";
 

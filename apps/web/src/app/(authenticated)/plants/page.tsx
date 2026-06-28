@@ -5,14 +5,13 @@ import { useApp } from "@/lib/context/app-context";
 import { useAtmosphere } from "@/lib/hooks/use-atmosphere";
 import Link from "next/link";
 import {
-  Plus, Search, Pencil, Trash2, Loader2, Sprout, Camera,
-  Heart, Archive, ArchiveRestore, Star, SlidersHorizontal,
-  ArrowUpDown, LayoutGrid, List, X, ChevronDown,
+  Plus, Search, Trash2, Loader2, Sprout, Camera,
+  Archive, ArchiveRestore, Star, SlidersHorizontal,
+  ArrowUpDown, LayoutGrid, List, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { formatDueDate } from "@/lib/data/care";
 import { ApplyCarePlanSheet } from "@/components/care/apply-care-plan-sheet";
 import { sortAndFilterPlants, type PlantSortField, type SortDirection } from "@/lib/data/plants";
 import type { HealthStatus, PlantRow, PlantSpeciesRow } from "@/lib/data/types";
@@ -538,7 +537,7 @@ function PlantForm({ editing, values, speciesList, saving, coverFile, onCoverCha
   const [speciesQuery, setSpeciesQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const [identifying, setIdentifying] = useState(false);
-  const [identifyError, setIdentifyError] = useState<string | null>(null);
+  const [, setIdentifyError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const matches = useMemo(() => {
