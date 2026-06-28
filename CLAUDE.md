@@ -13,6 +13,8 @@ npm run dev            # apps/web dev server at localhost:9999
 npm run build          # Web production build
 npm run typecheck      # TypeScript check
 npm run test:mcp       # MCP server tests (112 tests)
+npm run android:debug  # Debug APK
+npm run android:release # Signed AAB + APK
 ```
 
 ## Project Layout
@@ -24,14 +26,40 @@ apps/web/              # Next.js + Capacitor Android
   │   ├── login/             # Google OAuth sign-in (no email/password)
   │   ├── auth/callback/     # OAuth PKCE callback handler
   │   ├── api/mcp/           # MCP HTTP endpoint + token CRUD
-  │   ├── (authenticated)/   # App pages (today, plants, identify, etc.)
+  │   ├── (authenticated)/   # App pages
+  │   │   ├── today/         # Dashboard — Today's Care, insights, tasks
+  │   │   ├── plants/        # Plant collection with filters/sort/groups
+  │   │   ├── plants/[id]/   # Plant detail — gallery, schedules, doctor, timeline
+  │   │   ├── identify/      # Photo identification via PlantNet
+  │   │   ├── journal/       # Care log + journal entry feed
+  │   │   ├── calendar/      # Monthly task calendar
+  │   │   ├── explore/       # Species library browser
+  │   │   ├── profile/       # User profile
+  │   │   └── settings/      # Settings (notifications, data, integrations)
   │   ├── about/             # About page
   │   ├── privacy/           # Privacy policy
   │   ├── terms/             # Terms of service
   │   ├── mcp/               # AI Access guide
-  │   └── globals.css        # Design tokens
+  │   └── globals.css        # Design tokens, animations, a11y
   ├── android/               # Capacitor Android project
-  └── public/                # Static assets, PWA manifest, icons
+  ├── public/
+  │   ├── sw.js              # Service worker (v0.9.24)
+  │   ├── manifest.webmanifest  # PWA manifest
+  │   └── pwabuilder.json    # PWABuilder manifest
+  └── src/
+      ├── components/
+      │   ├── care/          # CadencePicker, ScheduleCard, ApplyCarePlanSheet, ScheduleEditSheet
+      │   ├── doctor/        # PlantDoctorSheet
+      │   ├── gallery/       # PhotoGallery
+      │   ├── insights/      # InsightCards
+      │   ├── onboarding/    # WelcomeWizard
+      │   ├── cards/         # PhotoPicker, CoverPhoto
+      │   ├── sheets/        # BottomSheet
+      │   ├── shell/         # TopBar, BottomNav, sidebar
+      │   └── ui/            # Button, Input, Skeleton
+      ├── lib/
+      │   ├── context/       # AppProvider, ThemeProvider
+      │   └── data/          # Data layer (plants, care, tasks, reminders, insights, etc.)
 
 apps/mcp/              # MCP server (28 tools, 112 tests)
   ├── src/
@@ -42,8 +70,7 @@ apps/mcp/              # MCP server (28 tools, 112 tests)
   │   ├── tools/             # 7 tool modules (plants, care, journal, etc.)
   │   └── __tests__/         # auth.test.ts + tools.test.ts
 
-docs/                  # 35+ docs (see docs/ directory)
-scripts/               # bump-version.mjs, package-windows.ps1, cleanup-default-data.sql
+scripts/               # bump-version.mjs, release.sh, package-windows.ps1, generate-store-screenshots.mjs
 supabase/migrations/   # Database migrations (shared project)
 ```
 
@@ -59,8 +86,9 @@ supabase/migrations/   # Database migrations (shared project)
 | `npm run android:release:bundle` | Signed release AAB |
 | `npm run android:release:apk` | Signed release APK |
 | `npm run android:release` | Both AAB + APK |
-| `npm run version:bump` | Interactive version bump |
 | `npm run -w @opensprout/mcp test` | MCP tests (112) |
+| `bash scripts/release.sh` | Full release automation (check → build → sign) |
+| `bash scripts/release.sh --check-only` | Run all checks without building |
 
 ## Design Conventions
 
@@ -93,13 +121,29 @@ Architecture follows the MCP Build Guide: SHA-256 token auth, centralized regist
 
 ## Release History
 
-- **v0.9.15** (current, Jun 27) — Product truth overhaul, plant detail route, cover photo upload, dark mode sweep, profile redesign, PWA persistence, data cleanup migration.
-- **v0.9.14** (Jun 25) — Production signing, PWA hardening, reliability fixes, MCP transport, Google OAuth, domain migration to sprout.kovina.org.
-- **v0.9.13** (Jun 23) — Platform RC Packaging & Test Prep.
-- **v0.9.12** (Jun 22) — Public homepage, nav/footer, auth-aware routing.
-- **v0.9.11** (Jun 22) — Knowledge & diagnosis foundation.
-- **v0.9.10** (Jun 22) — MCP reliability: user data isolation, 28 tools.
-- **v0.9.0–v0.9.9** — Brand identity, UI overhaul, MCP server foundation.
+- **v0.9.24** (Jun 28) — Platform completion. Android versionCode 4, cleartext disabled in production, PWABuilder manifest, store screenshots generator, release automation script, CI with Android build job.
+- **v0.9.23** (Jun 28) — UX polish. Welcome wizard onboarding, skeleton loading for calendar/explore, page fade-in animation, skip-to-content + focus-visible rings + aria-live accessibility, restructured settings with Danger Zone.
+- **v0.9.22** (Jun 28) — Plant organization. Favorites (`is_favorite` column), archive/restore UI, group by room/location, health/location/favorites filter panel, sort by name/date/health/species, grid/list view toggle, collection stats.
+- **v0.9.21** (Jun 28) — Notifications. Wired `rescheduleAllReminders` into dashboard refresh, web Notification API fallback, missed reminder summary, 15-min background refresh, quiet hours, Android notification reliability.
+- **v0.9.20** (Jun 28) — Smart care insights. Missed care detection, care streaks, last-watered indicators, seasonal tips, health reminders with expandable "Why?" reasoning, dashboard insight cards.
+- **v0.9.19** (Jun 28) — Diagnosis & health. Plant Doctor symptom-based diagnosis from the species care library, severity indicators, cause + solution display, never overwrites user health.
+- **v0.9.18** (Jun 28) — Plant detail completion. Photo gallery (multiple photos, nav, thumbs, upload/delete), species info panel with knowledge articles, care/health history tabs, inline notes editing, two-column desktop layout.
+- **v0.9.17** (Jun 28) — Dashboard intelligence. Rebuilt around "Today's Care" — overdue/today/upcoming sections, "Nothing due today" state, contextual next actions, per-plant care summaries, stats demoted.
+- **v0.9.16** (Jun 28) — Care engine foundation. Species care presets, Apply Care Plan BottomSheet, guided schedule creation with CadencePicker, user-friendly cadence pills, schedule edit/pause/delete.
+- **v0.9.15** (Jun 27) — Product truth overhaul, plant detail route, cover photo upload, dark mode sweep, profile redesign, PWA persistence.
+- **v0.9.14** (Jun 25) — Production signing, PWA hardening, MCP architecture, Google OAuth, domain migration.
+- **v0.9.0–v0.9.13** — Foundation layers: brand identity, UI, MCP server, knowledge base, RC packaging.
+
+## Design System Components
+
+- **CadencePicker** — Pill-based frequency selector (Daily → Yearly) with custom input
+- **ApplyCarePlanSheet** — Post-creation care plan setup with species presets and toggles
+- **ScheduleCard / ScheduleEditSheet** — Schedule management (edit cadence, pause, delete)
+- **PhotoGallery** — Multi-photo gallery with nav arrows, thumbnail strip, inline upload/delete
+- **PlantDoctorSheet** — Symptom-based diagnosis from species knowledge library
+- **InsightCards** — Data-driven insight display with expandable reasoning
+- **WelcomeWizard** — First-run onboarding tour (4-step, localStorage-gated)
+- **PhotoPicker** — Camera + gallery capture with `capture="environment"` for mobile
 
 ## App Identity
 

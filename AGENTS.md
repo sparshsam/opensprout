@@ -2,7 +2,7 @@
 
 ## Current Release
 
-**v0.9.15** — Product Truth Overhaul, Plant Detail Route, Dark Mode Sweep (2026-06-27)
+**v0.9.24** — Platform Completion (2026-06-28)
 
 ## Product Identity
 
@@ -31,8 +31,8 @@ opensprout/
 │   │   └── src/components/# UI components
 │   └── mcp/              # MCP server (28 tools, HTTP + stdio)
 │       └── src/tools/    # 7 tool modules (plants, care, journal, etc.)
-├── docs/                 # 35+ docs (see below)
-├── scripts/              # bump-version.mjs, package-windows.ps1
+├── docs/                 # 35+ docs
+├── scripts/              # build/release scripts
 ├── supabase/
 │   └── migrations/       # Database migrations
 └── package.json          # Root workspace
@@ -50,159 +50,239 @@ opensprout/
 | `/terms` | Terms of service |
 | `/mcp` | MCP integration guide |
 | `/api/mcp` | MCP Streamable HTTP endpoint |
-| `/today` | Authenticated home dashboard |
-| `/plants` | Plant collection |
-| `/plants/[id]` | Plant detail (photo, health, care history, schedules, quick care) |
-| `/identify` | Plant identification |
-| `/profile` | Profile & settings |
+| `/today` | Dashboard — Today's Care, tasks, insights |
+| `/plants` | Plant collection (filters, sort, group, archive, favorites) |
+| `/plants/[id]` | Plant detail (photos, schedules, doctor, timeline, notes) |
+| `/identify` | Plant identification (photo + AI) |
+| `/journal` | Care log + journal entry feed |
+| `/calendar` | Monthly task calendar |
+| `/explore` | Species library browser |
+| `/profile` | User profile |
+| `/settings` | Settings (notifications, data, MCP) |
 | `/settings/mcp` | MCP token management |
 
-## Key Changes in v0.9.15
+## Key Changes in v0.9.16 — Care Engine Foundation
 
-### Product Truth Overhaul
-- **No fake health:** `cleanHealthStatus()` returns `undefined` instead of `"stable"`. New plants start with no health assessment (shows "Not assessed").
-- **No fake schedules:** `emptyForm` removed `water_every_days: 7` and `fertilize_every_days: 30`. Schedules only created when user explicitly sets cadence.
-- **No fake stats:** Dashboard counts only real plants, real task instances, real care logs. Removed "Active schedules" and "Plant Health" sections.
-- **Data cleanup migration:** `scripts/cleanup-default-data.sql` — review-first SQL to reset old default health_status and delete auto-created schedules for plants with no species_id.
+### Species Care Presets
+- `resolveSpeciesPresets()` in `lib/data/care.ts` merges species knowledge (watering min/max, fertilizing frequency) with sensible defaults for mist/rotate/prune/repot/inspect/custom
+- `CarePreset` type with `source` field (`"species"` vs `"default"`) for transparency
 
-### Auth Loop Fix (Critical)
-- **Root cause:** `/auth/callback` used `NextResponse.redirect("/today")` without exchanging the PKCE auth code — the redirect stripped `?code=...` from the URL, so `detectSessionInUrl` never fired, causing an infinite sign-in loop.
-- **Fix:** Server-side code exchange via `createServerClient` + `exchangeCodeForSession()`, writing session cookies onto the redirect response.
+### Apply Care Plan Flow
+- `ApplyCarePlanSheet` — post-creation BottomSheet showing all 8 care types with toggles
+- Water enabled by default (species-backed); other presets opt-in
+- `CadencePicker` — 12 preset cadences (Daily → Yearly) + custom input
+- Batch-creates `care_schedules` on apply; "Not now" defers
 
-### CSP Dev-Mode Fix
-- **Root cause:** `script-src 'self' 'unsafe-inline'` blocked `eval()` used by Next.js HMR — page hung on splash.
-- **Fix:** Skip security headers in `NODE_ENV !== 'production'` (production Vercel builds get strict CSP).
-- `.env.local` symlinked into `apps/web/` so npm workspaces resolves it.
+### User-Friendly Scheduling
+- `formatCadence()` / `cadenceToDays()` / `daysToCadence()` helpers in `care.ts`
+- `CadencePicker` component with pills for all common cadences
+- Raw numeric interval inputs removed from plant form
 
-### Platform-Aware AuthGate
-- **Web browser:** Public homepage renders for everyone (signed in or out). Logo links to `/`. "Sign in" button checks session — if already authed, goes to `/today`.
-- **Native app (Capacitor):** Detects `window.Capacitor.isNativePlatform()` — redirects to `/login` or `/today` (if session exists).
-- All three nav components (TopBar, Sidebar, BottomNav) now label the home tab "Dashboard" instead of "Home".
+### Schedule Management
+- `ScheduleCard` — displays cadence + due date with Edit/Pause/Delete
+- `ScheduleEditSheet` — BottomSheet for editing cadence and notes
+- Pause sets `active: false` (stops task generation without deleting)
+- `updateCareSchedule()` / `deleteCareSchedule()` in `plants.ts`
 
-### Plant Detail Route (`/plants/[id]`)
-- New page created at `(authenticated)/plants/[id]/page.tsx`.
-- Shows: photo (or "No photo yet"), name, species (or "Unknown species"), location, health (or "Not assessed"), care schedule (or "No care schedule yet"), care history (or "No care logged yet").
-- "Basic tracker mode" badge when no species_id and no photo.
-- Quick care buttons log real actions with toast confirmation.
-- All plant cards in Dashboard and Plants grid link directly to `/plants/[id]`.
+### Cleanup
+- `createPlant()` no longer auto-creates water/fertilize schedules
+- `PlantFormValues` and `validatePlantValues()` cleaned of `water_every_days` / `fertilize_every_days`
 
-### Cover Photo Upload
-- Optional cover photo upload in the Add Plant form.
-- Uses existing `uploadPlantPhoto` + `setPlantCoverPhoto` pipeline.
-- Photo preview with remove option before save.
-- Plant creation succeeds even without photo.
+## Key Changes in v0.9.17 — Dashboard Intelligence
 
-### Plants Page Cleanup
-- Removed inline detail panel (quick care, schedule, timeline) — plants page is now a grid only.
-- Cards link directly to `/plants/[id]`.
-- Removed unused `selectedId`, `onQuickCare`, `timeline` state.
+### Layout (top to bottom)
+1. Hero — greeting + atmospheric headline
+2. Contextual next action — smart prompt based on current state
+3. Overdue section — red-tinted with count badge + dates
+4. Today's tasks — each with "Mark done" button + water/fertilizer detail fields
+5. "Nothing due today" — celebratory state with Browse Plants / Journal links
+6. Upcoming — next 5 tasks with relative times
+7. Stats row — compact, moved below tasks
+8. Quick actions — improved with Calendar link
+9. Plant care summaries — per-plant next care card
+10. Recent care — activity log with proper care-type icons
 
-### Dark Mode Sweep
-- Comprehensive dark mode fix across all components:
-  - `timeline-item.tsx`: careColors (8 types) and healthBar got `dark:bg-*-950 dark:border-*-800 dark:text-*-400` variants.
-  - `bottom-sheet.tsx`, `task-card.tsx`, `journal-form.tsx`: added `dark:bg-muted`.
-  - `button.tsx`: outline variant uses `dark:bg-background dark:hover:bg-muted` (visible hover).
-  - `calendar/page.tsx`, `explore/page.tsx`, `settings/page.tsx`, `journal/page.tsx`: all bg-white → `dark:bg-muted`.
-  - Red-tinted error/retry buttons: `dark:bg-muted dark:text-red-400 dark:hover:bg-red-900/30`.
+### Fixes
+- `handleMarkCare` handles all 8 care types with correct verb labels (watered, fertilized, misted, rotated, pruned, repotted, inspected)
+- `markCareDone` uses proper notes per care type
 
-### Theme Toggle Relocated
-- Moved from floating fixed button (bottom-right) to TopBar header.
-- Visible on all authenticated pages, both mobile and desktop.
+## Key Changes in v0.9.18 — Plant Detail Completion
 
-### PWA Install Persistence
-- Dismissal saved to `localStorage` (`opensprout-pwa-dismissed`).
-- Once dismissed/installed, prompt never shows again on reloads.
+### Photo Gallery
+- `PhotoGallery` component — multiple photos per plant from `journal_photos` table
+- Gallery nav arrows + thumbnail strip for navigation
+- Inline upload new photos, delete existing with confirmation
+- Auto-fallback to "upload first photo" empty state
+- `listPlantPhotos()` data function in `photos.ts`
 
-### Profile Page Redesign
-- Card-based layout with `SectionCard` component (icon header + content).
-- Account section: full-width card with avatar, email, plant count, logout.
-- Desktop: 2-column grid for settings cards.
-- About section: 4-column inline grid on large screens.
-- Consistent `rounded-2xl border bg-white dark:bg-muted` styling.
+### Two-Column Desktop Layout
+- `lg:grid-cols-5` split: photos + actions (2 cols) / info + schedules + timeline (3 cols)
 
-### Nav Labels
-- "Home" → "Dashboard" in TopBar, Sidebar, BottomNav.
-- OpenSprout logo links to `/` (public homepage) everywhere.
+### Species Info Panel
+- Collapsible section showing all species fields + knowledge articles
+- Fetches via `getSpeciesById()` + `getKnowledgeArticles()` from `knowledge.ts`
+- Articles displayed as expandable `<details>` elements
 
-### Dev Server Port
-- Dev server changed from port 3000 to 9999.
+### Timeline
+- Care/Health tab switcher
+- Care log shows all types with proper icons, amounts, timestamps
+- Health history shows current status with edit link
 
-## Key Changes in v0.9.14
+### Inline Notes
+- Tap to edit notes directly on the page with Save/Cancel
+- Empty state shows dashed "Add notes" prompt
 
-### Android Release Engineering
-- Production keystore (RSA 2048, 10,000 days) at `apps/web/android/opensprout-release.keystore` (gitignored)
-- Gradle signing config via `keystore.properties` (600 perms, gitignored)
-- Signed AAB (4.3 MB) and signed APK (3.8 MB) via R8 minification
-- `minifyEnabled true`, `shrinkResources true`, Capacitor-safe ProGuard rules
-- Version automation via `scripts/bump-version.mjs`
-- Notification icon fixed (`ic_stat_sprout.xml` was missing)
-- Capacitor splash `launchAutoHide` set to `true` (was hanging)
+## Key Changes in v0.9.19 — Diagnosis & Health
 
-### PWA Hardening
-- `PwaInstall` component — captures `beforeinstallprompt`, shows install banner
-- `AppUpdate` component — detects service worker updates, prompts reload
-- Service worker: removed broken `icon.svg` ref, origin-based cache filter, proper versioning, `SKIP_WAITING` handler
-- Manifest: added `scope`, `display_override`, `orientation`, `lang`
+### Plant Doctor
+- `PlantDoctorSheet` — 3-step flow: Welcome → Select symptoms → Result
+- Entry point button on plant detail (species required)
+- Symptoms grouped by category: Watering, Light, Pests, Disease, Nutrient, Environment
+- Sourced from `diagnosis_entries` table (species-specific + universal entries)
 
-### MCP Architecture (Build Guide Compliant)
-- Centralized `register-tools.ts` shared by stdio + HTTP transports
-- `vercel-handler.ts` — Streamable HTTP via `StreamableHTTPServerTransport`
-- `supabase.ts` — exported `sha256Hex()` and `generateToken()` for reuse
-- Token CRUD API routes at `api/mcp/tokens/` (create/list/revoke)
-- Web app handler at `src/lib/mcp-handler.ts`
-- Admin Supabase client at `src/lib/supabase/admin.ts`
-- Vercel build pipeline: builds MCP server before web app
+### Diagnosis Results
+- Severity indicator (severe/moderate/minor)
+- Full cause explanation + recommended action
+- Backed by curated species care library
 
-### Reliability
-- Exponential backoff retry (30s → 8m, max 5 retries) on sync push
-- `user_id` guards on UPDATE/DELETE push operations
-- Missing `user_id` filter on import client_id lookup (fixed)
-- Connectivity check uses Supabase auth endpoint (fixes CORS 404)
+### Safety
+- **Never overwrites user health** — diagnosis is purely informational
+- No automatic changes to `health_status` or any plant data
 
-### Auth
-- Google OAuth replaces email/password
-- PKCE flow via `@supabase/ssr`
-- `/auth/callback` route handles code exchange
+## Key Changes in v0.9.20 — Smart Care Insights
 
-### Domain
-- Migrated from `opensprout.vercel.app` to `sprout.kovina.org`
-- Cloudflare DNS: CNAME to `cname.vercel-dns.com` (grey cloud)
-- All code and docs references updated
+### Data Layer (`lib/data/insights.ts`)
+- `detectMissedCare()` — schedules past due without completion
+- `computeCareStreaks()` — consecutive-day streaks per plant per care type
+- `getLastWatered()` — per-plant last watering time
+- `getSeasonalTips()` — month-based growing/dormant cycle tips
+- `buildDashboardInsights()` — aggregates all insights with `reason` + `dataSource` fields
 
-### Documentation (8 new docs)
-- `docs/data-safety.md` — Play Store data safety section
-- `docs/faq.md` — Frequently asked questions
-- `docs/offline-behavior.md` — Offline capabilities guide
-- `docs/secret-rotation.md` — Credential rotation procedures
-- `docs/troubleshooting.md` — Troubleshooting guide
-- `docs/v1-migration.md` — v0.9 → v1.0 migration notes
-- `docs/windows-packaging-guide.md` — MSIX packaging guide
-- `docs/microsoft-store-submission.md` — Store submission checklist
+### Dashboard Insight Cards
+- `InsightCards` component renders on `/today`
+- Shows: missed care alerts, streak celebrations, health reminders, seasonal tips
+- Every insight has expandable "Why?" detail showing exact data source
+- Never invents recommendations without supporting data
+
+## Key Changes in v0.9.21 — Notifications
+
+### End-to-End Notifications
+- `rescheduleAllReminders()` called from `refreshDashboard()` in app-context
+- Web Notification API fallback via `new Notification()` for PWA/desktop
+- `scheduleWebNotification()` — setTimeout-based for session reminders
+- `showMissedReminders()` — summary on app load (deduplicated via sessionStorage)
+
+### Background Refresh
+- 15-minute `setInterval` in app-context, re-checks tasks + reschedules notifications
+
+### Quiet Hours
+- Handles same-day (08:00-17:00) and midnight-spanning (22:00-07:00) ranges
+- Shifted to end time if during quiet hours; skipped if adjusted time is past
+
+### Android Reliability
+- Every task gets Capacitor local notification with `allowWhileIdle: true`
+- Proper channel ID, small icon `ic_stat_sprout`, icon color
+
+### Settings Polish
+- Lead time options expanded (5 min → 1 day)
+- Platform behavior notes in info box
+- `saveReminderPrefs()` dispatches event for immediate rescheduling
+
+## Key Changes in v0.9.22 — Plant Organization
+
+### Favorites
+- `is_favorite` boolean column on `plants` (migration `20260627000000_add_favorites.sql`)
+- Star button on each card, Favorites filter toggle, favorites sort first
+- `toggleFavorite()` function + `handleToggleFavorite` context handler
+
+### Archive/Restore UI
+- Archive button on each card, Archived filter toggle
+- Restore button on archived plants, visual de-emphasis (opacity + label)
+- `archivePlant()` / `restorePlant()` data functions + context handlers
+- Existing `archived_at` column now fully usable from UI
+
+### Search & Filters
+- Search covers name, species, location, health_status, cultivar, nickname
+- Filter panel: health status chips, location chips, favorites toggle, archived toggle
+- `sortAndFilterPlants()` — pure function, no DB calls
+- Sort by: Name, Date added, Recently updated, Health, Species (asc/desc)
+
+### View Modes
+- Grid/list view toggle (pill UI)
+- List view: compact rows with inline Edit/Archive/Delete
+- Grid view: cards with photo, health badge, action buttons
+
+### Collection Stats
+- Total + favorites + archived counts in header
+- Health distribution (colored dots) when no filter active
+
+## Key Changes in v0.9.23 — User Experience Polish
+
+### Onboarding
+- `WelcomeWizard` — 4-step wizard (Welcome → Add → Plan → Track)
+- localStorage-gated, shows on first visit only with 600ms delay
+- Progress dots, icons, "Skip tour" option
+
+### Loading States
+- Calendar page: skeleton squares replacing spinner
+- Explore page: skeleton cards replacing pulse icon
+
+### Animations
+- `@keyframes fadeIn` + `@utility animate-page-in` in globals.css
+- Applied to `<main>` — pages fade up on route change
+
+### Accessibility
+- Skip-to-content link in layout (uses existing `.skip-to-content` CSS)
+- `aria-live="polite"` region for dynamic announcements
+- Global `*:focus-visible` ring in globals.css (2px+4px theme ring)
+
+### Settings Restructure
+- Groups: Profile, Notifications, Integrations, Data, Danger Zone, About
+- Consistent `rounded-2xl border-border/50` cards matching design language
+- Danger Zone visually separated with red tint
+
+## Key Changes in v0.9.24 — Platform Completion
+
+### Android
+- `versionCode` 4, `versionName` "0.9.24"
+- `cleartext` disabled in production (enabled via `CAPACITOR_CLEARTEXT=true`)
+
+### PWABuilder
+- `public/pwabuilder.json` — full metadata, screenshots, edge_side_panel, categories
+- `manifest.webmanifest` updated with categories, launch_handler, screenshots
+
+### Store Assets
+- `scripts/generate-store-screenshots.mjs` — Puppeteer generator for Play + Microsoft
+- `docs/store-listing.md` — complete listing with v0.9.24 features
+
+### Release Automation
+- `scripts/release.sh` — version bump → lint → typecheck → MCP → web → Android
+- Supports `--check-only`, `--android-only`, explicit version args
+
+### CI
+- Android build job in CI — static export → Capacitor sync → `assembleDebug` → artifact upload
+- Runs on `main` pushes and `v*` tags
 
 ## Known Issues
 
 - No tests exist in the web app (only MCP tests)
 - No crash reporting / analytics (intentional privacy choice)
-- Calendar, Journal, Explore pages built but hidden from nav
-- App version in `package.json` lags behind git tags
+- App version in `package.json` lags behind git tags (now synced)
 - Vercel Hobby plan rate-limited for deployments (24h cooldown)
 - Supabase project shared with other apps (send.kovina.org)
 
 ## Build Commands
 
 ```bash
-npm run dev                    # Dev server
+npm run dev                    # Dev server at localhost:9999
 npm run build                  # Web production build
 npm run typecheck              # TypeScript check (builds MCP first)
 npm run lint                   # ESLint
 npm run android:debug          # Debug APK
 npm run android:release        # Both signed AAB + APK
-npm run android:release:bundle # Signed AAB only
-npm run android:release:apk    # Signed APK only
-npm run version:bump           # Interactive version bump
-npm run rc:web                 # RC web validation (build)
-npm run rc:android             # RC Android (release bundle + APK)
 npm run -w @opensprout/mcp test # MCP tests
+bash scripts/release.sh        # Full release automation
+bash scripts/release.sh --check-only  # Checks only, no build
 ```
 
 ## MCP Server
@@ -228,6 +308,7 @@ Located at `apps/mcp/`. Exposes 28 tools for AI agents. Test suite: 112 tests.
 4. **Open source.** AGPLv3. Source on GitHub.
 5. **RLS + app-level isolation.** Supabase RLS enabled on all tables; MCP server adds explicit `user_id` filters since it uses the service role.
 6. **Soft deletes.** Deleted records set `deleted_at` — always filter with `.is("deleted_at", null)`.
+7. **Explain recommendations.** Every insight/recommendation includes a `reason` and `dataSource`. Never invent without supporting data.
 
 ## Ecosystem Standards
 
@@ -242,3 +323,5 @@ All ecosystem repos follow: https://github.com/sparshsam/ecosystem-standards
 - Buttons are pills (rounded-full)
 - Hero text: `text-hero` utility (clamp 2.5-4.5rem, font-black)
 - Display text: `text-display` utility (clamp 1.75-2.25rem, font-bold)
+- Page transitions: `animate-page-in` (fadeIn 0.35s ease-out)
+- Focus indicator: global `*:focus-visible` ring (2px bg + 4px theme ring)
