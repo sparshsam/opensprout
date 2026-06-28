@@ -16,27 +16,27 @@ export function registerExportTools(
       const [plants, careSchedules, careLogs, taskInstances, journalEntries] =
         await Promise.all([
           c
-            .from("plants")
+            .from("opensprout_plants")
             .select("*")
             .eq("user_id", userId)
             .is("deleted_at", null),
           c
-            .from("care_schedules")
+            .from("opensprout_care_schedules")
             .select("*")
             .eq("user_id", userId)
             .is("deleted_at", null),
           c
-            .from("care_logs")
+            .from("opensprout_care_logs")
             .select("*")
             .eq("user_id", userId)
             .is("deleted_at", null),
           c
-            .from("task_instances")
+            .from("opensprout_task_instances")
             .select("*")
             .eq("user_id", userId)
             .is("deleted_at", null),
           c
-            .from("journal_entries")
+            .from("opensprout_journal_entries")
             .select("*")
             .eq("user_id", userId)
             .is("deleted_at", null),

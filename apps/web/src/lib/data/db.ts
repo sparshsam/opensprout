@@ -12,12 +12,12 @@ const DB_VERSION = 1;
  * They use the record's `id` as the key path.
  */
 const CACHE_STORES = [
-  "plants",
-  "schedules",
-  "tasks",
-  "logs",
-  "journalEntries",
-  "journalPhotos",
+  "opensprout_plants",
+  "opensprout_care_schedules",
+  "opensprout_task_instances",
+  "opensprout_care_logs",
+  "opensprout_journal_entries",
+  "opensprout_journal_photos",
 ] as const;
 
 

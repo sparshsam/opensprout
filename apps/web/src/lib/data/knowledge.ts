@@ -8,7 +8,7 @@ export async function getSpeciesById(
   id: string,
 ): Promise<PlantSpeciesRow | null> {
   const { data, error } = await supabase
-    .from("plant_species")
+    .from("opensprout_plant_species")
     .select("*")
     .eq("id", id)
     .maybeSingle();
@@ -27,7 +27,7 @@ export async function searchSpecies(
   const lowered = trimmed.toLowerCase();
 
   const { data, error } = await supabase
-    .from("plant_species")
+    .from("opensprout_plant_species")
     .select("*")
     .limit(50);
 
@@ -69,7 +69,7 @@ export async function getKnowledgeArticles(
   speciesId: string,
 ): Promise<KnowledgeArticleRow[]> {
   const { data, error } = await supabase
-    .from("knowledge_articles")
+    .from("opensprout_knowledge_articles")
     .select("*")
     .eq("species_id", speciesId)
     .order("sort_order", { ascending: true });
@@ -83,7 +83,7 @@ export async function getDiagnosisEntries(
   speciesId?: string,
 ): Promise<DiagnosisEntryRow[]> {
   let query = supabase
-    .from("diagnosis_entries")
+    .from("opensprout_diagnosis_entries")
     .select("*")
     .order("sort_order", { ascending: true });
 
@@ -106,7 +106,7 @@ export async function getDiagnosisByCategory(
   category: DiagnosisEntryRow["category"],
 ): Promise<DiagnosisEntryRow[]> {
   const { data, error } = await supabase
-    .from("diagnosis_entries")
+    .from("opensprout_diagnosis_entries")
     .select("*")
     .eq("category", category)
     .order("sort_order", { ascending: true });

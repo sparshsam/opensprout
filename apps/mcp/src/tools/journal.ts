@@ -20,7 +20,7 @@ export function registerJournalTools(
     },
     async ({ plantId, limit }) => {
       const { data, error } = await getClient()
-        .from("journal_entries")
+        .from("opensprout_journal_entries")
         .select("*")
         .eq("user_id", userId)
         .eq("plant_id", plantId)
@@ -45,7 +45,7 @@ export function registerJournalTools(
     },
     async ({ entryId }) => {
       const { data, error } = await getClient()
-        .from("journal_entries")
+        .from("opensprout_journal_entries")
         .select("*")
         .eq("id", entryId)
         .eq("user_id", userId)
@@ -90,7 +90,7 @@ export function registerJournalTools(
 
       // Ownership check: verify plant belongs to this user
       const { data: plant, error: plantError } = await c
-        .from("plants")
+        .from("opensprout_plants")
         .select("id")
         .eq("id", plantId)
         .eq("user_id", userId)
@@ -99,7 +99,7 @@ export function registerJournalTools(
       if (plantError || !plant) throw new Error("Plant not found or access denied");
 
       const { data, error } = await c
-        .from("journal_entries")
+        .from("opensprout_journal_entries")
         .insert({
           plant_id: plantId,
           user_id: userId,
@@ -145,7 +145,7 @@ export function registerJournalTools(
 
       // Ownership check
       const { data: entry, error: checkError } = await c
-        .from("journal_entries")
+        .from("opensprout_journal_entries")
         .select("id")
         .eq("id", entryId)
         .eq("user_id", userId)
@@ -163,7 +163,7 @@ export function registerJournalTools(
       if (tags !== undefined) updates.tags = tags;
 
       const { data, error } = await c
-        .from("journal_entries")
+        .from("opensprout_journal_entries")
         .update(updates)
         .eq("id", entryId)
         .select()
@@ -190,7 +190,7 @@ export function registerJournalTools(
 
       // Ownership check
       const { data: entry, error: checkError } = await c
-        .from("journal_entries")
+        .from("opensprout_journal_entries")
         .select("id")
         .eq("id", entryId)
         .eq("user_id", userId)
@@ -202,7 +202,7 @@ export function registerJournalTools(
       }
 
       const { error } = await c
-        .from("journal_entries")
+        .from("opensprout_journal_entries")
         .update({ deleted_at: new Date().toISOString() })
         .eq("id", entryId);
 

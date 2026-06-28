@@ -26,7 +26,7 @@ export type CareType =
 export type Database = {
   public: {
     Tables: {
-      plants: {
+      opensprout_plants: {
         Row: {
           id: string;
           user_id: string;
@@ -74,7 +74,7 @@ export type Database = {
           updated_at?: string;
         };
       };
-      plant_species: {
+      opensprout_plant_species: {
         Row: {
           id: string;
           common_name: string;
@@ -106,7 +106,7 @@ export type Database = {
           updated_at: string;
         };
       };
-      care_schedules: {
+      opensprout_care_schedules: {
         Row: {
           id: string;
           user_id: string;
@@ -132,7 +132,7 @@ export type Database = {
           updated_at: string;
         };
       };
-      care_logs: {
+      opensprout_care_logs: {
         Row: {
           id: string;
           user_id: string;
@@ -163,7 +163,7 @@ export type Database = {
           task_instance_id?: string | null;
         };
       };
-      task_instances: {
+      opensprout_task_instances: {
         Row: {
           id: string;
           user_id: string;
@@ -188,7 +188,7 @@ export type Database = {
           updated_at: string;
         };
       };
-      journal_entries: {
+      opensprout_journal_entries: {
         Row: {
           id: string;
           user_id: string;
@@ -216,7 +216,7 @@ export type Database = {
           tags?: string[];
         };
       };
-      knowledge_articles: {
+      opensprout_knowledge_articles: {
         Row: {
           id: string;
           species_id: string;
@@ -231,7 +231,7 @@ export type Database = {
           updated_at: string;
         };
       };
-      diagnosis_entries: {
+      opensprout_diagnosis_entries: {
         Row: {
           id: string;
           species_id: string;
