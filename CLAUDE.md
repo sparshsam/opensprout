@@ -122,8 +122,16 @@ Two transport modes:
 
 Architecture follows the MCP Build Guide: SHA-256 token auth, centralized registration, Streamable HTTP, user-scoped service-role client, token CRUD API routes.
 
+## Database
+
+- **Shared Supabase project:** `rbdyrymtgfqqkdemicdo` — shared with OpenSend (file sharing app)
+- **Name-spacing:** All OpenSprout tables use the `opensprout_` prefix (e.g., `opensprout_plants`, `opensprout_care_schedules`). OpenSend uses `opensend_`. All RLS policies, triggers, and FK references follow the same prefix convention.
+- **Migrations:** `supabase/migrations/` contains all DDL history. The `20260628000000_prefix_opensprout_tables.sql` migration renamed all tables from un-prefixed to `opensprout_` prefixed.
+- **All `supabase.from()` calls** in TypeScript code use the `opensprout_` table names. TypeScript types in `types.ts` and `mcp/src/types.ts` use `opensprout_` as the Database table keys.
+
 ## Release History
 
+- **v0.9.26** (Jun 28) — CI stabilization + database namespacing. Android CI now builds with Java 21 (fixes AGP 8.13 compile error) and uses normal `next build` (not static export) — all `force-static`/`generateStaticParams` route hacks reverted. All 14 OpenSprout tables renamed to `opensprout_` prefix for shared Supabase project namespacing. Code references, type definitions, MCP tools, and tests updated.
 - **v0.9.26** (Jun 28) — Native Google Sign-In + Android Fixes. In-app Chrome Custom Tab for Android, browser-popup login for Windows/PWA, platform-aware sign-in dispatch, API routing for Capacitor static export, adaptive icon fix, white flash fix, debug diagnostics page.
 - **v0.9.25** (Jun 28) — Release Candidate Stabilization. Lint/typecheck/test/build clean, schema verification, build validation, changelog backfill.
 - **v0.9.24** (Jun 28) — Platform completion. Android versionCode 4, cleartext disabled in production, PWABuilder manifest, store screenshots generator, release automation script, CI with Android build job.
