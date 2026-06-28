@@ -85,7 +85,23 @@ jobs:
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
 
       - name: Prepare static output for Capacitor
-        run: mkdir -p out
+        run: |
+          mkdir -p out/_next
+          # Copy static assets
+          cp -r .next/static out/_next/ 2>/dev/null || true
+          # Copy page HTML files from server build
+          for f in .next/server/app/*/index.html; do
+            [ -f "$f" ] || continue
+            dir="$(basename "$(dirname "$f")")"
+            mkdir -p "out/$dir"
+            cp "$f" "out/$dir/index.html"
+          done
+          # Root page
+          [ -f .next/server/app/index.html ] && cp .next/server/app/index.html out/
+          # Fallback index
+          if [ ! -f out/index.html ]; then
+            echo '<!DOCTYPE html><html><head><script>location.href="/today";</script></head><body>Loading OpenSprout...</body></html>' > out/index.html
+          fi
         working-directory: apps/web
 
       - name: Sync Capacitor
@@ -93,7 +109,7 @@ jobs:
         working-directory: apps/web
 
       - name: Build Android (debug)
-        run: cd android && ./gradlew assembleDebug
+        run: cd android && chmod +x gradlew && ./gradlew assembleDebug
         working-directory: apps/web
 
       - name: Upload APK
