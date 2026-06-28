@@ -2,7 +2,7 @@
 
 ## Current Release
 
-**v0.9.24** — Platform Completion (2026-06-28)
+**v0.9.26** — Native Google Sign-In + Android Platform Fixes (2026-06-28)
 
 ## Product Identity
 
@@ -45,6 +45,8 @@ opensprout/
 | `/` | Public homepage (editorial hero + features) |
 | `/login` | Google OAuth sign-in (no email/password) |
 | `/auth/callback` | OAuth PKCE callback handler |
+| `/auth/complete` | PWA sign-in popup landing ("return to app") |
+| `/debug` | Diagnostics page (APK debugging, unlinked) |
 | `/about` | About page |
 | `/privacy` | Privacy policy |
 | `/terms` | Terms of service |
@@ -241,6 +243,43 @@ opensprout/
 - Consistent `rounded-2xl border-border/50` cards matching design language
 - Danger Zone visually separated with red tint
 
+## Key Changes in v0.9.25 — RC Stabilization
+
+### Code Cleanup
+- Fixed 4 ESLint `react/no-unescaped-entities` errors in care sheets and plant doctor.
+- Cleaned up 30+ unused import/variable declarations across 16 files.
+
+### Verification
+- All quality checks pass: lint (0 errors), TypeScript (clean), Next.js build (clean), MCP tests (112/112), release script `--check-only` mode.
+- Supabase migration ordering, columns, and RLS policies verified.
+- PWA manifest, service worker, and Android build validated.
+- Release script no destructive side effects.
+
+### Documentation
+- CHANGELOG.md backfilled with v0.9.15–v0.9.24 entries.
+- Version bumped to 0.9.25 (versionCode 5).
+
+## Key Changes in v0.9.26 — Native Google Sign-In + Android Platform Fixes
+
+### Platform-Aware Sign-In
+- **Platform detection** — `detectPlatform()` in login page selects the correct flow: direct browser (web), `@capacitor/browser` Chrome Custom Tab (Android native), or `window.open()` popup (PWA/Windows).
+- **Android native flow** — `skipBrowserRedirect: true` returns the OAuth URL without navigating, `Browser.open()` opens it in an in-app Chrome Custom Tab, `App.addListener("appUrlOpen")` catches the `opensprout://auth/callback` redirect, and `exchangeCodeForSession()` exchanges the PKCE code client-side.
+- **PWA flow** — `window.open()` opens a popup window with the sign-in URL, `/auth/complete` page exchanges the code and shows "Signed in! You can return to the app", then `postMessage({ type: "opensprout-oauth-done" })` notifies the PWA to navigate to `/today`.
+
+### New Files
+- `apps/web/src/app/auth/complete/page.tsx` — PWA popup landing page with `exchangeCodeForSession` + success UI + auto-close.
+- `apps/web/src/components/oauth-deeplink-handler.tsx` — Global Capacitor `appUrlOpen` listener mounted in root layout.
+- `apps/web/src/lib/data/platform.ts` — `isCapacitorNative()`, `getApiOrigin()`, `resolveApiUrl()` for Capacitor-safe API routing.
+- `apps/web/src/app/debug/` — Diagnostics page showing origin, Capacitor detection, API URLs, Supabase session.
+
+### Android Platform Fixes
+- **Adaptive icons** — `ic_launcher_background` changed from `#FFFFFF` to `#16784f` (fixed invisible icon on API 26+).
+- **White screen flash** — `android:windowBackground` → `@color/splashBackground` in `AppTheme.NoActionBar`.
+- **API routing** — `resolveApiUrl()` prepends production origin (`https://sprout.kovina.org`) when running in Capacitor's static-export WebView, fixing `/api/identify` and `/api/log` calls.
+
+### Dependencies
+- `@capacitor/browser@8.0.3` installed and synced to Android project.
+
 ## Key Changes in v0.9.24 — Platform Completion
 
 ### Android
@@ -267,9 +306,10 @@ opensprout/
 
 - No tests exist in the web app (only MCP tests)
 - No crash reporting / analytics (intentional privacy choice)
-- App version in `package.json` lags behind git tags (now synced)
+- App version in `package.json` now synced with git tags at v0.9.26
 - Vercel Hobby plan rate-limited for deployments (24h cooldown)
 - Supabase project shared with other apps (send.kovina.org)
+- Android OAuth requires `opensprout://auth/callback` and `https://sprout.kovina.org/auth/complete` added to Supabase Redirect URLs
 
 ## Build Commands
 
