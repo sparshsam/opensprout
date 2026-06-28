@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Sprout, Plus, Scan, BookOpen, ChevronRight, Check } from "lucide-react";
+import { Sprout, Plus, BookOpen, ChevronRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 

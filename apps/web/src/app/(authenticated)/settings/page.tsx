@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useApp } from "@/lib/context/app-context";
 import {
-  Download, LogOut, Bell, BellOff, Loader2, RefreshCw,
+  Download, LogOut, Bell, Loader2, RefreshCw,
   Database, Upload, Key, Sun, Moon, User, Shield,
   Clock, Smartphone, Info, AlertTriangle,
 } from "lucide-react";

@@ -6,18 +6,14 @@ import { buildCareTasks, formatDueDate } from "@/lib/data/care";
 import {
   archivePlant,
   createPlant,
-  createPlantSchedules,
   deletePlant,
-  deleteCareSchedule,
   listDashboardData,
   markCareDone,
   restorePlant,
   toggleFavorite,
-  updateCareSchedule,
   updatePlant,
   type DashboardData,
   type PlantFormValues,
-  type ScheduleUpdateInput,
 } from "@/lib/data/plants";
 import { listPlantSpecies } from "@/lib/data/species";
 import type {
@@ -42,8 +38,6 @@ import {
   rescheduleAllReminders,
   requestNotificationPermission,
   loadReminderPrefs,
-  saveReminderPrefs,
-  showMissedReminders,
 } from "@/lib/data/reminders";
 import {
   clearCache,

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useApp } from "@/lib/context/app-context";
-import { Download, LogOut, Upload, Bell, BellOff, Loader2, Database, ExternalLink, ArrowRight, Leaf, Sprout, Shield, Settings, Info } from "lucide-react";
+import { Download, LogOut, Upload, Bell, Loader2, Database, ExternalLink, ArrowRight, Leaf, Sprout, Shield, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { loadReminderPrefs, saveReminderPrefs, requestNotificationPermission } from "@/lib/data/reminders";

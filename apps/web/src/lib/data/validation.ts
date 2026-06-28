@@ -72,17 +72,6 @@ function cleanString(
   return trimmed;
 }
 
-function cleanPositiveInteger(value: unknown, label: string, min: number, max: number) {
-  if (value === undefined || value === null || value === "") return undefined;
-  const numberValue = typeof value === "number" ? value : Number(value);
-
-  if (!Number.isInteger(numberValue) || numberValue < min || numberValue > max) {
-    throw new ValidationError(`${label} must be between ${min} and ${max} days.`);
-  }
-
-  return numberValue;
-}
-
 function cleanHealthStatus(value: unknown) {
   if (value === undefined || value === null || value === "") return undefined;
   if (typeof value !== "string" || !healthStatuses.has(value as HealthStatus)) {

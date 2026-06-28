@@ -7,7 +7,6 @@ import { cadenceToDays, daysToCadence } from "@/lib/data/care";
 import { BottomSheet } from "@/components/sheets/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { CadencePicker } from "@/components/care/cadence-picker";
-import { Input } from "@/components/ui/input";
 import { Loader2, Save } from "lucide-react";
 import type { CareScheduleRow } from "@/lib/data/types";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useApp } from "@/lib/context/app-context";
 import { PhotoGallery } from "@/components/gallery/photo-gallery";
@@ -8,21 +8,17 @@ import { ScheduleCard } from "@/components/care/schedule-card";
 import { ScheduleEditSheet } from "@/components/care/schedule-edit-sheet";
 import { ApplyCarePlanSheet } from "@/components/care/apply-care-plan-sheet";
 import { PlantDoctorSheet } from "@/components/doctor/plant-doctor-sheet";
-import { CoverPhoto } from "@/components/cards/cover-photo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { BottomSheet } from "@/components/sheets/bottom-sheet";
-import { Input } from "@/components/ui/input";
 import { getKnowledgeArticles, getSpeciesById } from "@/lib/data/knowledge";
 import { updatePlant } from "@/lib/data/plants";
 import {
   ArrowLeft, Droplets, FlaskConical, Scissors, RotateCw,
   Loader2, Sprout, Pencil, Trash2, Plus, Sun, Search,
-  Leaf, Heart, Stethoscope, Info, Clock, BookOpen,
+  Leaf, Heart, Stethoscope, Clock, BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CareType, CareScheduleRow, KnowledgeArticleRow, PlantSpeciesRow } from "@/lib/data/types";
-import { formatDueDate, formatCadence } from "@/lib/data/care";
 import Link from "next/link";
 
 // ── Care type icon map ──
@@ -53,7 +49,7 @@ const CARE_TYPES: CareType[] = ["water", "fertilize", "mist", "rotate", "prune",
 export default function PlantDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { supabase, user, data, speciesList, handleMarkCare, handleDeletePlant, handleUpdatePlant, refreshDashboard } = useApp();
+  const { supabase, user, data, speciesList, handleMarkCare, handleDeletePlant, refreshDashboard } = useApp();
 
   // ── State ──
   const [submitting, setSubmitting] = useState<CareType | null>(null);
@@ -66,7 +62,7 @@ export default function PlantDetailPage() {
   const [editNotes, setEditNotes] = useState(false);
   const [notesText, setNotesText] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
-  const [speciesDetail, setSpeciesDetail] = useState<PlantSpeciesRow | null>(null);
+  const [, setSpeciesDetail] = useState<PlantSpeciesRow | null>(null);
   const [knowledgeArticles, setKnowledgeArticles] = useState<KnowledgeArticleRow[]>([]);
   const [showSpeciesInfo, setShowSpeciesInfo] = useState(false);
   const [activeTimelineTab, setActiveTimelineTab] = useState<"care" | "health">("care");
