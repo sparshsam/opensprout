@@ -12,6 +12,11 @@ import { createClient } from "@/lib/supabase/browser";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-static";
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return [];
+}
 
 export async function DELETE(
   _request: Request,
