@@ -77,12 +77,16 @@ jobs:
       - name: Build MCP
         run: npm --workspace @opensprout/mcp run build
 
-      - name: Build web (static export)
-        run: CAPACITOR_BUILD=true npx next build
+      - name: Build web
+        run: npx next build
         working-directory: apps/web
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+
+      - name: Prepare static output for Capacitor
+        run: mkdir -p out
+        working-directory: apps/web
 
       - name: Sync Capacitor
         run: npx cap sync android
