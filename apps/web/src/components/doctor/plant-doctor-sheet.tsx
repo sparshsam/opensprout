@@ -7,8 +7,8 @@ import { BottomSheet } from "@/components/sheets/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
-  Search, AlertTriangle, Leaf, Sparkles,
-  Loader2, Camera, Check, ArrowRight,
+  Search, AlertTriangle, Leaf,
+  Loader2, Check, ArrowRight,
 } from "lucide-react";
 import type { DiagnosisEntryRow, PlantSpeciesRow } from "@/lib/data/types";
 
@@ -26,10 +26,9 @@ export function PlantDoctorSheet({
   open,
   onClose,
   plantName,
-  plantId,
   species,
 }: PlantDoctorSheetProps) {
-  const { supabase, user } = useApp();
+  const { supabase } = useApp();
 
   const [step, setStep] = useState<DiagnosisStep>("welcome");
   const [entries, setEntries] = useState<DiagnosisEntryRow[]>([]);
@@ -111,9 +110,9 @@ export function PlantDoctorSheet({
                 <Search size={24} className="text-primary" />
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Tell me what symptoms you're seeing on <strong>{plantName}</strong>
+                Tell me what symptoms you&apos;re seeing on <strong>{plantName}</strong>
                 {species && <em> ({species.common_name || species.scientific_name})</em>},
-                and I'll help identify the issue.
+                and I&apos;ll help identify the issue.
               </p>
             </div>
 
@@ -284,7 +283,7 @@ export function PlantDoctorSheet({
 
             <p className="text-xs text-muted-foreground text-center">
               This diagnosis is based on the species care library. Always
-              consider your plant's specific environment.
+              consider your plant&apos;s specific environment.
             </p>
           </>
         )}

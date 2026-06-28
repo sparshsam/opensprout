@@ -84,7 +84,7 @@ export async function isOnline(): Promise<boolean> {
   try {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), 5_000);
-    const res = await fetch(`${SUPABASE_URL}/auth/v1/settings`, {
+    await fetch(`${SUPABASE_URL}/auth/v1/settings`, {
       method: "HEAD",
       signal: controller.signal,
     });

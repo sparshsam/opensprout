@@ -1,6 +1,6 @@
 {
   "name": "opensprout",
-  "version": "0.9.24",
+  "version": "0.9.25",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "workspaces": [
@@ -39,5 +39,8 @@
   "bugs": {
     "url": "https://github.com/sparshsam/opensprout/issues"
   },
-  "keywords": []
+  "keywords": [],
+  "dependencies": {
+    "@capacitor/browser": "^8.0.3"
+  }
 }

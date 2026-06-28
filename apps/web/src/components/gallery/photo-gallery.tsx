@@ -10,7 +10,7 @@ import {
 } from "@/lib/data/photos";
 import { cn } from "@/lib/utils";
 import {
-  ChevronLeft, ChevronRight, Trash2, Upload, X,
+  ChevronLeft, ChevronRight, Trash2, Upload,
   Loader2, Image as ImageIcon,
 } from "lucide-react";
 import type { JournalPhotoRow } from "@/lib/data/types";
@@ -23,8 +23,6 @@ interface PhotoGalleryProps {
 
 export function PhotoGallery({
   plantId,
-  currentCoverPath,
-  onCoverChanged,
 }: PhotoGalleryProps) {
   const { supabase, user, refreshDashboard } = useApp();
   const [photos, setPhotos] = useState<(JournalPhotoRow & { url: string })[]>([]);

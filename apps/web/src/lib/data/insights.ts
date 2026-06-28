@@ -221,7 +221,6 @@ export function getSeasonalTips(): SeasonalTip[] {
   const month = new Date().getMonth();
   // Northern hemisphere seasons (month 0=Jan)
   const isWarm = month >= 3 && month <= 8; // Apr–Sep
-  const season = isWarm ? "growing season" : "dormant season";
   const label = isWarm ? "Warm months" : "Cool months";
 
   const tips: SeasonalTip[] = [
@@ -252,7 +251,6 @@ export function buildDashboardInsights(
   logs: CareLogRow[],
 ): CareInsight[] {
   const insights: CareInsight[] = [];
-  const now = new Date();
 
   // Missed care
   const missed = detectMissedCare(schedules, logs, plants);

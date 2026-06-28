@@ -118,7 +118,7 @@ rooms:
   - seed-data
   - migration
 - name: packaging
-  description: RC packaging — Android build scripts, PWA manifest at /manifest.webmanifest, service worker at sw.js (network-first), CSP in vercel.json, docs/rc checklists
+  description: RC packaging — Android build scripts, PWA manifest at /manifest.webmanifest, service worker at sw.js (network-first), CSP in vercel.json, docs/rc checklists, release.sh automation
   keywords:
   - packaging
   - rc
@@ -131,6 +131,8 @@ rooms:
   - vercel
   - windows
   - store
+  - release.sh
+  - bump-version
 - name: legal
   description: Public pages /about /privacy /terms /support — privacy policy, terms of service, AGPLv3 license
   keywords:
@@ -153,17 +155,24 @@ rooms:
   - mobile-nav
   - public-nav
 - name: changelog
-  description: Version history — v0.9.13 current (RC packaging), v0.9.12 (public homepage), v0.9.11 (knowledge seed), v0.9.10 (MCP reliability)
+  description: Version history — v0.9.25 current (RC stabilization), v0.9.24 (platform completion), v0.9.15-v0.9.23 (care engine through UX polish)
   keywords:
   - changelog
   - version
   - release
-  - v0.9.13
-  - v0.9.12
-  - v0.9.11
-  - v0.9.10
+  - v0.9.25
+  - v0.9.24
+  - v0.9.23
+  - v0.9.22
+  - v0.9.21
+  - v0.9.20
+  - v0.9.19
+  - v0.9.18
+  - v0.9.17
+  - v0.9.16
+  - v0.9.15
 - name: identity
-  description: OpenSprout v0.9.13 — privacy-first plant care companion, open-source AGPLv3, editorial premium design, user-owned data, no subscriptions, mcp-ready
+  description: OpenSprout v0.9.25 — privacy-first plant care companion, open-source AGPLv3, editorial premium design, user-owned data, no subscriptions, mcp-ready
   keywords:
   - opensprout
   - plant-care

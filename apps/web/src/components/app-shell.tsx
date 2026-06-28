@@ -888,18 +888,6 @@ function CenteredState({ label, compact = false }: { label: string; compact?: bo
   );
 }
 
-function scheduleCadence(schedules: CareScheduleRow[], careType: CareType) {
-  return schedules.find((schedule) => schedule.care_type === careType)?.cadence_value;
-}
-
-function suggestedWaterDays(species: PlantSpeciesRow) {
-  if (species.watering_min_days && species.watering_max_days) {
-    return Math.round((species.watering_min_days + species.watering_max_days) / 2);
-  }
-
-  return species.watering_min_days ?? species.watering_max_days;
-}
-
 function formatWaterRange(species: PlantSpeciesRow) {
   if (species.watering_min_days && species.watering_max_days) {
     return `${species.watering_min_days}-${species.watering_max_days} days`;
