@@ -55,7 +55,7 @@ export async function ensureTaskInstances(
 ): Promise<void> {
   // Fetch active schedules
   const { data: schedules, error: schedError } = await supabase
-    .from("care_schedules")
+    .from("opensprout_care_schedules")
     .select("*")
     .eq("user_id", userId)
     .is("deleted_at", null)
@@ -70,7 +70,7 @@ export async function ensureTaskInstances(
   for (const schedule of schedules) {
     // Find existing pending/snoozed instances for this schedule
     const { data: existing } = await supabase
-      .from("task_instances")
+      .from("opensprout_task_instances")
       .select("id, due_at")
       .eq("user_id", userId)
       .eq("schedule_id", schedule.id)
@@ -92,7 +92,7 @@ export async function ensureTaskInstances(
 
     // Check if one was already completed today
     const { data: completed } = await supabase
-      .from("task_instances")
+      .from("opensprout_task_instances")
       .select("id")
       .eq("user_id", userId)
       .eq("schedule_id", schedule.id)
@@ -106,7 +106,7 @@ export async function ensureTaskInstances(
     // Create a new task instance
     const timestamp = nowIso();
     const { error: insertError } = await supabase
-      .from("task_instances")
+      .from("opensprout_task_instances")
       .insert({
         user_id: userId,
         plant_id: schedule.plant_id,
@@ -143,7 +143,7 @@ export async function listTasks(
 }> {
   // Fetch plants for name resolution
   const { data: plants } = await supabase
-    .from("plants")
+    .from("opensprout_plants")
     .select("id, name, location")
     .eq("user_id", userId)
     .is("deleted_at", null);
@@ -157,7 +157,7 @@ export async function listTasks(
   const todayEnd = now.toISOString().slice(0, 10) + "T23:59:59";
 
   const { data: tasks, error } = await supabase
-    .from("task_instances")
+    .from("opensprout_task_instances")
     .select("*")
     .eq("user_id", userId)
     .in("status", ["pending", "snoozed"])
@@ -214,7 +214,7 @@ export async function completeTask(
 ): Promise<CareLogRow> {
   // Fetch the task
   const { data: task, error: taskError } = await supabase
-    .from("task_instances")
+    .from("opensprout_task_instances")
     .select("*")
     .eq("id", taskId)
     .eq("user_id", userId)
@@ -228,7 +228,7 @@ export async function completeTask(
   let schedule: CareScheduleRow | null = null;
   if (taskRow.schedule_id) {
     const { data: sched } = await supabase
-      .from("care_schedules")
+      .from("opensprout_care_schedules")
       .select("*")
       .eq("id", taskRow.schedule_id as string)
       .eq("user_id", userId)
@@ -241,7 +241,7 @@ export async function completeTask(
 
   // Create care log
   const { data: log, error: logError } = await supabase
-    .from("care_logs")
+    .from("opensprout_care_logs")
     .insert({
       user_id: userId,
       plant_id: taskRow.plant_id,
@@ -264,7 +264,7 @@ export async function completeTask(
 
   // Mark task as done
   const { error: updateError } = await supabase
-    .from("task_instances")
+    .from("opensprout_task_instances")
     .update({
       status: "done",
       completed_log_id: log.id,
@@ -291,7 +291,7 @@ export async function completeTask(
     nextDue.setDate(nextDue.getDate() + days);
 
     await supabase
-      .from("care_schedules")
+      .from("opensprout_care_schedules")
       .update({
         last_completed_at: timestamp,
         next_due_at: nextDue.toISOString(),
@@ -315,7 +315,7 @@ export async function skipTask(
 ): Promise<void> {
   const timestamp = nowIso();
   const { error } = await supabase
-    .from("task_instances")
+    .from("opensprout_task_instances")
     .update({
       status: "skipped",
       client_updated_at: timestamp,
@@ -340,7 +340,7 @@ export async function snoozeTask(
 ): Promise<void> {
   const timestamp = nowIso();
   const { error } = await supabase
-    .from("task_instances")
+    .from("opensprout_task_instances")
     .update({
       status: "snoozed",
       snoozed_until: snoozeUntil,
@@ -366,7 +366,7 @@ export async function rescheduleTask(
 ): Promise<void> {
   const timestamp = nowIso();
   const { error } = await supabase
-    .from("task_instances")
+    .from("opensprout_task_instances")
     .update({
       due_at: newDueAt,
       status: "pending",
@@ -417,7 +417,7 @@ export async function listPlantTimeline(
 ): Promise<TimelineEvent[]> {
   // Fetch care logs
   const { data: logs, error: logError } = await supabase
-    .from("care_logs")
+    .from("opensprout_care_logs")
     .select("*")
     .eq("user_id", userId)
     .eq("plant_id", plantId)
@@ -429,7 +429,7 @@ export async function listPlantTimeline(
 
   // Fetch journal entries with their photos
   const { data: entries, error: entryError } = await supabase
-    .from("journal_entries")
+    .from("opensprout_journal_entries")
     .select("*")
     .eq("user_id", userId)
     .eq("plant_id", plantId)
@@ -444,7 +444,7 @@ export async function listPlantTimeline(
   if (entries && entries.length > 0) {
     const entryIds = entries.map((e) => e.id);
     const { data: photos, error: photosError } = await supabase
-      .from("journal_photos")
+      .from("opensprout_journal_photos")
       .select("journal_entry_id, object_path, content_type")
       .eq("user_id", userId)
       .in("journal_entry_id", entryIds)
@@ -555,8 +555,8 @@ export async function listJournalFeed(
 
   // Fetch care logs with plant name
   const logResponse = await supabase
-    .from("care_logs")
-    .select("*, plants!inner(name)")
+    .from("opensprout_care_logs")
+    .select("*, opensprout_plants!inner(name)")
     .eq("user_id", userId)
     .is("deleted_at", null)
     .order("occurred_at", { ascending: false })
@@ -567,8 +567,8 @@ export async function listJournalFeed(
 
   // Fetch journal entries with plant name
   const entryResponse = await supabase
-    .from("journal_entries")
-    .select("*, plants!inner(name)")
+    .from("opensprout_journal_entries")
+    .select("*, opensprout_plants!inner(name)")
     .eq("user_id", userId)
     .is("deleted_at", null)
     .order("observed_at", { ascending: false })

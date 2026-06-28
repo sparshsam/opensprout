@@ -18,7 +18,7 @@ export function registerKnowledgeTools(
     },
     async ({ query, category }) => {
       let dbQuery = getClient()
-        .from("knowledge_articles")
+        .from("opensprout_knowledge_articles")
         .select("*")
         .or(`title.ilike.%${query}%,body.ilike.%${query}%`);
 
@@ -47,7 +47,7 @@ export function registerKnowledgeTools(
     },
     async ({ symptom }) => {
       const { data, error } = await getClient()
-        .from("diagnosis_entries")
+        .from("opensprout_diagnosis_entries")
         .select("*")
         .or(`symptom.ilike.%${symptom}%,cause.ilike.%${symptom}%`)
         .order("sort_order")

@@ -13,7 +13,7 @@ export function registerPlantTools(
     {},
     async () => {
       const { data, error } = await getClient()
-        .from("plants")
+        .from("opensprout_plants")
         .select("*")
         .eq("user_id", userId)
         .is("deleted_at", null)
@@ -35,7 +35,7 @@ export function registerPlantTools(
     },
     async ({ query }) => {
       const { data, error } = await getClient()
-        .from("plants")
+        .from("opensprout_plants")
         .select("*")
         .eq("user_id", userId)
         .or(`name.ilike.%${query}%,location.ilike.%${query}%,species.ilike.%${query}%`)
@@ -58,7 +58,7 @@ export function registerPlantTools(
     },
     async ({ plantId }) => {
       const { data, error } = await getClient()
-        .from("plants")
+        .from("opensprout_plants")
         .select("*")
         .eq("id", plantId)
         .eq("user_id", userId)
@@ -109,7 +109,7 @@ export function registerPlantTools(
 
       // Ownership check: verify plant belongs to this user
       const { data: plant, error: plantError } = await getClient()
-        .from("plants")
+        .from("opensprout_plants")
         .select("id")
         .eq("id", plantId)
         .eq("user_id", userId)
@@ -119,7 +119,7 @@ export function registerPlantTools(
 
       const c = getClient() as any;
       const { data, error } = await c
-        .from("plants")
+        .from("opensprout_plants")
         .update(updates)
         .eq("id", plantId)
         .is("deleted_at", null)
@@ -155,7 +155,7 @@ export function registerPlantTools(
     async ({ name, speciesId, species, location, notes, healthStatus, nickname, acquiredOn }) => {
       const c = getClient() as any;
       const { data, error } = await c
-        .from("plants")
+        .from("opensprout_plants")
         .insert({
           name,
           user_id: userId,
@@ -191,7 +191,7 @@ export function registerPlantTools(
 
       // Ownership check
       const { data: plant, error: checkError } = await c
-        .from("plants")
+        .from("opensprout_plants")
         .select("id")
         .eq("id", plantId)
         .eq("user_id", userId)
@@ -203,7 +203,7 @@ export function registerPlantTools(
       }
 
       const { error } = await c
-        .from("plants")
+        .from("opensprout_plants")
         .update({ deleted_at: new Date().toISOString() })
         .eq("id", plantId);
 
@@ -228,7 +228,7 @@ export function registerPlantTools(
 
       // Ownership check
       const { data: plant, error: checkError } = await c
-        .from("plants")
+        .from("opensprout_plants")
         .select("id")
         .eq("id", plantId)
         .eq("user_id", userId)
@@ -240,7 +240,7 @@ export function registerPlantTools(
       }
 
       const { error } = await c
-        .from("plants")
+        .from("opensprout_plants")
         .update({ archived_at: new Date().toISOString() })
         .eq("id", plantId);
 
@@ -265,7 +265,7 @@ export function registerPlantTools(
 
       // Ownership check
       const { data: plant, error: checkError } = await c
-        .from("plants")
+        .from("opensprout_plants")
         .select("id")
         .eq("id", plantId)
         .eq("user_id", userId)
@@ -277,7 +277,7 @@ export function registerPlantTools(
       }
 
       const { error } = await c
-        .from("plants")
+        .from("opensprout_plants")
         .update({ archived_at: null })
         .eq("id", plantId);
 

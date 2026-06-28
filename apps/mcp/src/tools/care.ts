@@ -29,7 +29,7 @@ export function registerCareTools(
     },
     async ({ plantId }) => {
       let query = getClient()
-        .from("care_schedules")
+        .from("opensprout_care_schedules")
         .select("*")
         .eq("user_id", userId)
         .eq("active", true)
@@ -63,7 +63,7 @@ export function registerCareTools(
     },
     async ({ plantId, limit }) => {
       const { data, error } = await getClient()
-        .from("care_logs")
+        .from("opensprout_care_logs")
         .select("*")
         .eq("user_id", userId)
         .eq("plant_id", plantId)
@@ -95,7 +95,7 @@ export function registerCareTools(
     },
     async ({ plantId, status }) => {
       let query = getClient()
-        .from("task_instances")
+        .from("opensprout_task_instances")
         .select("*")
         .eq("user_id", userId)
         .is("deleted_at", null);
@@ -137,7 +137,7 @@ export function registerCareTools(
 
       // Ownership check: verify plant belongs to this user
       const { data: plant, error: plantError } = await c
-        .from("plants")
+        .from("opensprout_plants")
         .select("id")
         .eq("id", plantId)
         .eq("user_id", userId)
@@ -146,7 +146,7 @@ export function registerCareTools(
       if (plantError || !plant) throw new Error("Plant not found or access denied");
 
       const { data: log, error: logError } = await c
-        .from("care_logs")
+        .from("opensprout_care_logs")
         .insert({
           plant_id: plantId,
           user_id: userId,
@@ -161,7 +161,7 @@ export function registerCareTools(
 
       if (taskInstanceId) {
         await c
-          .from("task_instances")
+          .from("opensprout_task_instances")
           .update({
             status: "done",
             completed_at: new Date().toISOString(),
@@ -188,7 +188,7 @@ export function registerCareTools(
       const c = getClient() as any;
 
       const { data: tasks, error: taskError } = await c
-        .from("task_instances")
+        .from("opensprout_task_instances")
         .select("*")
         .eq("id", taskId)
         .eq("user_id", userId)
@@ -203,7 +203,7 @@ export function registerCareTools(
       const now = new Date().toISOString();
 
       const { data: log, error: logError } = await c
-        .from("care_logs")
+        .from("opensprout_care_logs")
         .insert({
           plant_id: task.plant_id,
           user_id: userId,
@@ -217,7 +217,7 @@ export function registerCareTools(
       if (logError) throw new Error("Failed to create care log for task completion: " + logError.message);
 
       await c
-        .from("task_instances")
+        .from("opensprout_task_instances")
         .update({
           status: "done",
           completed_at: now,
@@ -258,7 +258,7 @@ export function registerCareTools(
 
       // Verify plant ownership
       const { data: plant, error: plantError } = await c
-        .from("plants")
+        .from("opensprout_plants")
         .select("id")
         .eq("id", plantId)
         .eq("user_id", userId)
@@ -270,7 +270,7 @@ export function registerCareTools(
       }
 
       const { data, error } = await c
-        .from("care_schedules")
+        .from("opensprout_care_schedules")
         .insert({
           plant_id: plantId,
           user_id: userId,
@@ -306,7 +306,7 @@ export function registerCareTools(
 
       // Ownership check
       const { data: task, error: taskError } = await c
-        .from("task_instances")
+        .from("opensprout_task_instances")
         .select("id")
         .eq("id", taskId)
         .eq("user_id", userId)
@@ -318,7 +318,7 @@ export function registerCareTools(
       }
 
       const { error } = await c
-        .from("task_instances")
+        .from("opensprout_task_instances")
         .update({
           status: "skipped",
           skipped_at: new Date().toISOString(),
@@ -351,8 +351,8 @@ export function registerCareTools(
     async ({ days }) => {
       const futureDate = new Date(Date.now() + days * 86400000).toISOString();
       const { data, error } = await getClient()
-        .from("task_instances")
-        .select("*, plants!inner(name, location)")
+        .from("opensprout_task_instances")
+        .select("*, opensprout_plants!inner(name, location)")
         .eq("user_id", userId)
         .eq("status", "pending")
         .is("deleted_at", null)
@@ -381,7 +381,7 @@ export function registerCareTools(
 
       // Ownership check
       const { data: task, error: taskError } = await c
-        .from("task_instances")
+        .from("opensprout_task_instances")
         .select("id")
         .eq("id", taskId)
         .eq("user_id", userId)
@@ -393,7 +393,7 @@ export function registerCareTools(
       }
 
       const { error } = await c
-        .from("task_instances")
+        .from("opensprout_task_instances")
         .update({
           status: "snoozed",
           snoozed_until: until,

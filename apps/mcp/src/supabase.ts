@@ -71,7 +71,7 @@ export async function authenticateToken(
 
   // Look up the token hash
   const { data: records, error: lookupError } = await (admin
-    .from("mcp_tokens") as any)
+    .from("opensprout_mcp_tokens") as any)
     .select("user_id, id, revoked_at")
     .eq("token_hash", tokenHash);
 
@@ -94,7 +94,7 @@ export async function authenticateToken(
   }
 
   // Update last_used_at
-  await (admin.from("mcp_tokens") as any)
+  await (admin.from("opensprout_mcp_tokens") as any)
     .update({ last_used_at: new Date().toISOString() } as any)
     .eq("id", record.id);
 

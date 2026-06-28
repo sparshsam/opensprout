@@ -38,7 +38,7 @@ export async function createPlantSchedules(
   const timestamp = nowIso();
   const schedules = presets.map((p) => buildSchedule(userId, plantId, p.careType, p.cadenceDays, timestamp));
 
-  const { error } = await supabase.from("care_schedules").insert(schedules);
+  const { error } = await supabase.from("opensprout_care_schedules").insert(schedules);
   if (error) throw error;
 }
 
@@ -49,7 +49,7 @@ export async function updateCareSchedule(
   input: ScheduleUpdateInput,
 ): Promise<void> {
   const { error } = await supabase
-    .from("care_schedules")
+    .from("opensprout_care_schedules")
     .update({
       ...input,
       client_updated_at: nowIso(),
@@ -66,7 +66,7 @@ export async function deleteCareSchedule(
   scheduleId: string,
 ): Promise<void> {
   const { error } = await supabase
-    .from("care_schedules")
+    .from("opensprout_care_schedules")
     .update({ deleted_at: new Date().toISOString(), active: false, client_updated_at: nowIso() })
     .eq("id", scheduleId)
     .eq("user_id", userId);
@@ -100,20 +100,20 @@ function cleanText(value?: string) {
 export async function listDashboardData(supabase: Client, userId: string): Promise<DashboardData> {
   const [plantsResult, schedulesResult, logsResult] = await Promise.all([
     supabase
-      .from("plants")
+      .from("opensprout_plants")
       .select("*")
       .eq("user_id", userId)
       .is("deleted_at", null)
       .order("updated_at", { ascending: false }),
     supabase
-      .from("care_schedules")
+      .from("opensprout_care_schedules")
       .select("*")
       .eq("user_id", userId)
       .is("deleted_at", null)
       .eq("active", true)
       .order("next_due_at", { ascending: true, nullsFirst: false }),
     supabase
-      .from("care_logs")
+      .from("opensprout_care_logs")
       .select("*")
       .eq("user_id", userId)
       .is("deleted_at", null)
@@ -136,7 +136,7 @@ export async function createPlant(supabase: Client, userId: string, values: Plan
   const validated = validatePlantValues(values);
   const timestamp = nowIso();
   const { data: plant, error } = await supabase
-    .from("plants")
+    .from("opensprout_plants")
     .insert({
       user_id: userId,
       name: validated.name,
@@ -159,7 +159,7 @@ export async function createPlant(supabase: Client, userId: string, values: Plan
 export async function updatePlant(supabase: Client, userId: string, plantId: string, values: PlantFormValues) {
   const validated = validatePlantValues(values);
   const { data, error } = await supabase
-    .from("plants")
+    .from("opensprout_plants")
     .update({
       name: validated.name,
       species_id: cleanText(validated.species_id),
@@ -180,7 +180,7 @@ export async function updatePlant(supabase: Client, userId: string, plantId: str
 
 export async function deletePlant(supabase: Client, userId: string, plantId: string) {
   const { error } = await supabase
-    .from("plants")
+    .from("opensprout_plants")
     .update({ deleted_at: new Date().toISOString() })
     .eq("id", plantId)
     .eq("user_id", userId);
@@ -191,7 +191,7 @@ export async function deletePlant(supabase: Client, userId: string, plantId: str
 
 export async function archivePlant(supabase: Client, userId: string, plantId: string) {
   const { error } = await supabase
-    .from("plants")
+    .from("opensprout_plants")
     .update({ archived_at: new Date().toISOString() })
     .eq("id", plantId)
     .eq("user_id", userId)
@@ -201,7 +201,7 @@ export async function archivePlant(supabase: Client, userId: string, plantId: st
 
 export async function restorePlant(supabase: Client, userId: string, plantId: string) {
   const { error } = await supabase
-    .from("plants")
+    .from("opensprout_plants")
     .update({ archived_at: null })
     .eq("id", plantId)
     .eq("user_id", userId);
@@ -210,7 +210,7 @@ export async function restorePlant(supabase: Client, userId: string, plantId: st
 
 export async function toggleFavorite(supabase: Client, userId: string, plantId: string, isFavorite: boolean) {
   const { error } = await supabase
-    .from("plants")
+    .from("opensprout_plants")
     .update({ is_favorite: isFavorite })
     .eq("id", plantId)
     .eq("user_id", userId);
@@ -238,7 +238,7 @@ export async function listPlantLocations(
   userId: string,
 ): Promise<string[]> {
   const { data, error } = await supabase
-    .from("plants")
+    .from("opensprout_plants")
     .select("location")
     .eq("user_id", userId)
     .is("deleted_at", null)
@@ -257,7 +257,7 @@ export async function getPlantHealthCounts(
   userId: string,
 ): Promise<Record<string, number>> {
   const { data, error } = await supabase
-    .from("plants")
+    .from("opensprout_plants")
     .select("health_status")
     .eq("user_id", userId)
     .is("deleted_at", null);
@@ -350,7 +350,7 @@ export function sortAndFilterPlants(
 
 export async function markCareDone(supabase: Client, userId: string, plantId: string, careType: CareType) {
   const { data: schedule } = await supabase
-    .from("care_schedules")
+    .from("opensprout_care_schedules")
     .select("*")
     .eq("user_id", userId)
     .eq("plant_id", plantId)
@@ -373,7 +373,7 @@ export async function markCareDone(supabase: Client, userId: string, plantId: st
     custom: "Marked cared for",
   };
   const { data: log, error: logError } = await supabase
-    .from("care_logs")
+    .from("opensprout_care_logs")
     .insert({
       user_id: userId,
       plant_id: plantId,
@@ -398,7 +398,7 @@ export async function markCareDone(supabase: Client, userId: string, plantId: st
         : schedule.cadence_value;
 
     const { error: scheduleError } = await supabase
-      .from("care_schedules")
+      .from("opensprout_care_schedules")
       .update({
         last_completed_at: timestamp,
         next_due_at: addDaysIso(days),

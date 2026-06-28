@@ -62,7 +62,7 @@ export async function POST(request: Request) {
   // Store hash + prefix
   const admin = createAdminClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error: insertError } = await (admin.from("mcp_tokens") as any)
+  const { error: insertError } = await (admin.from("opensprout_mcp_tokens") as any)
     .insert({
       name,
       user_id: user.id,
@@ -102,7 +102,7 @@ export async function GET() {
 
   const admin = createAdminClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (admin.from("mcp_tokens") as any)
+  const { data, error } = await (admin.from("opensprout_mcp_tokens") as any)
     .select("id, name, token_prefix, last_used_at, created_at, revoked_at")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });

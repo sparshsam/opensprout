@@ -58,7 +58,7 @@ export async function createJournalEntry(
 ): Promise<JournalEntryRow> {
   const timestamp = nowIso();
   const { data, error } = await supabase
-    .from("journal_entries")
+    .from("opensprout_journal_entries")
     .insert({
       user_id: userId,
       plant_id: input.plant_id,
@@ -86,7 +86,7 @@ export async function updateJournalEntry(
 ): Promise<JournalEntryRow> {
   const timestamp = nowIso();
   const { data, error } = await supabase
-    .from("journal_entries")
+    .from("opensprout_journal_entries")
     .update({
       title: input.title?.trim() ?? undefined,
       body: input.body?.trim() ?? undefined,
@@ -111,7 +111,7 @@ export async function deleteJournalEntry(
 ): Promise<void> {
   // Soft delete — mark deleted_at
   const { error } = await supabase
-    .from("journal_entries")
+    .from("opensprout_journal_entries")
     .update({ deleted_at: nowIso() })
     .eq("id", entryId)
     .eq("user_id", userId);
@@ -125,7 +125,7 @@ export async function getJournalEntry(
   entryId: string,
 ): Promise<JournalEntryWithPhotos | null> {
   const { data: entry, error: entryError } = await supabase
-    .from("journal_entries")
+    .from("opensprout_journal_entries")
     .select("*")
     .eq("id", entryId)
     .eq("user_id", userId)
@@ -136,7 +136,7 @@ export async function getJournalEntry(
   if (!entry) return null;
 
   const { data: photos, error: photosError } = await supabase
-    .from("journal_photos")
+    .from("opensprout_journal_photos")
     .select("*")
     .eq("journal_entry_id", entryId)
     .eq("user_id", userId)
@@ -157,7 +157,7 @@ export async function listJournalEntries(
   filter?: JournalFilter,
 ): Promise<JournalEntryWithPhotos[]> {
   let query = supabase
-    .from("journal_entries")
+    .from("opensprout_journal_entries")
     .select("*")
     .eq("user_id", userId)
     .is("deleted_at", null);
@@ -182,7 +182,7 @@ export async function listJournalEntries(
   // Fetch photos for all entries in one query
   const entryIds = entries.map((e) => e.id);
   const { data: allPhotos, error: photosError } = await supabase
-    .from("journal_photos")
+    .from("opensprout_journal_photos")
     .select("*")
     .eq("user_id", userId)
     .in("journal_entry_id", entryIds)

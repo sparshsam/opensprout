@@ -223,7 +223,7 @@ export async function executeImport(
     }));
 
     const { data: plantsResult, error: plantsError } = await supabase
-      .from("plants")
+      .from("opensprout_plants")
       .upsert(plantRecords as never, {
         onConflict: "client_id",
         ignoreDuplicates: false,
@@ -247,7 +247,7 @@ export async function executeImport(
 
     if (clientIds.length > 0) {
       const { data: fetched } = await supabase
-        .from("plants")
+        .from("opensprout_plants")
         .select("id, client_id")
         .eq("user_id", userId)
         .in("client_id", clientIds);
@@ -286,7 +286,7 @@ export async function executeImport(
     });
 
     const { data: schedulesResult, error: schedulesError } = await supabase
-      .from("care_schedules")
+      .from("opensprout_care_schedules")
       .upsert(scheduleRecords as never, {
         onConflict: "client_id",
         ignoreDuplicates: false,
@@ -312,7 +312,7 @@ export async function executeImport(
     });
 
     const { data: logsResult, error: logsError } = await supabase
-      .from("care_logs")
+      .from("opensprout_care_logs")
       .upsert(logRecords as never, {
         onConflict: "client_id",
         ignoreDuplicates: false,

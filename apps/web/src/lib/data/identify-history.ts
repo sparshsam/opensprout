@@ -28,15 +28,15 @@ export async function saveIdentification(
   },
 ): Promise<string> {
   const { data: inserted, error } = await supabase
-    .from("identifications")
+    .from("opensprout_identifications")
     .insert({
       user_id: userId,
       photo_path: data.photo_path,
-      results: data.results as Database["public"]["Tables"]["identifications"]["Insert"]["results"],
+      results: data.results as Database["public"]["Tables"]["opensprout_identifications"]["Insert"]["results"],
       selected_species_id: data.selected_species_id ?? null,
       selected_name: data.selected_name ?? null,
       confidence: data.confidence ?? null,
-      diagnosis: (data.diagnosis as Database["public"]["Tables"]["identifications"]["Insert"]["diagnosis"]) ?? null,
+      diagnosis: (data.diagnosis as Database["public"]["Tables"]["opensprout_identifications"]["Insert"]["diagnosis"]) ?? null,
     })
     .select("id")
     .single();
@@ -54,7 +54,7 @@ export async function listIdentifications(
   limit?: number,
 ): Promise<IdentificationRecord[]> {
   let query = supabase
-    .from("identifications")
+    .from("opensprout_identifications")
     .select("*")
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
@@ -78,7 +78,7 @@ export async function getIdentification(
   id: string,
 ): Promise<IdentificationRecord | null> {
   const { data, error } = await supabase
-    .from("identifications")
+    .from("opensprout_identifications")
     .select("*")
     .eq("id", id)
     .eq("user_id", userId)
@@ -99,7 +99,7 @@ export async function updateIdentificationSelection(
   name: string | null,
 ): Promise<void> {
   const { error } = await supabase
-    .from("identifications")
+    .from("opensprout_identifications")
     .update({
       selected_species_id: speciesId,
       selected_name: name,
@@ -110,7 +110,7 @@ export async function updateIdentificationSelection(
   if (error) throw error;
 }
 
-type IdentificationsRow = Database["public"]["Tables"]["identifications"]["Row"];
+type IdentificationsRow = Database["public"]["Tables"]["opensprout_identifications"]["Row"];
 
 /**
  * Maps a raw Supabase row to our IdentificationRecord type.
