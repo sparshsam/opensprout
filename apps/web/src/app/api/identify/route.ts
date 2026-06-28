@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export const dynamic = "force-static";
-
 const PLANTNET_API_BASE = "https://my-api.plantnet.org/v2/identify/all";
 
 /**

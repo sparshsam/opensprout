@@ -13,8 +13,6 @@ import { createClient } from "@/lib/supabase/browser";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sha256Hex, generateToken } from "@/lib/mcp-auth";
 
-export const dynamic = "force-static";
-
 /**
  * Generate a display prefix for the token (first 12 chars + "...").
  */
