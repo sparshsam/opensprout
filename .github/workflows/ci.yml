@@ -77,15 +77,32 @@ jobs:
       - name: Build MCP
         run: npm --workspace @opensprout/mcp run build
 
-      - name: Build web
+      - name: Build web (verify compilation, skip export)
         run: npx next build
         working-directory: apps/web
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
 
-      - name: Prepare static output for Capacitor
-        run: mkdir -p out
+      - name: Create static output for Capacitor
+        run: |
+          mkdir -p out/_next
+          cp -r .next/static out/_next/
+          # Copy built pages to out/ as index.html files
+          for f in .next/server/app/*/index.html; do
+            [ -f "$f" ] || continue
+            dir=$(dirname "$f" | sed 's|.next/server/app/||')
+            mkdir -p "out/$dir"
+            cp "$f" "out/$dir/index.html"
+          done
+          # Copy root index.html
+          [ -f .next/server/app/index.html ] && cp .next/server/app/index.html out/
+          # Fallback: create a minimal index.html if none was built
+          if [ ! -f out/index.html ]; then
+            echo '<!DOCTYPE html><html><head><script>' > out/index.html
+            echo 'location.href="/today";' >> out/index.html
+            echo '</script><body>Loading OpenSprout...</body></html>' >> out/index.html
+          fi
         working-directory: apps/web
 
       - name: Sync Capacitor
