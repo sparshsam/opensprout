@@ -15,6 +15,9 @@ export const dynamic = "force-static";
 export const dynamicParams = false;
 
 export function generateStaticParams() {
+  if (process.env.CAPACITOR_BUILD === "true") {
+    return [{ id: "placeholder" }];
+  }
   return [];
 }
 
