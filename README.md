@@ -1,245 +1,183 @@
-# OpenSprout
-
-![License: AGPL v3](https://img.shields.io/badge/License-AGPLv3-blue.svg)
-![Next.js](https://img.shields.io/badge/Next.js-15-black)
-![TypeScript](https://img.shields.io/badge/TypeScript-ready-blue)
-![Supabase](https://img.shields.io/badge/Supabase-backed-3ecf8e)
-![CI](https://github.com/sparshsam/opensprout/actions/workflows/ci.yml/badge.svg)
-![Ecosystem Standards](https://img.shields.io/badge/Ecosystem_Standards-1.0-2ea44f)
-
-**OpenSprout is a privacy-minded, open-source plant care dashboard for tracking plants, care schedules, and watering or fertilizing logs without subscriptions or data lock-in.**
-
-[Live demo](https://sprout.kovina.org) · [Architecture](docs/architecture.md) · [Roadmap](docs/roadmap.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
-
-OpenSprout is built for people who want a practical plant tracker they can inspect, self-host, and improve. It currently supports authenticated plant tracking, built-in care templates, schedule-based reminders, care logs, plant journal entries, photo uploads to private Supabase Storage, JSON export, a standalone Android app via Capacitor, and **AI agent integration via MCP**. It does not yet include push notifications, offline sync, or import/restore.
-
-## Screenshots
-
-![OpenSprout desktop dashboard](docs/assets/opensprout-desktop.png)
-
-| Mobile dashboard | Dashboard concept |
-| --- | --- |
-| ![OpenSprout mobile dashboard](docs/assets/opensprout-mobile.png) | ![OpenSprout dashboard concept](docs/assets/opensprout-dashboard-concept.png) |
-
-## Why OpenSprout?
-
-Most plant care apps eventually become a subscription, a closed data silo, or both. OpenSprout takes a different path:
-
-- **No subscriptions**: the project is free and open-source.
-- **Portable data**: users can export their rows as JSON.
-- **Self-hostable direction**: the stack is ordinary Next.js, Supabase, and PostgreSQL.
-- **Open improvements**: AGPLv3 keeps public hosted improvements open to the community.
-
-## Current Status
-
-**Maturity:** Prototype. Core workflows are functional (auth, plant CRUD, care schedules, care logs) but breaking changes are expected as the API and data model stabilize.
-
-The public demo is deployed on Vercel and backed by Supabase.
-
-| Area | Status | Notes |
-| --- | --- | --- |
-| Authentication | Available | Supabase email/password auth with session persistence. |
-| Plant dashboard | Available | Protected dashboard for signed-in users. |
-| Plant CRUD | Available | Create, edit, delete, and inspect persisted plants. |
-| Care Templates | Available | 30 built-in plant species templates with suggested care rhythms. |
-| Schedules | Available | Watering and fertilizing schedules are created from user inputs/templates. |
-| Care logs | Available | Mark plants watered or fertilized and persist logs. |
-| JSON export | Available | Exports user-owned rows currently loaded by the app/backend. |
-| Journal entries | Available | Create, edit, delete journal entries with title, body, health score, tags, and optional photo attachments. |
-| Photos | Available | Capture from camera or gallery (Android), or file picker (web). Uploaded to private Supabase Storage. Plant cover photos, journal photo attachments, and visual timelines. |
-| PWA foundation | Partial | Manifest and service worker exist; offline sync is not complete. |
-| Import/restore | Planned | Schema includes transfer metadata; restore flow is not complete yet. |
-| Push reminders | Planned | Not implemented yet. |
-
-## Ecosystem Role
-
-OpenSprout is the **care systems** project in the [Sparsh Sam ecosystem](https://github.com/sparshsam/ecosystem-standards). It provides privacy-first, open-source infrastructure for tracking living things that need routine attention — starting with houseplants, but designed for the general pattern of schedules, logs, and long-running stewardship routines.
-
-All repositories follow the [ecosystem standards](https://github.com/sparshsam/ecosystem-standards) for documentation, security, naming, and maturity classification.
-
-## Quick Start
-
-```bash
-git clone https://github.com/sparshsam/opensprout.git
-cd opensprout
-npm install
-cp .env.example apps/web/.env.local
-npm run dev
-```
-
-Then open [http://localhost:3000](http://localhost:3000).
-
-You need a Supabase project with the OpenSprout schema applied before authenticated plant data will work locally.
-
-## Environment Variables
-
-Configure these in `apps/web/.env.local` for local development and in Vercel for deployments.
-
-| Variable | Required | Description |
-| --- | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL used by the web app. |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Yes | Browser-safe Supabase publishable key. |
-
-Do not expose Supabase service role keys in `NEXT_PUBLIC_` variables or client-side code.
-
-## Supabase Setup
-
-The schema source of truth lives in [`supabase/migrations`](supabase/migrations).
-
-It currently includes:
-
-- user profiles
-- read-only `plant_species` Care Templates
-- user-owned plants
-- care schedules
-- care logs
-- journal and photo metadata tables for future features
-- export/import metadata
-- sync device metadata
-- private `plant-photos` Storage bucket
-- RLS policies for user-owned data
-
-For local Supabase development:
-
-```bash
-supabase start
-supabase db reset
-```
-
-Then copy the local Supabase URL and publishable key into `apps/web/.env.local`.
-
-The hosted demo database was updated through Supabase SQL execution while the repo migrations remain the reviewable source of truth.
-
-## Development
-
-The web app lives in [`apps/web`](apps/web).
-
-```bash
-npm run dev        # Start the Next.js app
-npm run lint       # Run ESLint
-npm run typecheck  # Run TypeScript checks
-npm run build      # Build for production
-```
-
-CI runs `npm ci`, `npm audit --audit-level=high`, lint, typecheck, and build on pushes and pull requests.
-
-## Project Structure
-
-```text
-opensprout/
-|-- apps/web              # Next.js 15 app
-|-- apps/mcp              # MCP server for AI agent integration
-|-- packages/             # Future shared packages
-|-- docs/                 # Architecture, MCP, roadmap, license notes, screenshots
-|-- supabase/migrations   # PostgreSQL schema, RLS, seeds
-|-- .github/              # Workflows, issue templates, project docs
-|-- SECURITY.md           # Vulnerability disclosure policy
-|-- CONTRIBUTING.md       # Contributor guide
-`-- LICENSE               # AGPLv3
-
-## AI Agent Integration (MCP)
-
-OpenSprout includes an [MCP server](apps/mcp) that lets AI agents like Claude Code, Hermes Agent, and Cursor read your plant data and perform actions on your behalf.
-
-**25 tools** are available covering plant management, care tracking, journal entries, species knowledge, and plant identification.
-
-- [`docs/mcp-integration.md`](docs/mcp-integration.md) — Setup guide for connecting AI agents
-- [`docs/mcp-agent-prompts.md`](docs/mcp-agent-prompts.md) — Ready-to-use natural-language prompt pack
-- [`docs/mcp-reliability-audit.md`](docs/mcp-reliability-audit.md) — Step-by-step reliability audit guide
-```
-
-## Deployment
-
-The public demo is deployed on Vercel:
-
-[https://sprout.kovina.org](https://sprout.kovina.org)
-
-Vercel needs the same Supabase environment variables listed above. Production and Development variables are configured for the current demo project. Preview deployments may need Supabase variables configured separately in Vercel, depending on whether they apply to all branches or a specific branch.
-
-The root [`vercel.json`](vercel.json) configures the monorepo build output and edge security headers.
-
-## Security and Privacy Notes
-
-OpenSprout is privacy-minded, not zero-knowledge.
-
-- User-owned rows are isolated with Supabase Auth and PostgreSQL RLS.
-- The frontend uses only the Supabase publishable key.
-- Service role keys must never be exposed to the browser.
-- Data in the hosted demo is stored in Supabase PostgreSQL, not client-side encrypted.
-- The app now sets CSP and common browser security headers on the deployed site.
-- Basic in-memory API rate limiting is included, but it is not a distributed production-grade limiter.
-- Account deletion, import/restore, and full offline sync are still planned work.
-
-Please report sensitive issues through [SECURITY.md](SECURITY.md), not public issues.
-
-## Roadmap
-
-### v0.1: Usable MVP
-
-- Supabase Auth
-- protected dashboard
-- plant CRUD
-- Care Templates
-- watering/fertilizing schedules
-- care logs
-- JSON export
-- public Vercel demo
-- basic security hardening and CI
-
-### v0.2: Care Tracking Polish
-
-- edit care schedules after creation
-- richer care log forms
-- plant detail timeline
-- archive plants instead of hard delete
-- better empty states and onboarding
-
-### v0.3: Photos and Reminders
-
-- private plant photo uploads
-- plant health journal UI
-- calendar view
-- reminder task workflow
-- push notification research
-
-### v1.0: Self-Hostable Stable Release
-
-- documented self-host path
-- import/restore flow
-- offline sync queue
-- accessibility and security review
-- expanded community plant template process
-
-See the full roadmap in [`docs/roadmap.md`](docs/roadmap.md).
-
-## Contributing
-
-Contributions are welcome, especially focused bug fixes, docs improvements, accessibility work, and careful plant template additions.
-
-Start with:
-
-- [`CONTRIBUTING.md`](CONTRIBUTING.md)
-- [`docs/architecture.md`](docs/architecture.md)
-- [`docs/roadmap.md`](docs/roadmap.md)
-- [good first issue ideas](.github/project.md)
-
-Keep pull requests small, include screenshots for UI changes, and call out privacy/security implications when relevant.
-
-## License
-
-OpenSprout is licensed under the GNU Affero General Public License v3.0 or later.
-
-AGPLv3 allows use, study, modification, and self-hosting, but modified versions made available over a network must preserve the same source-availability obligations. See [`LICENSE`](LICENSE) and [`docs/license-notes.md`](docs/license-notes.md).
+<div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/branding/icon.png">
+    <img src="assets/branding/icon.png" width="96" height="96" alt="OpenSprout">
+  </picture>
+  <h1 align="center">OpenSprout</h1>
+  <p align="center">
+    <strong>Privacy-first plant care, open to everyone.</strong>
+    <br />
+    Track plants, care schedules, watering logs, and journal entries — no subscriptions, no data lock-in.
+  </p>
+  <br />
+</div>
+
+<p align="center">
+  <img src="assets/hero/opensprout-desktop.png" width="100%" alt="OpenSprout Dashboard" style="border-radius: 12px; max-width: 1000px;">
+</p>
+
+<br />
+
+<div align="center">
+
+[![Website](https://img.shields.io/badge/website-sprout.kovina.org-3ecf8e?style=for-the-badge&logo=vercel)](https://sprout.kovina.org)
+[![Google Play](https://img.shields.io/badge/Get%20it%20on-Google%20Play-414141?style=for-the-badge&logo=googleplay&logoColor=white)](https://play.google.com/store/apps/details?id=org.kovina.opensprout)
+[![Latest Release](https://img.shields.io/github/v/release/sparshsam/opensprout?sort=semver&style=for-the-badge&label=Release&color=2563eb)](https://github.com/sparshsam/opensprout/releases)
+[![Source Code](https://img.shields.io/badge/Source%20Code-GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/sparshsam/opensprout)
+
+</div>
+
+<br />
 
 ---
 
-*Last updated: June 2026*
+## Gallery
 
-## Tech Stack
+<p align="center">
+  <img src="assets/gallery/opensprout-mobile.png" width="30%" alt="Mobile Dashboard" style="border-radius: 8px;">
+  <img src="assets/gallery/opensprout-dashboard-concept.png" width="30%" alt="Dashboard Concept" style="border-radius: 8px;">
+  <img src="assets/gallery/01-login-page.png" width="30%" alt="Login Page" style="border-radius: 8px;">
+  <br /><br />
+  <img src="assets/gallery/02-desktop-dashboard.png" width="49%" alt="Desktop Dashboard" style="border-radius: 8px;">
+  <img src="assets/gallery/04-privacy-page.png" width="49%" alt="Privacy Page" style="border-radius: 8px;">
+</p>
 
-| Layer | Choice |
-|-------|--------|
-| Framework | Next.js (App Router) |
-| Language | TypeScript |
-| Styling | Tailwind CSS |
-| Data | Local-first with optional sync |
+<br />
+
+---
+
+## Why OpenSprout
+
+Most plant care apps eventually become a subscription, a closed data silo, or both. OpenSprout takes a different path.
+
+**No subscriptions.** **Portable data** — export your rows as JSON anytime. **Self-hostable** — the stack is ordinary Next.js, Supabase, and PostgreSQL. **Open improvements** — AGPLv3 keeps public hosted improvements open to the community.
+
+<br />
+
+---
+
+## Features
+
+<div align="center">
+
+| | |
+|---|---|
+| **Plant CRUD** — Create, edit, delete, inspect plants | **Care Templates** — 30 built-in species templates with suggested care rhythms |
+| **Care Schedules** — Watering and fertilizing schedules from templates or custom inputs | **Care Logs** — Mark plants watered or fertilized and persist logs |
+| **Journal Entries** — Title, body, health score, tags, optional photo attachments | **Photo Uploads** — Capture from camera or gallery, stored in private Supabase Storage |
+| **JSON Export** — Export your data anytime | **Android App** — Capacitor-based native Android experience |
+| **AI Agent Integration (MCP)** — 25 tools for plant management via Claude, Hermes, Cursor | **PWA** — Installable as a standalone web app |
+
+</div>
+
+<br />
+
+---
+
+## Designed For
+
+**People who care for living things and want practical, private tracking.**
+
+- **Houseplant owners** tracking watering schedules across a collection
+- **Gardeners** logging seasonal care routines
+- **Plant enthusiasts** journaling growth with photos and health scores
+
+<br />
+
+---
+
+## Design Philosophy
+
+> _"A care dashboard, not a social network."_
+
+Every feature serves one purpose: helping you remember what your plants need. No feeds, no likes, no notifications you didn't ask for. Dark-mode first, clean typography, generous spacing. Data is yours — portable, exportable, never sold.
+
+<br />
+
+---
+
+## Built With
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js" alt="Next.js 15">
+  <img src="https://img.shields.io/badge/Supabase-2.x-3fcf8e?style=for-the-badge&logo=supabase" alt="Supabase">
+  <img src="https://img.shields.io/badge/TypeScript-5.x-3178c6?style=for-the-badge&logo=typescript" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Tailwind%20CSS-4-06B6D4?style=for-the-badge&logo=tailwindcss" alt="Tailwind CSS 4">
+  <img src="https://img.shields.io/badge/Vercel-deployed-black?style=for-the-badge&logo=vercel" alt="Vercel">
+  <img src="https://img.shields.io/badge/Capacitor-Android-119EFF?style=for-the-badge&logo=capacitor" alt="Capacitor">
+  <img src="https://img.shields.io/badge/MCP-AI%20Agent%20API-FF6F00?style=for-the-badge" alt="MCP">
+</p>
+
+<br />
+
+---
+
+## Version Journey
+
+| Version | Date | Highlights |
+|---------|------|------------|
+| **v0.9.0** | 2026-06 | MCP server with 25 AI agent tools, photo uploads |
+| **v0.8.0** | 2026-05 | Android app (Capacitor), full Android project |
+| **v0.7.0** | 2026-05 | Journal entries, health scores, tag system |
+| **v0.6.0** | 2026-04 | Photo uploads, plant cover photos, timeline |
+| **v0.5.0** | 2026-04 | Care schedules, logging, JSON export |
+| **v0.4.0** | 2026-03 | Care templates (30 built-in species) |
+| **v0.3.0** | 2026-03 | Plant CRUD, species database |
+| **v0.2.0** | 2026-02 | Auth, dashboard, initial stack |
+| **v0.1.0** | 2026-01 | Project scaffold, Supabase schema |
+
+[Full Changelog](CHANGELOG.md)
+
+<br />
+
+---
+
+## License
+
+AGPLv3 — see [LICENSE](LICENSE)
+
+Built by [@sparshsam](https://github.com/sparshsam)
+
+<br />
+
+---
+
+## Part of the Open Collection
+
+<p align="center">
+  <table>
+    <tr>
+      <td align="center" width="200">
+        <img src="https://raw.githubusercontent.com/sparshsam/openpalette/main/assets/branding/icon.png" width="48" alt="OpenPalette"><br />
+        <strong>OpenPalette</strong><br />
+        <sub>A color studio for designers</sub><br />
+        <a href="https://github.com/sparshsam/openpalette">Repo</a> ·
+        <a href="https://palette.kovina.org">Web</a>
+      </td>
+      <td align="center" width="200">
+        <img src="https://raw.githubusercontent.com/sparshsam/opensend/main/assets/branding/opensend-icon.png" width="48" alt="OpenSend"><br />
+        <strong>OpenSend</strong><br />
+        <sub>Free file sharing, no account needed</sub><br />
+        <a href="https://github.com/sparshsam/opensend">Repo</a> ·
+        <a href="https://send.kovina.org">Web</a>
+      </td>
+      <td align="center" width="200">
+        <img src="https://raw.githubusercontent.com/sparshsam/opensprout/main/assets/branding/icon.png" width="48" alt="OpenSprout"><br />
+        <strong>OpenSprout</strong><br />
+        <sub>Plant care records</sub><br />
+        <a href="https://github.com/sparshsam/opensprout">Repo</a> ·
+        <a href="https://sprout.kovina.org">Web</a>
+      </td>
+      <td align="center" width="200">
+        <img src="https://raw.githubusercontent.com/sparshsam/OpenTone/main/assets/branding/icon.png" width="48" alt="OpenTone"><br />
+        <strong>OpenTone</strong><br />
+        <sub>Offline music library</sub><br />
+        <a href="https://github.com/sparshsam/OpenTone">Repo</a>
+      </td>
+    </tr>
+  </table>
+</p>
+
+<p align="center">
+  <a href="https://github.com/sparshsam?tab=repositories&q=open&type=public">View all Open* repositories →</a>
+</p>
