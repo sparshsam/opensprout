@@ -142,46 +142,6 @@ Built by [@sparshsam](https://github.com/sparshsam)
 
 ---
 
-## Part of the Open Collection
-
-<p align="center">
-  <table>
-    <tr>
-      <td align="center" width="200">
-        <img src="https://raw.githubusercontent.com/sparshsam/openpalette/main/assets/branding/icon.png" width="48" alt="OpenPalette"><br />
-        <strong>OpenPalette</strong><br />
-        <sub>A color studio for designers</sub><br />
-        <a href="https://github.com/sparshsam/openpalette">Repo</a> ·
-        <a href="https://palette.kovina.org">Web</a>
-      </td>
-      <td align="center" width="200">
-        <img src="https://raw.githubusercontent.com/sparshsam/opensend/main/assets/branding/opensend-icon.png" width="48" alt="OpenSend"><br />
-        <strong>OpenSend</strong><br />
-        <sub>Free file sharing, no account needed</sub><br />
-        <a href="https://github.com/sparshsam/opensend">Repo</a> ·
-        <a href="https://send.kovina.org">Web</a>
-      </td>
-      <td align="center" width="200">
-        <img src="https://raw.githubusercontent.com/sparshsam/opensprout/main/assets/branding/icon.png" width="48" alt="OpenSprout"><br />
-        <strong>OpenSprout</strong><br />
-        <sub>Plant care records</sub><br />
-        <a href="https://github.com/sparshsam/opensprout">Repo</a> ·
-        <a href="https://sprout.kovina.org">Web</a>
-      </td>
-      <td align="center" width="200">
-        <img src="https://raw.githubusercontent.com/sparshsam/OpenTone/main/assets/branding/icon.png" width="48" alt="OpenTone"><br />
-        <strong>OpenTone</strong><br />
-        <sub>Offline music library</sub><br />
-        <a href="https://github.com/sparshsam/OpenTone">Repo</a>
-      </td>
-    </tr>
-  </table>
-</p>
-
-<p align="center">
-  <a href="https://github.com/sparshsam?tab=repositories&q=open&type=public">View all Open* repositories →</a>
-</p>
-
 <br>
 
 ---
@@ -212,10 +172,11 @@ Built by [@sparshsam](https://github.com/sparshsam)
 <p align="center">
   <a href="https://github.com/sparshsam/wordwise">WordWise</a> ·
   <a href="https://github.com/sparshsam/openscrabble">OpenScrabble</a> ·
-  <a href="https://github.com/sparshsam/chess">Chess</a> ·
+  <a href="https://github.com/sparshsam/chess-by-sparsh">Chess by Sparsh</a> ·
   <a href="https://github.com/sparshsam/hisstastic">Hisstastic</a>
 </p>
 
 <p align="center">
   <sub>Minimal, focused tools for everyday tasks.</sub>
 </p>
+
