@@ -586,14 +586,14 @@ function AuthPanel({ supabase }: { supabase: ReturnType<typeof createClient> }) 
 function Brand() {
   return (
     <div className="mb-8 flex items-center gap-2.5">
-      <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground">
-        <Sprout size={22} aria-hidden />
+      <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
+        <Sprout size={18} aria-hidden />
       </div>
-      <div className="flex flex-col leading-tight">
-        <span className="text-[10px] font-bold tracking-[0.06em] uppercase text-muted-foreground/50">
+      <div className="flex flex-col leading-none">
+        <span className="text-[10px] font-bold tracking-[0.08em] uppercase opacity-[0.55]">
           OPEN
         </span>
-        <span className="text-lg font-bold text-foreground -mt-0.5">
+        <span className="text-base font-semibold text-foreground">
           Sprout
         </span>
         <span className="text-xs font-medium text-muted-foreground">Your plants. Your data.</span>

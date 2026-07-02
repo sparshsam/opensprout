@@ -43,12 +43,12 @@ export function PublicNav() {
           className="flex items-center gap-1.5 group shrink-0"
           aria-label="OpenSprout home"
         >
-          <Sprout size={20} className="text-primary shrink-0" aria-hidden />
-          <div className="flex flex-col leading-tight">
-            <span className="text-[10px] font-bold tracking-[0.06em] uppercase text-muted-foreground/50">
+          <Sprout size={18} className="text-primary shrink-0" aria-hidden />
+          <div className="flex flex-col leading-none">
+            <span className="text-[10px] font-bold tracking-[0.08em] uppercase opacity-[0.55]">
               OPEN
             </span>
-            <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors -mt-0.5">
+            <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
               Sprout
             </span>
           </div>
