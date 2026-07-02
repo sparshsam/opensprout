@@ -586,8 +586,9 @@ function AuthPanel({ supabase }: { supabase: ReturnType<typeof createClient> }) 
 function Brand() {
   return (
     <div className="mb-8 flex items-center gap-2.5">
-      <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
-        <Sprout size={18} aria-hidden />
+      <div className="relative h-9 w-9 shrink-0">
+        <img src="/opensprout-icon-header.png" alt="" className="absolute inset-0 h-9 w-9 rounded-md transition-opacity duration-300 dark:opacity-0" />
+        <img src="/opensprout-icon-header-dark.png" alt="" className="absolute inset-0 h-9 w-9 rounded-md transition-opacity duration-300 opacity-0 dark:opacity-100" />
       </div>
       <div className="flex flex-col leading-none">
         <span className="text-[10px] font-bold tracking-[0.08em] uppercase opacity-[0.55]">

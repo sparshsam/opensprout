@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Sprout } from "lucide-react";
 import { useTheme } from "@/lib/context/theme-context";
 import { Sun, Moon } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
@@ -43,7 +42,10 @@ export function PublicNav() {
           className="flex items-center gap-1.5 group shrink-0"
           aria-label="OpenSprout home"
         >
-          <Sprout size={18} className="text-primary shrink-0" aria-hidden />
+          <div className="relative size-[18px] shrink-0">
+            <img src="/opensprout-icon-header.png" alt="" className="absolute inset-0 size-[18px] rounded transition-opacity duration-300 dark:opacity-0" />
+            <img src="/opensprout-icon-header-dark.png" alt="" className="absolute inset-0 size-[18px] rounded transition-opacity duration-300 opacity-0 dark:opacity-100" />
+          </div>
           <div className="flex flex-col leading-none">
             <span className="text-[10px] font-bold tracking-[0.08em] uppercase opacity-[0.55]">
               OPEN
