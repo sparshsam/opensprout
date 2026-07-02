@@ -306,8 +306,15 @@ export function AppShell() {
           <header className="flex flex-col gap-4 border-b border-border pb-5 md:flex-row md:items-center md:justify-between">
             <div>
               <div className="flex items-center gap-2 lg:hidden">
-                <Sprout className="text-primary" size={24} aria-hidden />
-                <span className="text-lg font-bold">OpenSprout</span>
+                <Sprout className="text-primary shrink-0" size={24} aria-hidden />
+                <div className="flex flex-col leading-tight">
+                  <span className="text-[10px] font-bold tracking-[0.06em] uppercase text-muted-foreground/50">
+                    OPEN
+                  </span>
+                  <span className="text-lg font-bold text-foreground -mt-0.5">
+                    Sprout
+                  </span>
+                </div>
               </div>
               <h1 className="mt-2 text-3xl font-bold tracking-normal text-foreground md:mt-0">Plant dashboard</h1>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -578,13 +585,18 @@ function AuthPanel({ supabase }: { supabase: ReturnType<typeof createClient> }) 
 
 function Brand() {
   return (
-    <div className="mb-8 flex items-center gap-3">
+    <div className="mb-8 flex items-center gap-2.5">
       <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground">
         <Sprout size={22} aria-hidden />
       </div>
-      <div>
-        <p className="text-lg font-bold leading-tight">OpenSprout</p>
-        <p className="text-xs font-medium text-muted-foreground">Your plants. Your data.</p>
+      <div className="flex flex-col leading-tight">
+        <span className="text-[10px] font-bold tracking-[0.06em] uppercase text-muted-foreground/50">
+          OPEN
+        </span>
+        <span className="text-lg font-bold text-foreground -mt-0.5">
+          Sprout
+        </span>
+        <span className="text-xs font-medium text-muted-foreground">Your plants. Your data.</span>
       </div>
     </div>
   );

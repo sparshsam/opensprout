@@ -104,6 +104,25 @@ supabase/migrations/   # Database migrations (shared project)
 - **Icons:** lucide-react (consistent stroke set)
 - **Theme:** CSS variables in globals.css, `.dark` class via ThemeProvider
 
+## Brand Architecture
+
+### Ecosystem Hierarchy
+
+```
+KOVINA          Parent ecosystem     → kovina.org/standards/KOVINA_MANIFESTO.md
+  ↓
+OPEN            Product family       → apps/web/docs/BRANDING.md
+  ↓
+Sprout          Individual product   → apps/web/docs/BRANDING.md
+```
+
+- **OPEN has no icon.** No symbol, no badge, no monogram. Typography only.
+- The application icon belongs only to OpenSprout, never to OPEN.
+- Do not merge the icon into the typography lockup.
+- The header lockup is: `[icon] OPEN / Sprout` (stacked, icon on left).
+- OpenPalette is the canonical reference implementation for the Open Product Family branding.
+- See `apps/web/docs/BRANDING.md` for complete product-specific branding documentation.
+
 ## Auth
 
 - **Provider:** Google OAuth only (email/password disabled)

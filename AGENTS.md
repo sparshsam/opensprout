@@ -10,6 +10,23 @@ OpenSprout is a privacy-first, open-source plant care companion. Track watering,
 
 **Tagline:** Track, identify, and care for your plants.
 
+## Brand Architecture
+
+```
+KOVINA          Parent ecosystem     → kovina.org/standards/KOVINA_MANIFESTO.md
+  ↓
+OPEN            Product family       → apps/web/docs/BRANDING.md
+  ↓
+Sprout          Individual product   → apps/web/docs/BRANDING.md
+```
+
+- **OPEN has no icon.** No symbol, no badge, no monogram. Typography only.
+- The application icon belongs only to OpenSprout, never to OPEN.
+- Do not merge the icon into the typography lockup.
+- The header lockup is: `[icon] OPEN / Sprout` (stacked, icon on left).
+- OpenPalette is the canonical reference implementation for the Open Product Family branding.
+- See `apps/web/docs/BRANDING.md` for complete product-specific branding documentation.
+
 ## Stack
 
 - **Frontend:** Next.js 15 (App Router) + Tailwind CSS v4 + TypeScript

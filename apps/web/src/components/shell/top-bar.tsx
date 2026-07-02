@@ -18,16 +18,25 @@ export function TopBar() {
   return (
     <header className="sticky top-0 z-50 bg-background/90 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-10">
-        {/* Wordmark + icon */}
-        <Link href="/" className="flex items-center gap-2.5">
+        {/* Brand — Open Product Family lockup */}
+        <Link
+          href="/"
+          className="flex items-center gap-1.5 group shrink-0"
+          aria-label="OpenSprout home"
+        >
           <img
             src="/opensprout-icon.png"
-            alt="OpenSprout"
-            className="h-7 w-7"
+            alt=""
+            className="h-7 w-7 shrink-0"
           />
-          <span className="text-lg font-bold tracking-tight text-foreground">
-            OpenSprout
-          </span>
+          <div className="flex flex-col leading-tight">
+            <span className="text-[10px] font-bold tracking-[0.06em] uppercase text-muted-foreground/50">
+              OPEN
+            </span>
+            <span className="text-sm sm:text-[15px] font-bold text-foreground group-hover:text-primary transition-colors -mt-0.5">
+              Sprout
+            </span>
+          </div>
           <span className="sr-only">Go to homepage</span>
         </Link>
 

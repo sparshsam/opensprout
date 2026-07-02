@@ -37,13 +37,21 @@ export function PublicNav() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-10">
-        {/* Logo */}
+        {/* Brand — Open Product Family lockup */}
         <Link
           href="/"
-          className="flex items-center gap-2 text-sm font-bold text-foreground"
+          className="flex items-center gap-1.5 group shrink-0"
+          aria-label="OpenSprout home"
         >
-          <Sprout size={20} className="text-primary" aria-hidden />
-          OpenSprout
+          <Sprout size={20} className="text-primary shrink-0" aria-hidden />
+          <div className="flex flex-col leading-tight">
+            <span className="text-[10px] font-bold tracking-[0.06em] uppercase text-muted-foreground/50">
+              OPEN
+            </span>
+            <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors -mt-0.5">
+              Sprout
+            </span>
+          </div>
         </Link>
 
         {/* Desktop nav */}
