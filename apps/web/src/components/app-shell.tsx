@@ -305,13 +305,16 @@ export function AppShell() {
         <main className="px-4 py-4 sm:px-6 lg:px-8">
           <header className="flex flex-col gap-4 border-b border-border pb-5 md:flex-row md:items-center md:justify-between">
             <div>
-              <div className="flex items-center gap-2 lg:hidden">
-                <Sprout className="text-primary shrink-0" size={24} aria-hidden />
+              <div className="flex items-center gap-1.5 lg:hidden">
+                <div className="relative size-7 sm:size-8 shrink-0">
+                  <img src="/opensprout-icon-header.png" alt="" className="absolute inset-0 size-7 sm:size-8 rounded-lg transition-opacity duration-300 dark:opacity-0" />
+                  <img src="/opensprout-icon-header-dark.png" alt="" className="absolute inset-0 size-7 sm:size-8 rounded-lg transition-opacity duration-300 opacity-0 dark:opacity-100" />
+                </div>
                 <div className="flex flex-col leading-tight">
-                  <span className="text-[10px] font-bold tracking-[0.06em] uppercase text-muted-foreground/50">
+                  <span className="text-[10px] font-bold tracking-[0.06em] uppercase text-muted-foreground opacity-50">
                     OPEN
                   </span>
-                  <span className="text-lg font-bold text-foreground -mt-0.5">
+                  <span className="text-sm sm:text-[15px] font-medium text-foreground -mt-0.5">
                     Sprout
                   </span>
                 </div>
@@ -585,21 +588,16 @@ function AuthPanel({ supabase }: { supabase: ReturnType<typeof createClient> }) 
 
 function Brand() {
   return (
-    <div className="mb-8 flex items-center gap-2.5">
-      <div className="relative h-9 w-9 shrink-0">
-        <img src="/opensprout-icon-header.png" alt="" className="absolute inset-0 h-9 w-9 rounded-md transition-opacity duration-300 dark:opacity-0" />
-        <img src="/opensprout-icon-header-dark.png" alt="" className="absolute inset-0 h-9 w-9 rounded-md transition-opacity duration-300 opacity-0 dark:opacity-100" />
+    <Link href="/" className="flex items-center gap-1.5 group shrink-0">
+      <div className="relative size-7 sm:size-8 shrink-0">
+        <img src="/opensprout-icon-header.png" alt="" className="absolute inset-0 size-7 sm:size-8 rounded-lg transition-opacity duration-300 dark:opacity-0" />
+        <img src="/opensprout-icon-header-dark.png" alt="" className="absolute inset-0 size-7 sm:size-8 rounded-lg transition-opacity duration-300 opacity-0 dark:opacity-100" />
       </div>
-      <div className="flex flex-col leading-none">
-        <span className="text-[10px] font-bold tracking-[0.08em] uppercase opacity-[0.55]">
-          OPEN
-        </span>
-        <span className="text-base font-semibold text-foreground">
-          Sprout
-        </span>
-        <span className="text-xs font-medium text-muted-foreground">Your plants. Your data.</span>
+      <div className="flex flex-col leading-tight">
+        <span className="text-[10px] font-bold tracking-[0.06em] uppercase text-muted-foreground opacity-50">OPEN</span>
+        <span className="text-sm sm:text-[15px] font-medium text-foreground group-hover:text-primary transition-colors -mt-0.5">Sprout</span>
       </div>
-    </div>
+    </Link>
   );
 }
 
