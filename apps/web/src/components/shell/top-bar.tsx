@@ -25,7 +25,7 @@ export function TopBar() {
           aria-label="OpenSprout home"
         >
           <img
-            src="/opensprout-icon.png"
+            src="/opensprout-icon-header.png"
             alt=""
             className="h-7 w-7 shrink-0"
           />
