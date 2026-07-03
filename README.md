@@ -1,8 +1,8 @@
 <div align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/branding/icon.png">
-    <img src="assets/branding/icon.png" width="96" height="96" alt="OpenSprout">
-  </picture>
+  <img src="assets/branding/icon.png" width="72" alt="OpenSprout">
+</div>
+
+<div align="center">
   <h1 align="center">OpenSprout</h1>
   <p align="center">
     <strong>Privacy-first plant care, open to everyone.</strong>
