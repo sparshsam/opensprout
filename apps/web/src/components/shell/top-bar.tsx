@@ -25,7 +25,9 @@ export function TopBar() {
           aria-label="OpenSprout home"
         >
           <div className="relative size-7 sm:size-8 shrink-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/opensprout-icon-header.png" alt="" className="absolute inset-0 size-7 sm:size-8 rounded-lg transition-opacity duration-300 dark:opacity-0" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/opensprout-icon-header-dark.png" alt="" className="absolute inset-0 size-7 sm:size-8 rounded-lg transition-opacity duration-300 opacity-0 dark:opacity-100" />
           </div>
           <div className="flex flex-col leading-tight">
