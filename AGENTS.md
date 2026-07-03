@@ -2,7 +2,7 @@
 
 ## Current Release
 
-**v0.9.27** — Open Product Family Branding Alignment (2026-07-02)
+**v0.9.27** — Open Product Family Branding Alignment + Vercel Deployment (2026-07-03)
 
 ## Product Identity
 
@@ -369,6 +369,16 @@ The Supabase project `rbdyrymtgfqqkdemicdo` is shared between OpenSprout (plant 
 
 ### Documentation
 - `apps/web/docs/BRANDING.md` created with ecosystem hierarchy, Open Product Family guidelines, and product-specific branding details
+- OpenPalette canonical spec alignment
+
+### Build Fixes
+- Added `eslint-disable` comments for `<img>` tags (was blocking Vercel build due to Next.js `<Image/>` enforcement)
+- Added missing `import Link from "next/link"` to `app-shell.tsx`
+- Added root `public/` directory with hard copies for Vercel static file serving (icons, favicons, manifests)
+
+### Deployment
+- Vercel deploy: `sprout.kovina.org` live
+- All three header components, generated icons, and dark mode variants confirmed working in production
 
 ## Key Changes in v0.9.24 — Platform Completion
 
