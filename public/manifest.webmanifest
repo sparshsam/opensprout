@@ -1,1 +1,56 @@
-../apps/web/public/manifest.webmanifest
+{
+  "name": "OpenSprout",
+  "short_name": "OpenSprout",
+  "description": "Free and open-source plant care tracking — schedules, logs, photos & journal.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "lang": "en-US",
+  "background_color": "#f8fbf9",
+  "theme_color": "#16784f",
+  "categories": ["lifestyle", "productivity"],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "icons": [
+    {
+      "src": "/icons/icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop-dashboard.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "OpenSprout Dashboard"
+    },
+    {
+      "src": "/screenshots/mobile-plants.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Plant Collection"
+    }
+  ]
+}
