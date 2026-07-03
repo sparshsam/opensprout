@@ -2,7 +2,7 @@
 
 ## Current Release
 
-**v0.9.26** — CI Stabilization + Database Namespacing (2026-06-28)
+**v0.9.27** — Open Product Family Branding Alignment (2026-07-02)
 
 ## Product Identity
 
@@ -24,6 +24,11 @@ Sprout          Individual product   → apps/web/docs/BRANDING.md
 - The application icon belongs only to OpenSprout, never to OPEN.
 - Do not merge the icon into the typography lockup.
 - The header lockup is: `[icon] OPEN / Sprout` (stacked, icon on left).
+- Three header components use the lockup: `public-nav.tsx`, `shell/top-bar.tsx`, `app-shell.tsx`.
+- Icons are generated from 1024x1024 light + dark masters via Lanczos resampling: 210 assets across all platforms. 114 dark variant assets (including opensprout-icon-header-dark.png).
+- Dark/light themed headers use dual `<img>` elements with `dark:opacity-0`/`dark:opacity-100` CSS transitions.
+- The header lockup uses the generated PNG icon (not lucide Sprout) in `public-nav.tsx` and `app-shell.tsx`.
+- Lockup styling matches OpenPalette canonical spec.
 - OpenPalette is the canonical reference implementation for the Open Product Family branding.
 - See `apps/web/docs/BRANDING.md` for complete product-specific branding documentation.
 
@@ -341,6 +346,30 @@ The Supabase project `rbdyrymtgfqqkdemicdo` is shared between OpenSprout (plant 
 - All MCP tool files, test mocks, sync cache mappings, and `db.ts` store names updated.
 - `delete_account()` RPC function replaced (table `RENAME` doesn't update hardcoded names in function bodies).
 
+## Key Changes in v0.9.27 — Open Product Family Branding Alignment (2026-07-02)
+
+### Header Lockup Standardization
+- Three header components updated to `[icon] OPEN / Sprout` stacked lockup:
+  - `apps/web/src/components/public-nav.tsx` — public header
+  - `apps/web/src/components/shell/top-bar.tsx` — authenticated header
+  - `apps/web/src/components/app-shell.tsx` — Brand() component (legacy)
+- Lockup styling matches OpenPalette canonical spec: icon 28/32px, OPEN tracking 0.06em opacity-50, product font-medium -mt-0.5, leading-tight
+- Generated PNG icon (opensprout-icon-header.png) replaces the lucide Sprout icon in `public-nav.tsx` and `app-shell.tsx`
+
+### Icon Generation
+- 210 assets generated from 1024x1024 light + dark masters via Lanczos resampling
+- Platform targets: Windows ICO, MSIX store assets, Android mipmaps, iOS, macOS, Web/PWA favicons, social OG, GitHub, header icons
+- 114 dark mode variant assets generated, including opensprout-icon-header-dark.png for all three header components
+- Script-based generation pipeline (not manually exported)
+
+### Dark/Light Themed Headers
+- All three header locations use dual `<img>` elements
+- CSS transition: `dark:opacity-0` hides the light icon in dark mode, `dark:opacity-100` reveals the dark variant
+- Smooth cross-fade on theme switch (no flicker)
+
+### Documentation
+- `apps/web/docs/BRANDING.md` created with ecosystem hierarchy, Open Product Family guidelines, and product-specific branding details
+
 ## Key Changes in v0.9.24 — Platform Completion
 
 ### Android
@@ -427,3 +456,4 @@ All ecosystem repos follow: https://github.com/sparshsam/ecosystem-standards
 - Display text: `text-display` utility (clamp 1.75-2.25rem, font-bold)
 - Page transitions: `animate-page-in` (fadeIn 0.35s ease-out)
 - Focus indicator: global `*:focus-visible` ring (2px bg + 4px theme ring)
+- Header icons: generated PNG (opensprout-icon-header.png / -dark.png) with dual-image `dark:opacity-0/100` CSS transition; lucide-react for functional/UI icons

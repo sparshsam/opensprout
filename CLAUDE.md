@@ -1,4 +1,4 @@
-# OpenSprout v0.9.26
+# OpenSprout v0.9.27
 
 **Stack:** Next.js 15 (App Router) · Supabase · Capacitor v8 Android · Tailwind CSS v4 · Sora font  
 **Deploy:** https://sprout.kovina.org  
@@ -45,7 +45,7 @@ apps/web/              # Next.js + Capacitor Android
   │   └── globals.css        # Design tokens, animations, a11y
   ├── android/               # Capacitor Android project
   ├── public/
-  │   ├── sw.js              # Service worker (v0.9.26)
+  │   ├── sw.js              # Service worker (v0.9.27)
   │   ├── manifest.webmanifest  # PWA manifest
   │   └── pwabuilder.json    # PWABuilder manifest
   └── src/
@@ -101,7 +101,7 @@ supabase/migrations/   # Database migrations (shared project)
 - **Primary green:** hsl(155, 68%, 28%) / dark: hsl(155, 52%, 44%)
 - **Buttons:** pills (`rounded-full`), `px-7 py-3.5 text-sm font-semibold`
 - **Borders:** ultra-subtle (`border-border/40`), hierarchy via spacing not boxes
-- **Icons:** lucide-react (consistent stroke set)
+- **Icons:** Headers use generated PNG icons (opensprout-icon-header.png / -dark.png) with `dark:opacity-0/100` CSS transition; app icons from 1024×1024 Lanczos-generated masters; lucide-react for functional/UI icons
 - **Theme:** CSS variables in globals.css, `.dark` class via ThemeProvider
 
 ## Brand Architecture
@@ -120,6 +120,11 @@ Sprout          Individual product   → apps/web/docs/BRANDING.md
 - The application icon belongs only to OpenSprout, never to OPEN.
 - Do not merge the icon into the typography lockup.
 - The header lockup is: `[icon] OPEN / Sprout` (stacked, icon on left).
+- Three header components use the lockup: `public-nav.tsx`, `shell/top-bar.tsx`, `app-shell.tsx`.
+- Icons are generated from 1024×1024 light + dark masters via Lanczos resampling: 210 assets across Windows ICO, MSIX store assets, Android mipmaps, iOS, macOS, Web/PWA favicons, social OG, GitHub, and header icons. Dark mode variant (opensprout-icon-header-dark.png) available as a 114-asset dark subset.
+- Dark/light themed headers use dual `<img>` elements with `dark:opacity-0`/`dark:opacity-100` CSS transitions — each theme shows its own icon and hides the other.
+- The header lockup uses actual generated PNG icon (not lucide Sprout) in `public-nav.tsx` and `app-shell.tsx`.
+- Lockup styling matches OpenPalette canonical spec: icon 28/32px, OPEN tracking 0.06em opacity-50, product font-medium -mt-0.5, leading-tight.
 - OpenPalette is the canonical reference implementation for the Open Product Family branding.
 - See `apps/web/docs/BRANDING.md` for complete product-specific branding documentation.
 
@@ -150,6 +155,7 @@ Architecture follows the MCP Build Guide: SHA-256 token auth, centralized regist
 
 ## Release History
 
+- **v0.9.27** (Jul 2) — Open Product Family branding alignment. Header lockups standardized to `[icon] OPEN / Sprout` stacked layout in all three header components (public-nav, shell/top-bar, app-shell). Icons generated from 1024x1024 light + dark masters via Lanczos resampling: 210 assets across Windows ICO, MSIX, Android mipmaps, iOS, macOS, Web/PWA favicons, social OG, GitHub, and header icons. 114 dark mode variant assets generated (including opensprout-icon-header-dark.png). All three header locations use dual-image wrap with `dark:opacity-0`/`dark:opacity-100` CSS transitions for dark/light theming. Generated PNG icons replace the lucide Sprout icon in public-nav.tsx and app-shell.tsx. Lockup styling aligned to OpenPalette canonical spec. Brand hierarchy documented in `apps/web/docs/BRANDING.md`.
 - **v0.9.26** (Jun 28) — CI stabilization + database namespacing. Android CI now builds with Java 21 (fixes AGP 8.13 compile error) and uses normal `next build` (not static export) — all `force-static`/`generateStaticParams` route hacks reverted. All 14 OpenSprout tables renamed to `opensprout_` prefix for shared Supabase project namespacing. Code references, type definitions, MCP tools, and tests updated.
 - **v0.9.26** (Jun 28) — Native Google Sign-In + Android Fixes. In-app Chrome Custom Tab for Android, browser-popup login for Windows/PWA, platform-aware sign-in dispatch, API routing for Capacitor static export, adaptive icon fix, white flash fix, debug diagnostics page.
 - **v0.9.25** (Jun 28) — Release Candidate Stabilization. Lint/typecheck/test/build clean, schema verification, build validation, changelog backfill.
