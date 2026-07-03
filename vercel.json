@@ -1,8 +1,9 @@
 {
   "framework": "nextjs",
-  "installCommand": "npm install",
-  "buildCommand": "npm run -w @opensprout/mcp build && npm run build",
-  "outputDirectory": "apps/web/.next",
+  "installCommand": "cd ../.. && npm install",
+  "buildCommand": "cd ../.. && npm run -w @opensprout/mcp build && cd apps/web && npm run build",
+  "rootDirectory": "apps/web",
+  "outputDirectory": ".next",
   "headers": [
     {
       "source": "/(.*)",
