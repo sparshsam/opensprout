@@ -451,6 +451,17 @@ Located at `apps/mcp/`. Exposes 28 tools for AI agents. Test suite: 112 tests.
 7. **Explain recommendations.** Every insight/recommendation includes a `reason` and `dataSource`. Never invent without supporting data.
 8. **Name-spaced table names.** All OpenSprout Supabase tables use the `opensprout_` prefix (e.g., `opensprout_plants`). Always use the full prefixed name in `.from()` calls, type definitions, and SQL queries.
 
+## Privacy & Legal (Kovina Standard)
+
+OpenSprout follows the Kovina Privacy & Terms Standard.
+- **License:** AGPL-3.0-or-later — full text at `LICENSE` in repo root and at https://github.com/sparshsam/opensprout/blob/main/LICENSE
+- **Advice disclaimer:** "No Medical or Gardening Advice" — OpenSprout is a tool for tracking plant care schedules and observations. It does not provide medical, veterinary, or professional gardening advice. Consult qualified professionals for specific guidance.
+- **Cloud / Backup:** Supabase (auth, PostgreSQL database, file storage for plant photos). PlantNet API for optional plant identification (photo only).
+- **Hosting:** Vercel (apps/web) — privacy: https://vercel.com/legal/privacy
+- **Backup provider privacy:** https://supabase.com/privacy
+- **Privacy policy:** `/privacy` — covers local-first data model, optional cloud features, data collection, third-party services, deletion, export
+- **Terms of service:** `/terms` — covers acceptance, AGPL-3.0 license, advice disclaimer, warranty disclaimer, data responsibility, service availability, user conduct
+
 ## Ecosystem Standards
 
 All ecosystem repos follow: https://github.com/sparshsam/ecosystem-standards

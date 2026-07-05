@@ -185,6 +185,17 @@ Architecture follows the MCP Build Guide: SHA-256 token auth, centralized regist
 - **OAuthDeepLinkHandler** — Global Capacitor deep-link listener for OAuth callback, mounted in root layout
 - **DebugInfo** — Diagnostics widget for APK debugging (origin, session, platform detection)
 
+## Privacy & Legal (Kovina Standard)
+
+OpenSprout follows the Kovina Privacy & Terms Standard.
+- **License:** AGPL-3.0-or-later — full text at `LICENSE` in repo root and at https://github.com/sparshsam/opensprout/blob/main/LICENSE
+- **Advice disclaimer:** "No Medical or Gardening Advice" — OpenSprout is a tool for tracking plant care schedules and observations. It does not provide medical, veterinary, or professional gardening advice. Consult qualified professionals for specific guidance.
+- **Cloud / Backup:** Supabase (auth, PostgreSQL database, file storage for plant photos). PlantNet API for optional plant identification (photo only).
+- **Hosting:** Vercel (apps/web) — privacy: https://vercel.com/legal/privacy
+- **Backup provider privacy:** https://supabase.com/privacy
+- **Privacy policy:** `/privacy` — covers local-first data model, optional cloud features, data collection, third-party services, deletion, export
+- **Terms of service:** `/terms` — covers acceptance, AGPL-3.0 license, advice disclaimer, warranty disclaimer, data responsibility, service availability, user conduct
+
 ## App Identity
 
 OpenSprout is a privacy-first, open-source plant care companion. Track, identify, and care for your plants. No subscriptions. User-owned data. AI-agent ready via MCP.
