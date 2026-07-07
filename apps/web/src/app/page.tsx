@@ -26,49 +26,42 @@ export const metadata: Metadata = {
 
 const features = [
   {
-    number: "01",
     icon: Sprout,
     title: "Plant collection",
     description:
       "Build a living catalog of your plants. Add names, species, locations, and photos. Your garden, organized your way.",
   },
   {
-    number: "02",
     icon: Bell,
     title: "Care reminders",
     description:
       "Set watering, fertilizing, and misting schedules per plant. OpenSprout tells you what needs attention and when.",
   },
   {
-    number: "03",
     icon: Scan,
     title: "Plant identification",
     description:
       "Snap a photo and let AI suggest the species. Powered by PlantNet — your data stays private, only the image is analyzed.",
   },
   {
-    number: "04",
     icon: BookOpen,
     title: "Growth journal",
     description:
       "Log observations, track milestones, and score health over time. Build a visual history of every plant's journey.",
   },
   {
-    number: "05",
     icon: Stethoscope,
     title: "Diagnosis & care knowledge",
     description:
       "Search a built-in knowledge base for symptoms like yellow leaves or drooping stems. Get causes, solutions, and prevention tips.",
   },
   {
-    number: "06",
     icon: WifiOff,
     title: "Offline-first ownership",
     description:
       "Your data lives on your device. Sync when you choose. Export everything as JSON at any time — no vendor lock-in.",
   },
   {
-    number: "07",
     icon: Bot,
     title: "AI-agent ready",
     description:
@@ -89,16 +82,12 @@ function FeatureSection() {
           for plant people.
         </p>
 
-        <div className="grid gap-14 sm:grid-cols-[auto_1fr] sm:gap-x-10 sm:gap-y-16">
+        <div className="grid gap-14 sm:grid-cols-1">
           {features.map((f) => (
             <div
-              key={f.number}
+              key={f.title}
               className="sm:contents"
             >
-              {/* Number anchor — large, bold, accent */}
-              <span className="hidden text-6xl font-black leading-none text-primary/20 select-none sm:block sm:text-7xl">
-                {f.number}
-              </span>
               {/* Content */}
               <div>
                 <div className="mb-3 flex items-center gap-3">
