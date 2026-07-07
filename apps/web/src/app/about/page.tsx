@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicNav } from "@/components/public-nav";
-import { PublicFooter } from "@/components/public-footer";
 
 export const metadata: Metadata = {
   title: "About — OpenSprout",
@@ -17,12 +16,12 @@ export default function AboutPage() {
         className="px-6 py-28 sm:py-36 lg:px-10"
       >
         <article className="mx-auto max-w-2xl">
-          <img
-            src="/opensprout-icon.png"
-            alt=""
-            className="mb-6 h-12 w-12"
-            aria-hidden
-          />
+          <div className="relative mb-6 h-12 w-12">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/opensprout-icon-header.png" alt="" className="absolute inset-0 h-12 w-12 rounded-lg transition-opacity duration-300 dark:opacity-0" aria-hidden />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/opensprout-icon-header-dark.png" alt="" className="absolute inset-0 h-12 w-12 rounded-lg transition-opacity duration-300 opacity-0 dark:opacity-100" aria-hidden />
+          </div>
           <p className="text-label mb-4 text-primary">About</p>
           <h1 className="text-hero mb-6 text-foreground">OpenSprout</h1>
           <p className="mb-16 max-w-xl text-lg leading-relaxed text-muted-foreground">
@@ -132,7 +131,6 @@ export default function AboutPage() {
           </div>
         </article>
       </main>
-      <PublicFooter />
     </div>
   );
 }
