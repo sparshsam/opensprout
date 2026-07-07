@@ -82,26 +82,20 @@ function FeatureSection() {
           for plant people.
         </p>
 
-        <div className="grid gap-14 sm:grid-cols-1">
+        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((f) => (
-            <div
-              key={f.title}
-              className="sm:contents"
-            >
-              {/* Content */}
-              <div>
-                <div className="mb-3 flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <f.icon size={18} aria-hidden />
-                  </div>
-                  <h3 className="text-xl font-bold text-foreground">
-                    {f.title}
-                  </h3>
+            <div key={f.title}>
+              <div className="mb-3 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <f.icon size={18} aria-hidden />
                 </div>
-                <p className="max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">
-                  {f.description}
-                </p>
+                <h3 className="text-xl font-bold text-foreground">
+                  {f.title}
+                </h3>
               </div>
+              <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
+                {f.description}
+              </p>
             </div>
           ))}
         </div>
