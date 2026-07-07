@@ -59,7 +59,7 @@ export function PublicFooter() {
             href="https://kovina.org"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs font-bold tracking-[0.1em] text-muted-foreground/40 hover:text-muted-foreground transition-colors no-underline"
+            className="text-xs font-black tracking-[-0.03em] text-muted-foreground/40 hover:text-muted-foreground transition-colors no-underline"
             aria-label="KOVINA — Personal software. Forged to last."
           >
             KOVINA
