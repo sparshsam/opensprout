@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicNav } from "@/components/public-nav";
+import { PublicFooter } from "@/components/public-footer";
 
 export const metadata: Metadata = {
   title: "About — OpenSprout",
@@ -109,28 +110,17 @@ export default function AboutPage() {
             </section>
           </div>
 
-          <div className="border-t border-border/40 mt-16 pt-8 flex flex-wrap gap-6">
+          <div className="border-t border-border/40 mt-16 pt-8">
             <Link
               href="/"
               className="text-sm font-semibold text-primary hover:underline"
             >
               ← Home
             </Link>
-            <Link
-              href="/privacy"
-              className="text-sm text-muted-foreground hover:text-foreground"
-            >
-              Privacy
-            </Link>
-            <Link
-              href="/terms"
-              className="text-sm text-muted-foreground hover:text-foreground"
-            >
-              Terms
-            </Link>
           </div>
         </article>
       </main>
+      <PublicFooter />
     </div>
   );
 }
