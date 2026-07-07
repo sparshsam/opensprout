@@ -2,7 +2,7 @@
 
 ## Current Release
 
-**v0.9.27** — Open Product Family Branding Alignment + Vercel Deployment (2026-07-03)
+**v1.0.0** — Web + PWA Stable Release (2026-07-07)
 
 ## Product Identity
 
@@ -36,24 +36,25 @@ Sprout          Individual product   → apps/web/docs/BRANDING.md
 
 - **Frontend:** Next.js 15 (App Router) + Tailwind CSS v4 + TypeScript
 - **Backend:** Supabase (auth, PostgreSQL DB, file storage, edge functions)
-- **Mobile:** Capacitor v8 Android (PWA for Windows/desktop)
+- **Mobile:** PWA (Installable on all platforms; Android archive preserved at `archive/android/`)
 - **AI:** MCP server at `apps/mcp/` — 28 tools, 112 tests
 - **Auth:** Google OAuth (email/password disabled via Supabase)
 - **Design:** Sora variable font, warm paper light mode, deep botanical dark mode
 - **Hosting:** Vercel (web at sprout.kovina.org), Supabase (backend, shared project with OpenSend)
-- **CI:** GitHub Actions — Java 21 for Android, Node 24 for web, caching via `setup-node`
+- **CI:** GitHub Actions — Node 24 for web, caching via `setup-node`
 
 ## Repo Structure
 
 ```
 opensprout/
 ├── apps/
-│   ├── web/              # Next.js app + Capacitor Android
+│   ├── web/              # Next.js app (App Router) + PWA
 │   │   ├── src/app/      # App Router pages + API routes
 │   │   ├── src/lib/      # Data layer, auth, supabase clients, context
 │   │   └── src/components/# UI components
 │   └── mcp/              # MCP server (28 tools, HTTP + stdio)
 │       └── src/tools/    # 7 tool modules (plants, care, journal, etc.)
+├── archive/              # Archived platforms (Android/Capacitor)
 ├── docs/                 # 35+ docs
 ├── scripts/              # build/release scripts
 ├── supabase/
@@ -346,6 +347,34 @@ The Supabase project `rbdyrymtgfqqkdemicdo` is shared between OpenSprout (plant 
 - All MCP tool files, test mocks, sync cache mappings, and `db.ts` store names updated.
 - `delete_account()` RPC function replaced (table `RENAME` doesn't update hardcoded names in function bodies).
 
+## Key Changes in v1.0.0 — Web + PWA Stable Release (2026-07-07)
+
+### Android/Capacitor Archived
+- Full Android build preserved at `archive/android/` (120 MB, 2814 files).
+- Capacitor config archived at `archive/capacitor.config.ts`.
+- 8 `@capacitor/*` npm packages removed from both `package.json` files.
+- All 18 Android/Cap scripts removed. Only `rc:web` remains.
+
+### Capacitor Code Cleaned (13 files touched)
+- `platform.ts` — simplified to `resolveApiUrl()` and `PRODUCTION_ORIGIN` only.
+- `haptics.ts` — Capacitor plugin removed, `navigator.vibrate` only.
+- `reminders.ts` — Capacitor LocalNotifications path removed, web-only scheduling.
+- `app-context.tsx` — Capacitor `appUrlOpen` listener removed.
+- `auth-gate.tsx` — Capacitor native detection removed, always shows public page.
+- `photo-picker.tsx` — Capacitor Camera plugin removed, `capture="environment"` only.
+- `login/page.tsx` — Capacitor "native" auth branch removed.
+- `debug-info.tsx` — Capacitor diagnostics removed.
+- `oauth-deeplink-handler.tsx` — deleted (Capacitor-only).
+- `capacitor-haptics.d.ts` — deleted.
+
+### Other Changes
+- **GeneratedAssets committed** — 324 cross-platform brand icon files.
+- **Footer redesigned** — OPEN/Sprout lockup with icon, KOVINA wordmark, no AGPLv3 legalese.
+- **About page** — dual dark/light icons, PublicFooter restored.
+- **Feature grid** — responsive 1→2→3 column layout.
+- **Header** — "View on GitHub" button removed.
+- **Version bumped** to 1.0.0.
+
 ## Key Changes in v0.9.27 — Open Product Family Branding Alignment (2026-07-02)
 
 ### Header Lockup Standardization
@@ -408,8 +437,6 @@ The Supabase project `rbdyrymtgfqqkdemicdo` is shared between OpenSprout (plant 
 - No crash reporting / analytics (intentional privacy choice)
 - Vercel Hobby plan rate-limited for deployments (24h cooldown)
 - Supabase project shared with OpenSend (send.kovina.org) — all tables use `opensprout_` prefix
-- Android OAuth requires `opensprout://auth/callback` and `https://sprout.kovina.org/auth/complete` added to Supabase Redirect URLs
-- Android APK built in CI has placeholder web assets (no static export) — functional for development only
 
 ## Build Commands
 
@@ -418,9 +445,7 @@ npm run dev                    # Dev server at localhost:9999
 npm run build                  # Web production build
 npm run typecheck              # TypeScript check (builds MCP first)
 npm run lint                   # ESLint
-npm run android:debug          # Debug APK
-npm run android:release        # Both signed AAB + APK
-npm run -w @opensprout/mcp test # MCP tests
+npm run -w @opensprout/mcp test # MCP tests (112)
 bash scripts/release.sh        # Full release automation
 bash scripts/release.sh --check-only  # Checks only, no build
 ```

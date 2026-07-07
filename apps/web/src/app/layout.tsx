@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Sora } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/context/theme-context";
-import { OAuthDeepLinkHandler } from "@/components/oauth-deeplink-handler";
 
 const sora = Sora({
   subsets: ["latin"],
@@ -61,7 +60,6 @@ export default function RootLayout({
           Skip to content
         </a>
         <ThemeProvider>
-          <OAuthDeepLinkHandler />
           {children}
         </ThemeProvider>
       </body>

@@ -7,15 +7,11 @@ import { PublicNav } from "@/components/public-nav";
 import { PublicFooter } from "@/components/public-footer";
 import Link from "next/link";
 
-type SignInPlatform = "web" | "native" | "pwa";
+type SignInPlatform = "web" | "pwa";
 
 /** Detect the current runtime platform to choose the right sign-in flow. */
 function detectPlatform(): SignInPlatform {
   if (typeof window === "undefined") return "web";
-  const win = window as typeof window & {
-    Capacitor?: { isNativePlatform?: () => boolean };
-  };
-  if (win.Capacitor?.isNativePlatform?.()) return "native";
   if (
     window.matchMedia("(display-mode: standalone)").matches ||
     (window.navigator as { standalone?: boolean }).standalone === true
@@ -76,7 +72,7 @@ export default function LoginPage() {
       const platform = detectPlatform();
 
       if (platform === "web") {
-        // ── Web: direct browser redirect (existing flow) ────────────────
+        // ── Web: direct browser redirect ──────────────────────────────
         const { error: oauthError } = await supabase.auth.signInWithOAuth({
           provider: "google",
           options: {
@@ -84,25 +80,6 @@ export default function LoginPage() {
           },
         });
         if (oauthError) throw oauthError;
-        // Page navigates away — no need to reset busy state
-      } else if (platform === "native") {
-        // ── Capacitor native: in-app Chrome Custom Tab ──────────────────
-        const { data, error: oauthError } =
-          await supabase.auth.signInWithOAuth({
-            provider: "google",
-            options: {
-              redirectTo: "opensprout://auth/callback",
-              skipBrowserRedirect: true,
-            },
-          });
-        if (oauthError) throw oauthError;
-        if (!data?.url) throw new Error("Failed to get sign-in URL.");
-
-        // Open in in-app browser (Chrome Custom Tab on Android)
-        const { Browser } = await import("@capacitor/browser");
-        await Browser.open({ url: data.url });
-
-        // Don't reset busy — user will return via deep link
       } else {
         // ── PWA: open system browser popup ──────────────────────────────
         const { data, error: oauthError } =
@@ -161,7 +138,6 @@ export default function LoginPage() {
   /** Platform label shown beneath the button. */
   const platformHint = useMemo(() => {
     const p = detectPlatform();
-    if (p === "native") return "You'll be taken to Google to sign in securely.";
     if (p === "pwa") return "A browser window will open to sign you in.";
     return null;
   }, []);

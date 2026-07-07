@@ -222,22 +222,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const params = new URLSearchParams(window.location.search);
       handleDeepLink(params.get("taskId"), params.get("plantId"));
     }
-
-    // Capacitor appUrlOpen (app already running or cold start via URL scheme)
-    async function setupCapacitorListener() {
-      try {
-        const { App } = await import("@capacitor/app");
-        await App.addListener("appUrlOpen", (data) => {
-          const url = new URL(data.url);
-          const taskId = url.searchParams.get("taskId");
-          const plantId = url.searchParams.get("plantId");
-          handleDeepLink(taskId, plantId);
-        });
-      } catch {
-        // Not running in Capacitor — no-op on web
-      }
-    }
-    void setupCapacitorListener();
   }, []);
 
   // Refresh dashboard data

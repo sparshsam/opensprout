@@ -1,6 +1,6 @@
 {
   "name": "opensprout",
-  "version": "0.9.26",
+  "version": "1.0.0",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "workspaces": [
@@ -10,20 +10,10 @@
   "scripts": {
     "dev": "npm --workspace apps/web run dev",
     "build": "npm --workspace apps/web run build",
-    "build:mobile": "npm --workspace apps/web run build:mobile",
     "start": "npm --workspace apps/web run start",
     "lint": "npm --workspace apps/web run lint",
     "typecheck": "npm run -w @opensprout/mcp build && npm --workspace apps/web run typecheck",
-    "cap:dev:android": "npm --workspace apps/web run cap:dev:android",
-    "cap:open:android": "npm --workspace apps/web run cap:open:android",
-    "android:debug": "npm --workspace apps/web run android:debug",
-    "android:release:bundle": "npm --workspace apps/web run android:release:bundle",
-    "android:release:apk": "npm --workspace apps/web run android:release:apk",
-    "android:release": "npm --workspace apps/web run android:release",
     "version:bump": "node scripts/bump-version.mjs",
-    "android:sync": "npm --workspace apps/web run cap:sync",
-    "android:open": "npm --workspace apps/web run cap:open:android",
-    "rc:android": "npm run android:release:bundle && npm run android:release:apk",
     "rc:web": "npm run build"
   },
   "engines": {
@@ -39,8 +29,5 @@
   "bugs": {
     "url": "https://github.com/sparshsam/opensprout/issues"
   },
-  "keywords": [],
-  "dependencies": {
-    "@capacitor/browser": "^8.0.3"
-  }
+  "keywords": []
 }

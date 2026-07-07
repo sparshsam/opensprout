@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 120" width="600" height="120">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@900&amp;display=swap');
+      text { font-family: 'Inter', 'Arial Black', sans-serif; font-weight: 900; }
+    </style>
+  </defs>
+  <text x="0" y="88" font-size="96" letter-spacing="-0.03em" fill="#111111">KOVINA</text>
+</svg>

@@ -48,18 +48,9 @@ export function saveReminderPrefs(prefs: ReminderPreferences): void {
 // ──────────────────────────────────────────────
 
 const NOTIF_PREFIX = "opensprout-task";
-const CHANNEL_ID = "opensprout-care-reminders";
 
 export function taskNotifId(taskId: string): string {
   return `${NOTIF_PREFIX}-${taskId}`;
-}
-
-function isCapacitorNative(): boolean {
-  try {
-    return typeof window !== "undefined" && "Capacitor" in window;
-  } catch {
-    return false;
-  }
 }
 
 // ──────────────────────────────────────────────
@@ -194,8 +185,7 @@ export function showDueSoonNotification(
 
 // ──────────────────────────────────────────────
 // Schedule a single task reminder
-// Uses Capacitor Local Notifications on Android,
-// Web Notification API on PWA/desktop
+// Uses Web Notification API (PWA/desktop)
 // ──────────────────────────────────────────────
 
 export type TaskReminderInput = {
@@ -241,12 +231,8 @@ export async function scheduleTaskReminder(
     minute: "2-digit",
   })}`;
 
-  if (isCapacitorNative()) {
-    await scheduleCapacitor(input.taskId, title, body, fireAt, input.plantId);
-  } else {
-    // Web: schedule via setTimeout (only lasts for the session)
-    scheduleWebNotification(input.taskId, title, body, fireAt - Date.now(), input);
-  }
+  // Schedule via setTimeout (session-scoped)
+  scheduleWebNotification(input.taskId, title, body, fireAt - Date.now(), input);
 }
 
 function applyQuietHours(fireAt: number, quietStart: string, quietEnd: string): number | null {
@@ -286,40 +272,6 @@ function applyQuietHours(fireAt: number, quietStart: string, quietEnd: string): 
 
   if (adjusted && fireAt <= Date.now()) return null;
   return fireAt;
-}
-
-async function scheduleCapacitor(
-  taskId: string,
-  title: string,
-  body: string,
-  fireAt: number,
-  plantId: string,
-) {
-  try {
-    const { LocalNotifications } = await import("@capacitor/local-notifications");
-
-    await LocalNotifications.cancel({
-      notifications: [{ id: notifIdFromTask(taskId) }],
-    });
-
-    await LocalNotifications.schedule({
-      notifications: [
-        {
-          title,
-          body,
-          id: notifIdFromTask(taskId),
-          schedule: { at: new Date(fireAt), allowWhileIdle: true },
-          extra: { taskId, plantId, screen: "plants" },
-          channelId: CHANNEL_ID,
-          smallIcon: "ic_stat_sprout",
-          iconColor: "#16784f",
-          actionTypeId: "",
-        },
-      ],
-    });
-  } catch (err) {
-    console.warn("LocalNotifications not available:", err);
-  }
 }
 
 /** Web notification timers — keyed by taskId so we can cancel. */
@@ -364,17 +316,6 @@ export async function cancelTaskReminder(taskId: string): Promise<void> {
     webTimers.delete(taskId);
   }
   dueSoonTags.delete(taskId);
-
-  // Cancel capacitor notification
-  if (!isCapacitorNative()) return;
-  try {
-    const { LocalNotifications } = await import("@capacitor/local-notifications");
-    await LocalNotifications.cancel({
-      notifications: [{ id: notifIdFromTask(taskId) }],
-    });
-  } catch {
-    // Silently fail
-  }
 }
 
 // ──────────────────────────────────────────────
@@ -417,33 +358,10 @@ export async function rescheduleAllReminders(
 }
 
 // ──────────────────────────────────────────────
-// Request notification permissions (unified)
-// Works for both Capacitor native and Web
+// Request notification permissions (web / PWA)
 // ──────────────────────────────────────────────
 
 export async function requestNotificationPermission(): Promise<boolean> {
-  if (isCapacitorNative()) {
-    try {
-      const { LocalNotifications } = await import("@capacitor/local-notifications");
-      const perm = await LocalNotifications.requestPermissions();
-      return perm.display === "granted";
-    } catch {
-      return false;
-    }
-  }
   return requestWebNotificationPermission();
 }
 
-// ──────────────────────────────────────────────
-// Create a numeric notification ID from a UUID
-// ──────────────────────────────────────────────
-
-function notifIdFromTask(taskId: string): number {
-  let hash = 0;
-  for (let i = 0; i < taskId.length; i++) {
-    const char = taskId.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash |= 0;
-  }
-  return Math.abs(hash);
-}

@@ -21,7 +21,7 @@
 <div align="center">
 
 [![Website](https://img.shields.io/badge/website-sprout.kovina.org-3ecf8e?style=for-the-badge&logo=vercel)](https://sprout.kovina.org)
-[![Google Play](https://img.shields.io/badge/Get%20it%20on-Google%20Play-414141?style=for-the-badge&logo=googleplay&logoColor=white)](https://play.google.com/store/apps/details?id=org.kovina.opensprout)
+[![PWA](https://img.shields.io/badge/PWA-Installable-5A0FC8?style=for-the-badge&logo=pwa)](https://sprout.kovina.org)
 [![Latest Release](https://img.shields.io/github/v/release/sparshsam/opensprout?sort=semver&style=for-the-badge&label=Release&color=2563eb)](https://github.com/sparshsam/opensprout/releases)
 [![Source Code](https://img.shields.io/badge/Source%20Code-GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/sparshsam/opensprout)
 
@@ -65,8 +65,8 @@ Most plant care apps eventually become a subscription, a closed data silo, or bo
 | **Plant CRUD** — Create, edit, delete, inspect plants | **Care Templates** — 30 built-in species templates with suggested care rhythms |
 | **Care Schedules** — Watering and fertilizing schedules from templates or custom inputs | **Care Logs** — Mark plants watered or fertilized and persist logs |
 | **Journal Entries** — Title, body, health score, tags, optional photo attachments | **Photo Uploads** — Capture from camera or gallery, stored in private Supabase Storage |
-| **JSON Export** — Export your data anytime | **Android App** — Capacitor-based native Android experience |
-| **AI Agent Integration (MCP)** — 25 tools for plant management via Claude, Hermes, Cursor | **PWA** — Installable as a standalone web app |
+| **JSON Export** — Export your data anytime | **AI Agent Integration (MCP)** — 28 tools for plant management via Claude, Cursor, and any MCP client |
+| **PWA** — Installable as a standalone web app on desktop and mobile | **Privacy-first** — No tracking, no ads, no data sales |
 
 </div>
 
@@ -104,7 +104,7 @@ Every feature serves one purpose: helping you remember what your plants need. No
   <img src="https://img.shields.io/badge/TypeScript-5.x-3178c6?style=for-the-badge&logo=typescript" alt="TypeScript">
   <img src="https://img.shields.io/badge/Tailwind%20CSS-4-06B6D4?style=for-the-badge&logo=tailwindcss" alt="Tailwind CSS 4">
   <img src="https://img.shields.io/badge/Vercel-deployed-black?style=for-the-badge&logo=vercel" alt="Vercel">
-  <img src="https://img.shields.io/badge/Capacitor-Android-119EFF?style=for-the-badge&logo=capacitor" alt="Capacitor">
+  <img src="https://img.shields.io/badge/PWA-Installable-5A0FC8?style=for-the-badge&logo=pwa" alt="PWA">
   <img src="https://img.shields.io/badge/MCP-AI%20Agent%20API-FF6F00?style=for-the-badge" alt="MCP">
 </p>
 
@@ -116,6 +116,7 @@ Every feature serves one purpose: helping you remember what your plants need. No
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| **v1.0.0** | 2026-07 | **Stable release** — Web + PWA. Android archived. Capacitor removed. |
 | **v0.9.0** | 2026-06 | MCP server with 25 AI agent tools, photo uploads |
 | **v0.8.0** | 2026-05 | Android app (Capacitor), full Android project |
 | **v0.7.0** | 2026-05 | Journal entries, health scores, tag system |

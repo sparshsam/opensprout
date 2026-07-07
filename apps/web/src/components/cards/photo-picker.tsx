@@ -37,13 +37,6 @@ function generateId() {
   return `photo-${crypto.randomUUID().slice(0, 8)}`;
 }
 
-function isCapacitorNative(): boolean {
-  try {
-    return typeof window !== "undefined" && "Capacitor" in window;
-  } catch {
-    return false;
-  }
-}
 
 /** Check if we're on a mobile device likely to have a camera. */
 function isMobileDevice(): boolean {
@@ -97,57 +90,7 @@ export function PhotoPicker({
   async function handleCameraCapture() {
     if (!canAdd) return;
 
-    if (isCapacitorNative()) {
-      // Capacitor native — use Camera plugin
-      setLoading(true);
-      try {
-        const { Camera, CameraResultType } = await import(
-          "@capacitor/camera"
-        );
-        const image = await Camera.getPhoto({
-          resultType: CameraResultType.Uri,
-          quality: 80,
-          width: 1920,
-          height: 1920,
-          saveToGallery: false,
-        });
-
-        if (!image.webPath) {
-          setLoading(false);
-          return;
-        }
-
-        const response = await fetch(image.webPath);
-        const blob = await response.blob();
-        const fileName =
-          image.path?.split("/").pop() ?? `camera-${Date.now()}.jpg`;
-
-        const newPhoto: PickedPhoto = {
-          id: generateId(),
-          blob,
-          previewUrl: image.webPath,
-          name: fileName,
-          file: null,
-        };
-
-        onAdd([newPhoto]);
-      } catch {
-        // Fallback to file picker
-        galleryInputRef.current?.click();
-      } finally {
-        setLoading(false);
-      }
-      return;
-    }
-
     // Web / PWA — use capture="environment" to open the native camera
-    // This works on:
-    //   - iOS Safari  (opens Camera app)
-    //   - Chrome iOS  (opens Camera app)
-    //   - Chrome Android (opens Camera app)
-    //   - Samsung Internet
-    //   - All modern mobile browsers
-    // On desktop, it falls back to the file picker.
     cameraInputRef.current?.click();
   }
 
@@ -212,11 +155,9 @@ export function PhotoPicker({
           )}
         >
           <Camera size={16} />
-          {isCapacitorNative()
+          {isMobileDevice()
             ? "Camera"
-            : isMobileDevice()
-              ? "Camera"
-              : "Take photo"}
+            : "Take photo"}
         </button>
 
         {/* Hidden file input for gallery (standard image picker) */}

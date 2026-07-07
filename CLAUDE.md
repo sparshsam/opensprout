@@ -1,6 +1,6 @@
-# OpenSprout v0.9.27
+# OpenSprout v1.0.0
 
-**Stack:** Next.js 15 (App Router) · Supabase · Capacitor v8 Android · Tailwind CSS v4 · Sora font  
+**Stack:** Next.js 15 (App Router) · Supabase · Tailwind CSS v4 · Sora font · PWA  
 **Deploy:** https://sprout.kovina.org  
 **Source:** github.com/sparshsam/opensprout  
 **License:** AGPLv3
@@ -20,7 +20,7 @@ npm run android:release # Signed AAB + APK
 ## Project Layout
 
 ```
-apps/web/              # Next.js + Capacitor Android
+apps/web/              # Next.js app + PWA
   ├── src/app/
   │   ├── page.tsx           # Public homepage
   │   ├── login/             # Google OAuth sign-in (platform-aware: web/PWA/Android)
@@ -43,7 +43,6 @@ apps/web/              # Next.js + Capacitor Android
   │   ├── terms/             # Terms of service
   │   ├── mcp/               # AI Access guide
   │   └── globals.css        # Design tokens, animations, a11y
-  ├── android/               # Capacitor Android project
   ├── public/
   │   ├── sw.js              # Service worker (v0.9.27)
   │   ├── manifest.webmanifest  # PWA manifest
@@ -85,10 +84,6 @@ supabase/migrations/   # Database migrations (shared project)
 | `npm run build` | Web production build |
 | `npm run typecheck` | TypeScript check (builds MCP first) |
 | `npm run lint` | ESLint |
-| `npm run android:debug` | Debug APK |
-| `npm run android:release:bundle` | Signed release AAB |
-| `npm run android:release:apk` | Signed release APK |
-| `npm run android:release` | Both AAB + APK |
 | `npm run -w @opensprout/mcp test` | MCP tests (112) |
 | `bash scripts/release.sh` | Full release automation (check → build → sign) |
 | `bash scripts/release.sh --check-only` | Run all checks without building |
@@ -135,7 +130,7 @@ Sprout          Individual product   → apps/web/docs/BRANDING.md
 - **Callback:** `/auth/callback` exchanges code server-side via `createServerClient` + `exchangeCodeForSession()` (critical — without this the redirect drops the `code` param causing a sign-in loop)
 - **Session:** Auto-refreshed via `@supabase/ssr`
 - **CSP:** Security headers disabled in dev mode (Next.js HMR needs `'unsafe-eval'`); production Vercel builds get strict headers
-- **Platform awareness:** `AuthGate` detects Capacitor native via `window.Capacitor.isNativePlatform()` — web shows public homepage, native redirects to login
+- **Platform awareness:** Web + PWA only. Capacitor native (Android) archived at `archive/`.
 
 ## MCP Server
 
@@ -155,6 +150,7 @@ Architecture follows the MCP Build Guide: SHA-256 token auth, centralized regist
 
 ## Release History
 
+- **v1.0.0** (Jul 7) — **Stable release — Web + PWA.** Android/Capacitor archived, 8 Capacitor packages removed, 13 source files cleaned, footer redesigned, feature grid, KOVINA wordmark, GeneratedAssets committed.
 - **v0.9.27** (Jul 3) — Open Product Family branding alignment + Vercel deployment. Header lockups standardized to `[icon] OPEN / Sprout` stacked layout in all three header components (public-nav, shell/top-bar, app-shell). Icons generated from 1024x1024 light + dark masters via Lanczos resampling: 210 assets across Windows ICO, MSIX, Android mipmaps, iOS, macOS, Web/PWA favicons, social OG, GitHub, and header icons. 114 dark mode variant assets generated (including opensprout-icon-header-dark.png). All three header locations use dual-image wrap with `dark:opacity-0`/`dark:opacity-100` CSS transitions for dark/light theming. Generated PNG icons replace the lucide Sprout icon in public-nav.tsx and app-shell.tsx. Lockup styling aligned to OpenPalette canonical spec. Brand hierarchy documented in `apps/web/docs/BRANDING.md`. Build fixes: added eslint-disable comments for `<img>` tags (blocking Vercel build), added missing `import Link from "next/link"` to app-shell.tsx, added root `public/` directory with hard copies for Vercel static file serving. Docs/BRANDING.md created. OpenPalette canonical spec alignment. Vercel deploy live at sprout.kovina.org.
 - **v0.9.26** (Jun 28) — CI stabilization + database namespacing. Android CI now builds with Java 21 (fixes AGP 8.13 compile error) and uses normal `next build` (not static export) — all `force-static`/`generateStaticParams` route hacks reverted. All 14 OpenSprout tables renamed to `opensprout_` prefix for shared Supabase project namespacing. Code references, type definitions, MCP tools, and tests updated.
 - **v0.9.26** (Jun 28) — Native Google Sign-In + Android Fixes. In-app Chrome Custom Tab for Android, browser-popup login for Windows/PWA, platform-aware sign-in dispatch, API routing for Capacitor static export, adaptive icon fix, white flash fix, debug diagnostics page.

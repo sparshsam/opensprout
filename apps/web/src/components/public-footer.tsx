@@ -59,10 +59,15 @@ export function PublicFooter() {
             href="https://kovina.org"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs font-black tracking-[-0.03em] text-muted-foreground/40 hover:text-muted-foreground transition-colors no-underline"
             aria-label="KOVINA — Personal software. Forged to last."
           >
-            KOVINA
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/kovina-wordmark-monochrome.svg"
+              alt=""
+              className="inline-block h-5 w-auto"
+              aria-hidden
+            />
           </a>
         </div>
       </div>

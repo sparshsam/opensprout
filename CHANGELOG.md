@@ -2,6 +2,22 @@
 
 All notable changes to OpenSprout will be documented here. The format follows [Keep a Changelog](https://keepachangelog.com/). OpenSprout uses [Semantic Versioning](https://semver.org/).
 
+## 1.0.0 — 2026-07-07
+
+### Changed
+- **v1.0.0 stable release** — OpenSprout ships as a web + PWA application.
+- **Android/Capacitor archived** — Android build removed from active tree for future revisiting (preserved in `archive/`).
+- **Capacitor dependencies removed** — 8 @capacitor/* packages cleaned from both package.json files. Android scripts stripped.
+- **Notification system simplified** — Capacitor LocalNotifications path removed; all reminders use Web Notification API (PWA).
+- **Auth flow cleaned** — Capacitor native auth branch removed; web + PWA sign-in streamlined.
+- **Haptics simplified** — Capacitor Haptics plugin path removed; falls back to navigator.vibrate.
+- **Debug page cleaned** — Capacitor detection diagnostics removed.
+- **Photo picker simplified** — Capacitor Camera plugin path removed; uses native `capture="environment"` input.
+- **Platform utilities simplified** — Capacitor-specific routing removed.
+- **GeneratedAssets committed to repo** (324 cross-platform brand icon files).
+- **Branding updates** — About page icon fixed with dark/light variants. Footer features OPEN/Sprout lockup with icon, KOVINA wordmark, no AGPLv3 legalese. Landing page feature cards in responsive grid.
+- **Header cleaned** — "View on GitHub" button removed.
+
 ## 0.9.26 — 2026-06-28
 
 ### Added
