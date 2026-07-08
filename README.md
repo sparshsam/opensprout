@@ -116,7 +116,7 @@ Every feature serves one purpose: helping you remember what your plants need. No
 
 | Version | Date | Highlights |
 |---------|------|------------|
-| **v1.0.0** | 2026-07 | **Stable release** — Web + PWA. Android archived. Capacitor removed. |
+| **v0.9.28** | 2026-07 | Android archived. Capacitor removed. Web + PWA focus. |
 | **v0.9.0** | 2026-06 | MCP server with 25 AI agent tools, photo uploads |
 | **v0.8.0** | 2026-05 | Android app (Capacitor), full Android project |
 | **v0.7.0** | 2026-05 | Journal entries, health scores, tag system |

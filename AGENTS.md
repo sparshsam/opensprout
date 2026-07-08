@@ -2,7 +2,7 @@
 
 ## Current Release
 
-**v1.0.0** — Web + PWA Stable Release (2026-07-07)
+**v0.9.28** — Android/Capacitor archived, web + PWA cleanup (2026-07-07)
 
 ## Product Identity
 
@@ -347,7 +347,7 @@ The Supabase project `rbdyrymtgfqqkdemicdo` is shared between OpenSprout (plant 
 - All MCP tool files, test mocks, sync cache mappings, and `db.ts` store names updated.
 - `delete_account()` RPC function replaced (table `RENAME` doesn't update hardcoded names in function bodies).
 
-## Key Changes in v1.0.0 — Web + PWA Stable Release (2026-07-07)
+## Key Changes in v0.9.28 — Android/Capacitor Archived (2026-07-07)
 
 ### Android/Capacitor Archived
 - Full Android build preserved at `archive/android/` (120 MB, 2814 files).
@@ -373,7 +373,7 @@ The Supabase project `rbdyrymtgfqqkdemicdo` is shared between OpenSprout (plant 
 - **About page** — dual dark/light icons, PublicFooter restored.
 - **Feature grid** — responsive 1→2→3 column layout.
 - **Header** — "View on GitHub" button removed.
-- **Version bumped** to 1.0.0.
+- **Version bumped** to 0.9.28.
 
 ## Key Changes in v0.9.27 — Open Product Family Branding Alignment (2026-07-02)
 

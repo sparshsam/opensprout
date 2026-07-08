@@ -2,12 +2,11 @@
 
 All notable changes to OpenSprout will be documented here. The format follows [Keep a Changelog](https://keepachangelog.com/). OpenSprout uses [Semantic Versioning](https://semver.org/).
 
-## 1.0.0 — 2026-07-07
+## 0.9.28 — 2026-07-07
 
 ### Changed
-- **v1.0.0 stable release** — OpenSprout ships as a web + PWA application.
-- **Android/Capacitor archived** — Android build removed from active tree for future revisiting (preserved in `archive/`).
-- **Capacitor dependencies removed** — 8 @capacitor/* packages cleaned from both package.json files. Android scripts stripped.
+- **Android/Capacitor archived** — Android build removed from active tree, preserved in `archive/` for future revisiting.
+- **Capacitor dependencies removed** — 8 @capacitor/* packages cleaned from both package.json files. All Android/Cap scripts stripped.
 - **Notification system simplified** — Capacitor LocalNotifications path removed; all reminders use Web Notification API (PWA).
 - **Auth flow cleaned** — Capacitor native auth branch removed; web + PWA sign-in streamlined.
 - **Haptics simplified** — Capacitor Haptics plugin path removed; falls back to navigator.vibrate.
